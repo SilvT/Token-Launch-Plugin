@@ -5,7 +5,7 @@
  * and connection testing within Figma's plugin environment.
  */
 
-import { GitHubClient } from './GitHubClient';
+import { GitHubClientHybrid } from './GitHubClientHybrid';
 import { SecureStorage } from '../storage/SecureStorage';
 import { isHardCodedMode, getTestConfig, validateHardCodedToken, logTestConfiguration } from './HardCodedConfig';
 import { ClientTracker } from '../debug/ClientTracker';
@@ -29,7 +29,7 @@ import {
 
 export class GitHubAuth {
   private static instance: GitHubAuth;
-  private client: GitHubClient | null = null;
+  private client: GitHubClientHybrid | null = null;
   private state: GitHubConfigState = {
     isConfigured: false,
     isConnected: false,
@@ -65,6 +65,9 @@ export class GitHubAuth {
    */
   async initialize(): Promise<void> {
     try {
+      console.log('🐛 DEBUG: GitHubAuth.initialize() - START');
+      console.log('🐛 DEBUG: Hard-coded mode?', isHardCodedMode());
+
       // Check for hard-coded configuration first (for testing)
       if (isHardCodedMode()) {
         console.log('🔧 Using hard-coded GitHub configuration for testing...');
@@ -78,7 +81,7 @@ export class GitHubAuth {
         const config = getTestConfig();
         console.log('🔧 GitHubAuth - Creating GitHubClient with credentials...');
         console.log('🔧 GitHubAuth - Credentials:', { token: config.credentials.token.substring(0, 10) + '...', username: config.credentials.username });
-        this.client = new GitHubClient(config.credentials);
+        this.client = new GitHubClientHybrid(config.credentials);
         console.log('🔧 GitHubAuth - GitHubClient created:', typeof this.client);
         console.log('🔧 GitHubAuth - Client methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.client)));
         this.state = {
@@ -97,15 +100,22 @@ export class GitHubAuth {
           }
         };
 
+        console.log('🐛 DEBUG: Hard-coded state set:', this.state.isConfigured, this.state.isConnected);
         console.log('✅ Hard-coded configuration initialized successfully');
         return;
       }
 
       // Normal stored credentials flow
+      console.log('🐛 DEBUG: Loading stored configuration...');
       const config = await SecureStorage.getCompleteConfig();
+      console.log('🐛 DEBUG: Stored config loaded:', !!config, !!config?.credentials?.token);
 
       if (config?.credentials?.token) {
-        this.client = new GitHubClient(config.credentials);
+        console.log('🐛 DEBUG: Creating client from stored config...');
+        console.log('🐛 DEBUG: Token preview:', config.credentials.token.substring(0, 10) + '...');
+        console.log('🐛 DEBUG: Repository:', config.repository?.owner + '/' + config.repository?.name);
+
+        this.client = new GitHubClientHybrid(config.credentials);
         this.state = {
           isConfigured: true,
           isConnected: false,
@@ -113,20 +123,34 @@ export class GitHubAuth {
           errors: []
         };
 
+        console.log('🐛 DEBUG: Dynamic state set:', this.state.isConfigured, this.state.isConnected);
+        console.log('🐛 DEBUG: Config stored in state:', !!this.state.config);
+
         // Try to restore last connection test result
         const lastTest = await SecureStorage.getLastConnectionTest();
         if (lastTest) {
           this.state.lastTestResult = lastTest;
           this.state.isConnected = lastTest.success;
+          console.log('🐛 DEBUG: Last test result restored:', lastTest.success);
         }
       } else {
+        console.log('🐛 DEBUG: No stored configuration found');
         this.state = {
           isConfigured: false,
           isConnected: false,
           errors: []
         };
       }
+
+      console.log('🐛 DEBUG: GitHubAuth.initialize() - END, final state:', {
+        isConfigured: this.state.isConfigured,
+        isConnected: this.state.isConnected,
+        hasClient: !!this.client,
+        hasConfig: !!this.state.config
+      });
+
     } catch (error) {
+      console.error('🐛 DEBUG: GitHubAuth.initialize() - ERROR:', error);
       this.state = {
         isConfigured: false,
         isConnected: false,
@@ -181,6 +205,14 @@ export class GitHubAuth {
    */
   async configure(config: GitHubConfig): Promise<{ success: boolean; error?: string }> {
     try {
+      console.log('🐛 DEBUG: GitHubAuth.configure() - START');
+      console.log('🐛 DEBUG: Input config:', {
+        hasToken: !!config.credentials?.token,
+        tokenPreview: config.credentials?.token?.substring(0, 10) + '...',
+        repository: config.repository?.owner + '/' + config.repository?.name,
+        branch: config.repository?.branch
+      });
+
       // Validate token format
       if (!config.credentials.token || config.credentials.token.trim().length === 0) {
         throw new Error('GitHub token is required');
@@ -191,12 +223,17 @@ export class GitHubAuth {
         throw new Error('Repository owner and name are required');
       }
 
+      console.log('🐛 DEBUG: Storing configuration to SecureStorage...');
       // Store credentials and config
       await SecureStorage.storeCredentials(config.credentials);
       await SecureStorage.storeConfig(config);
+      console.log('🐛 DEBUG: Configuration stored successfully');
 
+      console.log('🐛 DEBUG: Creating new GitHubClientHybrid...');
       // Create client and update state
-      this.client = new GitHubClient(config.credentials);
+      this.client = new GitHubClientHybrid(config.credentials);
+      console.log('🐛 DEBUG: Client created with ID:', this.client.getClientId());
+
       this.state = {
         isConfigured: true,
         isConnected: false,
@@ -204,8 +241,16 @@ export class GitHubAuth {
         errors: []
       };
 
+      console.log('🐛 DEBUG: GitHubAuth.configure() - SUCCESS, state updated:', {
+        isConfigured: this.state.isConfigured,
+        isConnected: this.state.isConnected,
+        hasClient: !!this.client,
+        hasConfig: !!this.state.config
+      });
+
       return { success: true };
     } catch (error) {
+      console.error('🐛 DEBUG: GitHubAuth.configure() - ERROR:', error);
       const errorMessage = error instanceof Error ? error.message : 'Configuration failed';
       this.state.errors = [errorMessage];
       return { success: false, error: errorMessage };
@@ -233,7 +278,7 @@ export class GitHubAuth {
       } as GitHubConfig;
 
       await SecureStorage.storeCredentials(newCredentials);
-      this.client = new GitHubClient(newCredentials);
+      this.client = new GitHubClientHybrid(newCredentials);
 
       this.state.config = newConfig;
       this.state.isConnected = false; // Reset connection status
@@ -333,12 +378,23 @@ export class GitHubAuth {
   /**
    * Get GitHub client (throws if not configured)
    */
-  getClient(): GitHubClient {
-    console.log('🔧 GitHubAuth.getClient - Called, client available:', !!this.client);
+  getClient(): GitHubClientHybrid {
+    console.log('🐛 DEBUG: GitHubAuth.getClient() - Called');
+    console.log('🐛 DEBUG: Current state:', {
+      isConfigured: this.state.isConfigured,
+      isConnected: this.state.isConnected,
+      hasClient: !!this.client,
+      hasConfig: !!this.state.config,
+      clientId: this.client?.getClientId()
+    });
+
     if (!this.client) {
+      console.error('🐛 DEBUG: GitHubAuth.getClient() - NO CLIENT AVAILABLE!');
+      console.error('🐛 DEBUG: State dump:', JSON.stringify(this.state, null, 2));
       throw new Error('GitHub client not configured. Please configure your GitHub credentials first.');
     }
-    console.log('🔧 GitHubAuth.getClient - Returning client ID:', this.client.getClientId());
+
+    console.log('🐛 DEBUG: GitHubAuth.getClient() - Returning client ID:', this.client.getClientId());
     return this.client;
   }
 

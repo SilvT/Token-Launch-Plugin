@@ -41,7 +41,7 @@ export const HARD_CODED_CONFIG: GitHubConfig = {
  * Enable hard-coded configuration mode
  * Set to false to use normal authentication flow
  */
-export const USE_HARD_CODED_CONFIG = true;
+export const USE_HARD_CODED_CONFIG = false;
 
 // =============================================================================
 // HELPER FUNCTIONS

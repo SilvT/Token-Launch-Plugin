@@ -450,7 +450,6 @@ export class DiagnosticTester {
       }
 
       // Method validation
-      const client = auth.getClient();
       const boundClient = auth.createBoundClient();
 
       const validation = MethodValidator.validateMethods(

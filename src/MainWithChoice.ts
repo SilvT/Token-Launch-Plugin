@@ -5,7 +5,7 @@
  * allowing users to choose between Git push and local download.
  */
 
-import { TokenExtractor, ExtractionConfig, ExtractionResult } from './TokenExtractor';
+import { TokenExtractor, ExtractionConfig } from './TokenExtractor';
 import { ExportWorkflow } from './workflow/ExportWorkflow';
 import { DocumentInfo, BasicTokenCount } from './types/CommonTypes';
 

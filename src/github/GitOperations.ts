@@ -5,13 +5,12 @@
  * Focuses on single-file pushes with validation, error handling, and user feedback.
  */
 
-import { GitHubClient } from './GitHubClient';
+import { GitHubClientHybrid } from './GitHubClientHybrid';
 import { GitHubAuth } from './GitHubAuth';
 import { ClientTracker } from '../debug/ClientTracker';
 import {
   GitHubRepository,
   ConnectionTestResult,
-  GitHubFile,
   CreateFileRequest,
   UpdateFileRequest,
   BoundGitHubClient
@@ -63,7 +62,7 @@ export interface ProgressCallback {
 
 export class GitOperations {
   private auth: GitHubAuth;
-  private client: GitHubClient | null = null;
+  private client: GitHubClientHybrid | null = null;
   private boundClient: BoundGitHubClient | null = null;
 
   constructor() {
@@ -848,23 +847,55 @@ export class GitOperations {
    * Check if client is ready for operations
    */
   isReady(): boolean {
-    return this.boundClient !== null && this.auth.hasClient();
+    console.log('🐛 DEBUG: GitOperations.isReady() - Checking readiness...');
+
+    // Always refresh client state in case auth was configured after initialization
+    const authHasClient = this.auth.hasClient();
+    console.log('🐛 DEBUG: Auth hasClient:', authHasClient);
+
+    // If auth has client but we don't have bound client, refresh it
+    if (authHasClient && !this.boundClient) {
+      console.log('🐛 DEBUG: Auth has client but bound client is null, refreshing...');
+      try {
+        this.client = this.auth.getClient();
+        this.boundClient = this.auth.createBoundClient();
+        console.log('🐛 DEBUG: Successfully refreshed client and bound client');
+      } catch (error) {
+        console.error('🐛 DEBUG: Failed to refresh client:', error);
+        return false;
+      }
+    }
+
+    const isReady = this.boundClient !== null && authHasClient;
+    console.log('🐛 DEBUG: GitOperations.isReady() result:', isReady);
+    return isReady;
   }
 
   /**
    * Get current repository configuration
    */
   getCurrentRepository(): RepositoryConfig | null {
+    console.log('🐛 DEBUG: GitOperations.getCurrentRepository() - Called');
+
     const config = this.auth.getPublicConfig();
+    console.log('🐛 DEBUG: getPublicConfig() returned:', {
+      hasConfig: !!config,
+      hasRepository: !!config?.repository,
+      repository: config?.repository ? `${config.repository.owner}/${config.repository.name}` : 'null'
+    });
 
     if (!config?.repository) {
+      console.log('🐛 DEBUG: getCurrentRepository() - No repository config found, returning null');
       return null;
     }
 
-    return {
+    const result = {
       owner: config.repository.owner,
       name: config.repository.name,
       branch: config.repository.branch || 'main'
     };
+
+    console.log('🐛 DEBUG: getCurrentRepository() - Returning:', result);
+    return result;
   }
 }

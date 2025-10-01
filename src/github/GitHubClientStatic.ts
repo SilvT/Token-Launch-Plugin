@@ -1,9 +1,9 @@
 /**
- * GitHub API Client for Figma Plugin
+ * Static GitHub API Client for Figma Plugin
  *
- * Handles all GitHub API interactions within Figma's plugin environment.
- * Supports Personal Access Token authentication and provides methods
- * for repository operations, file management, and user authentication.
+ * This static implementation avoids method binding issues that occur
+ * in the Figma plugin environment during minification and compilation.
+ * All methods are static and don't rely on 'this' context.
  */
 
 import {
@@ -20,31 +20,16 @@ import {
 } from './GitHubTypes';
 
 // =============================================================================
-// GITHUB API CLIENT
+// STATIC GITHUB API CLIENT
 // =============================================================================
 
-export class GitHubClient {
-  private baseUrl = 'https://api.github.com';
-  private credentials: GitHubCredentials;
-  private readonly clientId: string;
-
-  constructor(credentials: GitHubCredentials) {
-    // Generate unique ID for this client instance
-    this.clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    console.log('🔧 GitHubClient constructor - Creating new client with ID:', this.clientId);
-    console.log('🔧 GitHubClient constructor - Called with:', { token: credentials.token.substring(0, 10) + '...', username: credentials.username });
-    this.credentials = credentials;
-
-    // Test arrow function methods immediately after assignment
-    this.validateArrowFunctionMethods();
-
-    console.log('🔧 GitHubClient constructor - Completed initialization for client:', this.clientId);
-  }
+export class GitHubClientStatic {
+  private static readonly baseUrl = 'https://api.github.com';
 
   /**
    * Custom base64 encoder for Figma plugin environment
    */
-  private customBase64Encode(input: string): string {
+  private static customBase64Encode(input: string): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     let result = '';
     let i = 0;
@@ -74,70 +59,17 @@ export class GitHubClient {
   }
 
   /**
-   * Validate that arrow function methods are properly assigned
-   */
-  private validateArrowFunctionMethods(): void {
-    console.log('🔍 GitHubClient - Validating arrow function methods...');
-
-    const arrowMethods = ['fileExists', 'createFile', 'updateFile', 'getFile', 'getRepository', 'testConnection', 'getUser'];
-
-    for (const methodName of arrowMethods) {
-      const method = (this as any)[methodName];
-      const methodType = typeof method;
-
-      console.log(`  📋 ${methodName}: ${methodType}`);
-
-      if (methodType !== 'function') {
-        console.error(`  ❌ CRITICAL: ${methodName} is not a function! Type: ${methodType}`);
-        continue;
-      }
-
-      try {
-        // Check if it's an arrow function
-        const methodSource = method.toString();
-        const isArrowFunction = methodSource.includes('=>');
-        const hasProperBinding = methodSource.includes('this.');
-
-        console.log(`    - Is arrow function: ${isArrowFunction}`);
-        console.log(`    - Has 'this' reference: ${hasProperBinding}`);
-        console.log(`    - Method length: ${method.length} parameters`);
-
-        // Test that the method can be called (with wrong args to avoid actual API calls)
-        const canBeCalled = typeof method.call === 'function';
-        console.log(`    - Can be called: ${canBeCalled}`);
-
-        if (isArrowFunction && hasProperBinding) {
-          console.log(`    ✅ ${methodName} appears correctly configured as arrow function`);
-        } else {
-          console.warn(`    ⚠️ ${methodName} may have binding issues`);
-        }
-
-      } catch (error) {
-        console.error(`    ❌ Error inspecting ${methodName}:`, error);
-      }
-    }
-
-    console.log('✅ Arrow function method validation completed');
-  }
-
-  /**
-   * Get client ID for debugging
-   */
-  getClientId(): string {
-    return this.clientId;
-  }
-
-  /**
    * Make authenticated request to GitHub API
    */
-  private async makeRequest<T>(
+  private static async makeRequest<T>(
+    credentials: GitHubCredentials,
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const url = `${GitHubClientStatic.baseUrl}${endpoint}`;
 
     const defaultHeaders = {
-      'Authorization': `Bearer ${this.credentials.token}`,
+      'Authorization': `Bearer ${credentials.token}`,
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'Figma-Design-System-Distributor/1.0.0',
       'Content-Type': 'application/json'
@@ -151,30 +83,29 @@ export class GitHubClient {
       }
     };
 
-    // Enhanced logging for testing
-    console.log(`🌐 GitHub API Request: ${options.method || 'GET'} ${url}`);
-    console.log(`🔑 Token: ${this.credentials.token.substring(0, 10)}...`);
+    console.log(`🌐 GitHubStatic API Request: ${options.method || 'GET'} ${url}`);
+    console.log(`🔑 Token: ${credentials.token.substring(0, 10)}...`);
 
     try {
       const response = await fetch(url, config);
 
-      console.log(`📡 GitHub API Response: ${response.status} ${response.statusText}`);
+      console.log(`📡 GitHubStatic API Response: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
-        await this.handleApiError(response);
+        await GitHubClientStatic.handleApiError(response);
       }
 
       // Handle 204 No Content responses
       if (response.status === 204) {
-        console.log('✅ GitHub API: No content response (success)');
+        console.log('✅ GitHubStatic API: No content response (success)');
         return {} as T;
       }
 
       const data = await response.json();
-      console.log(`✅ GitHub API: Response received (${JSON.stringify(data).length} chars)`);
+      console.log(`✅ GitHubStatic API: Response received (${JSON.stringify(data).length} chars)`);
       return data as T;
     } catch (error) {
-      console.error('❌ GitHub API Request failed:', error);
+      console.error('❌ GitHubStatic API Request failed:', error);
       if (error instanceof Error) {
         throw error;
       }
@@ -185,7 +116,7 @@ export class GitHubClient {
   /**
    * Handle GitHub API errors with detailed messaging
    */
-  private async handleApiError(response: Response): Promise<never> {
+  private static async handleApiError(response: Response): Promise<never> {
     let errorData: GitHubError;
 
     try {
@@ -233,18 +164,20 @@ export class GitHubClient {
   /**
    * Get authenticated user information
    */
-  getUser = async (): Promise<GitHubUser> => {
-    return this.makeRequest<GitHubUser>('/user');
+  static async getUser(credentials: GitHubCredentials): Promise<GitHubUser> {
+    return GitHubClientStatic.makeRequest<GitHubUser>(credentials, '/user');
   }
 
   /**
    * Test connection and get comprehensive status
-   * Using arrow function to preserve context through minification
    */
-  testConnection = async (repositoryConfig?: { owner: string; name: string }): Promise<ConnectionTestResult> => {
+  static async testConnection(
+    credentials: GitHubCredentials,
+    repositoryConfig?: { owner: string; name: string }
+  ): Promise<ConnectionTestResult> {
     try {
       // Test basic authentication
-      const user = await this.getUser();
+      const user = await GitHubClientStatic.getUser(credentials);
 
       const result: ConnectionTestResult = {
         success: true,
@@ -259,7 +192,11 @@ export class GitHubClient {
       // Test repository access if provided
       if (repositoryConfig) {
         try {
-          const repository = await this.getRepository(repositoryConfig.owner, repositoryConfig.name);
+          const repository = await GitHubClientStatic.getRepository(
+            credentials,
+            repositoryConfig.owner,
+            repositoryConfig.name
+          );
 
           result.repository = repository;
           result.permissions = {
@@ -294,18 +231,25 @@ export class GitHubClient {
   /**
    * Get repository information
    */
-  getRepository = async (owner: string, repo: string): Promise<GitHubRepository> => {
-    return this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
+  static async getRepository(
+    credentials: GitHubCredentials,
+    owner: string,
+    repo: string
+  ): Promise<GitHubRepository> {
+    return GitHubClientStatic.makeRequest<GitHubRepository>(credentials, `/repos/${owner}/${repo}`);
   }
 
   /**
    * List user's repositories
    */
-  async listRepositories(options: {
-    type?: 'owner' | 'collaborator' | 'organization_member';
-    sort?: 'created' | 'updated' | 'pushed' | 'full_name';
-    per_page?: number;
-  } = {}): Promise<GitHubRepository[]> {
+  static async listRepositories(
+    credentials: GitHubCredentials,
+    options: {
+      type?: 'owner' | 'collaborator' | 'organization_member';
+      sort?: 'created' | 'updated' | 'pushed' | 'full_name';
+      per_page?: number;
+    } = {}
+  ): Promise<GitHubRepository[]> {
     // Build query string manually (URLSearchParams not available in Figma)
     const queryParts: string[] = [];
 
@@ -316,7 +260,7 @@ export class GitHubClient {
     const queryString = queryParts.join('&');
     const endpoint = `/user/repos${queryString ? `?${queryString}` : ''}`;
 
-    return this.makeRequest<GitHubRepository[]>(endpoint);
+    return GitHubClientStatic.makeRequest<GitHubRepository[]>(credentials, endpoint);
   }
 
   // =============================================================================
@@ -325,74 +269,89 @@ export class GitHubClient {
 
   /**
    * Get file contents from repository
-   * Using arrow function to preserve context through minification
    */
-  getFile = async (owner: string, repo: string, path: string, ref?: string): Promise<GitHubFile> => {
+  static async getFile(
+    credentials: GitHubCredentials,
+    owner: string,
+    repo: string,
+    path: string,
+    ref?: string
+  ): Promise<GitHubFile> {
     const params = ref ? `?ref=${encodeURIComponent(ref)}` : '';
-    return this.makeRequest<GitHubFile>(`/repos/${owner}/${repo}/contents/${path}${params}`);
+    return GitHubClientStatic.makeRequest<GitHubFile>(credentials, `/repos/${owner}/${repo}/contents/${path}${params}`);
   }
 
   /**
    * Create a new file in repository
-   * Using arrow function to preserve context through minification
    */
-  createFile = async (
+  static async createFile(
+    credentials: GitHubCredentials,
     owner: string,
     repo: string,
     path: string,
     request: CreateFileRequest
-  ): Promise<{ content: GitHubFile; commit: any }> => {
-    console.log(`🔧 [${this.clientId}] createFile called - owner: ${owner}, repo: ${repo}, path: ${path}`);
-    console.log(`🔧 [${this.clientId}] createFile - 'this' context:`, !!this, `clientId: ${this.clientId}`);
-    console.log(`🔧 [${this.clientId}] createFile - request keys:`, Object.keys(request));
+  ): Promise<{ content: GitHubFile; commit: any }> {
+    console.log(`🔧 GitHubStatic.createFile - owner: ${owner}, repo: ${repo}, path: ${path}`);
+    console.log(`🔧 GitHubStatic.createFile - request keys:`, Object.keys(request));
 
     try {
-      const result = await this.makeRequest<{ content: GitHubFile; commit: any }>(`/repos/${owner}/${repo}/contents/${path}`, {
-        method: 'PUT',
-        body: JSON.stringify(request)
-      });
-      console.log(`✅ [${this.clientId}] createFile - success, commit SHA:`, result.commit?.sha);
+      const result = await GitHubClientStatic.makeRequest<{ content: GitHubFile; commit: any }>(
+        credentials,
+        `/repos/${owner}/${repo}/contents/${path}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(request)
+        }
+      );
+      console.log(`✅ GitHubStatic.createFile - success, commit SHA:`, result.commit?.sha);
       return result;
     } catch (error) {
-      console.error(`❌ [${this.clientId}] createFile - failed:`, error);
+      console.error(`❌ GitHubStatic.createFile - failed:`, error);
       throw error;
     }
   }
 
   /**
    * Update existing file in repository
-   * Using arrow function to preserve context through minification
    */
-  updateFile = async (
+  static async updateFile(
+    credentials: GitHubCredentials,
     owner: string,
     repo: string,
     path: string,
     request: UpdateFileRequest
-  ): Promise<{ content: GitHubFile; commit: any }> => {
-    return this.makeRequest<{ content: GitHubFile; commit: any }>(`/repos/${owner}/${repo}/contents/${path}`, {
-      method: 'PUT',
-      body: JSON.stringify(request)
-    });
+  ): Promise<{ content: GitHubFile; commit: any }> {
+    return GitHubClientStatic.makeRequest<{ content: GitHubFile; commit: any }>(
+      credentials,
+      `/repos/${owner}/${repo}/contents/${path}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(request)
+      }
+    );
   }
 
   /**
    * Check if file exists in repository
-   * Using arrow function to preserve context through minification
    */
-  fileExists = async (owner: string, repo: string, path: string): Promise<boolean> => {
-    console.log(`🔧 [${this.clientId}] fileExists called - owner: ${owner}, repo: ${repo}, path: ${path}`);
-    console.log(`🔧 [${this.clientId}] fileExists - 'this' context:`, !!this, `clientId: ${this.clientId}`);
+  static async fileExists(
+    credentials: GitHubCredentials,
+    owner: string,
+    repo: string,
+    path: string
+  ): Promise<boolean> {
+    console.log(`🔧 GitHubStatic.fileExists - owner: ${owner}, repo: ${repo}, path: ${path}`);
 
     try {
-      await this.getFile(owner, repo, path);
-      console.log(`✅ [${this.clientId}] fileExists - file found, returning true`);
+      await GitHubClientStatic.getFile(credentials, owner, repo, path);
+      console.log(`✅ GitHubStatic.fileExists - file found, returning true`);
       return true;
     } catch (error) {
       if ((error as any).status === 404) {
-        console.log(`📁 [${this.clientId}] fileExists - file not found (404), returning false`);
+        console.log(`📁 GitHubStatic.fileExists - file not found (404), returning false`);
         return false;
       }
-      console.error(`❌ [${this.clientId}] fileExists - unexpected error:`, error);
+      console.error(`❌ GitHubStatic.fileExists - unexpected error:`, error);
       throw error;
     }
   }
@@ -404,7 +363,10 @@ export class GitHubClient {
   /**
    * Push design tokens to GitHub repository
    */
-  async pushTokens(request: TokenPushRequest): Promise<TokenPushResult> {
+  static async pushTokens(
+    credentials: GitHubCredentials,
+    request: TokenPushRequest
+  ): Promise<TokenPushResult> {
     const { tokens, config, options = {} } = request;
     const { repository, paths } = config;
 
@@ -417,7 +379,7 @@ export class GitHubClient {
 
       // Prepare file content
       const tokenContent = JSON.stringify(tokens, null, 2);
-      const encodedContent = this.customBase64Encode(tokenContent);
+      const encodedContent = GitHubClientStatic.customBase64Encode(tokenContent);
 
       // Generate commit message
       const commitMessage = options.commitMessage ||
@@ -431,14 +393,25 @@ export class GitHubClient {
       };
 
       // Check if file exists
-      const fileExists = await this.fileExists(repository.owner, repository.name, paths.rawTokens);
+      const fileExists = await GitHubClientStatic.fileExists(
+        credentials,
+        repository.owner,
+        repository.name,
+        paths.rawTokens
+      );
 
       if (fileExists) {
         // Update existing file
-        const existingFile = await this.getFile(repository.owner, repository.name, paths.rawTokens);
+        const existingFile = await GitHubClientStatic.getFile(
+          credentials,
+          repository.owner,
+          repository.name,
+          paths.rawTokens
+        );
         (fileRequest as UpdateFileRequest).sha = existingFile.sha;
 
-        const updateResult = await this.updateFile(
+        const updateResult = await GitHubClientStatic.updateFile(
+          credentials,
           repository.owner,
           repository.name,
           paths.rawTokens,
@@ -449,7 +422,8 @@ export class GitHubClient {
         result.filesUpdated.push(paths.rawTokens);
       } else {
         // Create new file
-        const createResult = await this.createFile(
+        const createResult = await GitHubClientStatic.createFile(
+          credentials,
           repository.owner,
           repository.name,
           paths.rawTokens,
@@ -480,17 +454,17 @@ export class GitHubClient {
   /**
    * Validate token permissions
    */
-  async validateTokenPermissions(): Promise<{
+  static async validateTokenPermissions(credentials: GitHubCredentials): Promise<{
     valid: boolean;
     permissions: string[];
     user?: GitHubUser;
     error?: string;
   }> {
     try {
-      const user = await this.getUser();
+      const user = await GitHubClientStatic.getUser(credentials);
 
       // Try to get user repositories to test repo access
-      await this.listRepositories({ per_page: 1 });
+      await GitHubClientStatic.listRepositories(credentials, { per_page: 1 });
 
       return {
         valid: true,
@@ -509,20 +483,20 @@ export class GitHubClient {
   /**
    * Get rate limit information
    */
-  async getRateLimit(): Promise<{
+  static async getRateLimit(credentials: GitHubCredentials): Promise<{
     limit: number;
     remaining: number;
     reset: number;
     used: number;
   }> {
-    const response = await this.makeRequest<{
+    const response = await GitHubClientStatic.makeRequest<{
       rate: {
         limit: number;
         remaining: number;
         reset: number;
         used: number;
       };
-    }>('/rate_limit');
+    }>(credentials, '/rate_limit');
 
     return response.rate;
   }

@@ -29,6 +29,65 @@ const STORAGE_KEYS = {
 class SimpleEncryption {
   private static key = 'figma-github-plugin-2024';
 
+  /**
+   * Custom base64 encoder for Figma plugin environment
+   */
+  private static customBase64Encode(input: string): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let result = '';
+    let i = 0;
+
+    while (i < input.length) {
+      const a = input.charCodeAt(i++);
+      const b = i < input.length ? input.charCodeAt(i++) : 0;
+      const c = i < input.length ? input.charCodeAt(i++) : 0;
+
+      const bitmap = (a << 16) | (b << 8) | c;
+
+      result += chars.charAt((bitmap >> 18) & 63);
+      result += chars.charAt((bitmap >> 12) & 63);
+      result += chars.charAt((bitmap >> 6) & 63);
+      result += chars.charAt(bitmap & 63);
+    }
+
+    // Add padding
+    const padding = input.length % 3;
+    if (padding === 1) {
+      result = result.slice(0, -2) + '==';
+    } else if (padding === 2) {
+      result = result.slice(0, -1) + '=';
+    }
+
+    return result;
+  }
+
+  /**
+   * Custom base64 decoder for Figma plugin environment
+   */
+  private static customBase64Decode(input: string): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let result = '';
+    let i = 0;
+
+    // Remove padding
+    input = input.replace(/[^A-Za-z0-9+/]/g, '');
+
+    while (i < input.length) {
+      const encoded1 = chars.indexOf(input.charAt(i++));
+      const encoded2 = chars.indexOf(input.charAt(i++));
+      const encoded3 = chars.indexOf(input.charAt(i++));
+      const encoded4 = chars.indexOf(input.charAt(i++));
+
+      const bitmap = (encoded1 << 18) | (encoded2 << 12) | (encoded3 << 6) | encoded4;
+
+      result += String.fromCharCode((bitmap >> 16) & 255);
+      if (encoded3 !== 64) result += String.fromCharCode((bitmap >> 8) & 255);
+      if (encoded4 !== 64) result += String.fromCharCode(bitmap & 255);
+    }
+
+    return result;
+  }
+
   static encrypt(text: string): string {
     try {
       // Simple XOR encryption with base64 encoding
@@ -41,7 +100,7 @@ class SimpleEncryption {
         )
         .join('');
 
-      return btoa(encrypted);
+      return this.customBase64Encode(encrypted);
     } catch (error) {
       console.error('Encryption failed:', error);
       throw new Error('Failed to encrypt data');
@@ -50,7 +109,7 @@ class SimpleEncryption {
 
   static decrypt(encryptedText: string): string {
     try {
-      const decoded = atob(encryptedText);
+      const decoded = this.customBase64Decode(encryptedText);
 
       return decoded
         .split('')
@@ -100,6 +159,18 @@ export class SecureStorage {
       return JSON.parse(decrypted) as GitHubCredentials;
     } catch (error) {
       console.error('Failed to retrieve credentials:', error);
+
+      // If parsing failed due to corruption, clear the corrupted storage
+      if (error instanceof SyntaxError && error.message.includes('unexpected')) {
+        console.warn('⚠️ Detected corrupted credentials storage, clearing...');
+        try {
+          await figma.clientStorage.deleteAsync(STORAGE_KEYS.GITHUB_CREDENTIALS);
+          console.log('✅ Corrupted credentials storage cleared');
+        } catch (clearError) {
+          console.error('❌ Failed to clear corrupted storage:', clearError);
+        }
+      }
+
       return null;
     }
   }
@@ -139,6 +210,18 @@ export class SecureStorage {
       return JSON.parse(configString) as Partial<GitHubConfig>;
     } catch (error) {
       console.error('Failed to retrieve config:', error);
+
+      // If parsing failed due to corruption, clear the corrupted storage
+      if (error instanceof SyntaxError && error.message.includes('unexpected')) {
+        console.warn('⚠️ Detected corrupted config storage, clearing...');
+        try {
+          await figma.clientStorage.deleteAsync(STORAGE_KEYS.GITHUB_CONFIG);
+          console.log('✅ Corrupted config storage cleared');
+        } catch (clearError) {
+          console.error('❌ Failed to clear corrupted storage:', clearError);
+        }
+      }
+
       return null;
     }
   }

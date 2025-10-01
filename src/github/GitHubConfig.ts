@@ -6,10 +6,8 @@
  */
 
 import { GitHubAuth } from './GitHubAuth';
-import { GitHubClient } from './GitHubClient';
 import {
   GitHubConfig,
-  GitHubCredentials,
   ConnectionTestResult,
   GitHubConnectionStatus,
   TokenPushRequest,

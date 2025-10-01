@@ -7,7 +7,7 @@
  * @version 1.0.0 (Token Extraction)
  */
 
-import { TokenExtractor, ExtractionConfig, ExtractionResult, ExtractionError } from './TokenExtractor';
+import { TokenExtractor, ExtractionConfig, ExtractionResult } from './TokenExtractor';
 import { DocumentInfo, BasicTokenCount } from './types/CommonTypes';
 import { ExportWorkflow } from './workflow/ExportWorkflow';
 
@@ -366,7 +366,9 @@ function generateJSONFilename(documentInfo: DocumentInfo): string {
 
 /**
  * Download JSON dataset as file using Figma's showUI and postMessage API
+ * @deprecated - This function is no longer used but kept for reference
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function downloadJSONFile(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): Promise<void> {
   try {
     console.log('Preparing JSON file for download...');
@@ -467,8 +469,11 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
               URL.revokeObjectURL(url);
 
               // Show success message
-              document.getElementById('downloadStatus').innerHTML =
-                '<div class="success">✅ Download started! Check your Downloads folder.</div>';
+              const statusElement = document.getElementById('downloadStatus');
+              if (statusElement) {
+                statusElement.textContent = '✅ Download started! Check your Downloads folder.';
+                statusElement.className = 'success';
+              }
 
               // Auto-close after successful download
               setTimeout(function() {
@@ -476,8 +481,11 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
               }, 2000);
 
             } catch (error) {
-              document.getElementById('downloadStatus').innerHTML =
-                '<div style="color: red;">❌ Download failed: ' + error.message + '</div>';
+              const statusElement = document.getElementById('downloadStatus');
+              if (statusElement) {
+                statusElement.textContent = '❌ Download failed: ' + error.message;
+                statusElement.style.color = 'red';
+              }
             }
           });
 

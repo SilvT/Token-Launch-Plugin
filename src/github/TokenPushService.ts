@@ -277,10 +277,26 @@ export class TokenPushService {
 
       } else {
         // Normal flow - get repository from auth config
+        console.log('🐛 DEBUG: TokenPushService.quickPush - Getting repository from GitOps...');
         const repository = this.gitOps.getCurrentRepository();
+        console.log('🐛 DEBUG: GitOps.getCurrentRepository() returned:', repository);
+
         if (!repository) {
+          console.error('🐛 DEBUG: TokenPushService.quickPush - No repository configured!');
+
+          // Let's also check the auth state directly
+          const authState = this.auth.getState();
+          console.error('🐛 DEBUG: Auth state when repository is null:', {
+            isConfigured: authState.isConfigured,
+            isConnected: authState.isConnected,
+            hasConfig: !!authState.config,
+            hasClient: this.auth.hasClient()
+          });
+
           throw new Error('No repository configured. Please setup GitHub integration first.');
         }
+
+        console.log('🐛 DEBUG: Creating config with repository:', repository);
         config = { repository };
       }
 

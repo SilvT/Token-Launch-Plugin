@@ -92,22 +92,56 @@ export class BuildEnvironmentDetector {
     const features: string[] = [];
 
     try {
-      // Check if figma object is available
-      if (typeof figma === 'undefined') {
+      // Check if figma object is available with a more reliable test
+      if (typeof figma === 'undefined' || !figma) {
         return {
           available: false,
           features: ['no-figma-object']
         };
       }
 
-      // Check Figma API features
-      if (figma.root) features.push('document-access');
-      if (figma.variables) features.push('variables-api');
-      if (typeof figma.getLocalPaintStyles === 'function') features.push('styles-api');
-      if (figma.ui) features.push('ui-api');
+      // Test if figma object is actually functional (sometimes it exists but isn't ready)
+      try {
+        // Try accessing a basic property that should always be available
+        const hasBasicAccess = typeof figma.showUI === 'function';
+        if (!hasBasicAccess) {
+          return {
+            available: false,
+            features: ['figma-object-not-functional']
+          };
+        }
+      } catch (accessError) {
+        return {
+          available: false,
+          features: ['figma-access-error']
+        };
+      }
 
-      // Check if development mode
-      if (process.env.NODE_ENV === 'development') features.push('development');
+      // Check Figma API features
+      try {
+        if (figma.root) features.push('document-access');
+      } catch (e) {}
+
+      try {
+        if (figma.variables) features.push('variables-api');
+      } catch (e) {}
+
+      try {
+        if (typeof figma.getLocalPaintStyles === 'function') features.push('styles-api');
+      } catch (e) {}
+
+      try {
+        if (figma.ui) features.push('ui-api');
+      } catch (e) {}
+
+      // Check if development mode (safely handle process being undefined)
+      try {
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+          features.push('development');
+        }
+      } catch (e) {
+        // process is not available in Figma environment, skip
+      }
 
       // Check plugin manifest data
       if (figma.pluginId) features.push('plugin-id-available');
@@ -133,17 +167,20 @@ export class BuildEnvironmentDetector {
   private static analyzeJSEngine(): BuildEnvironmentInfo['jsEngine'] {
     const features: string[] = [];
 
-    // Check ES6+ features
+    // Check ES6+ features using safe detection methods
     try {
-      // Arrow functions
-      eval('() => {}');
-      features.push('arrow-functions');
+      // Arrow functions - test if they exist
+      const arrowTest = () => true;
+      if (arrowTest.toString().includes('=>')) {
+        features.push('arrow-functions');
+      }
     } catch {}
 
     try {
-      // Async/await
-      eval('async function test() { await Promise.resolve(); }');
-      features.push('async-await');
+      // Async/await - check if async function constructor exists
+      if (typeof (async function(){}).constructor === 'function') {
+        features.push('async-await');
+      }
     } catch {}
 
     try {
@@ -153,15 +190,20 @@ export class BuildEnvironmentDetector {
     } catch {}
 
     try {
-      // Classes
-      eval('class TestClass {}');
-      features.push('classes');
+      // Classes - test if class syntax is supported
+      const classTest = function() {};
+      classTest.toString = function() { return 'class TestClass {}'; };
+      if (typeof class TestClass {} === 'function') {
+        features.push('classes');
+      }
     } catch {}
 
     try {
-      // Template literals
-      eval('`template`');
-      features.push('template-literals');
+      // Template literals - check if template strings work
+      const templateTest = `template`;
+      if (templateTest === 'template') {
+        features.push('template-literals');
+      }
     } catch {}
 
     // Detect engine

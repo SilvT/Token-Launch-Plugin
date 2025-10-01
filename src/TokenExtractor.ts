@@ -1234,7 +1234,7 @@ export class TokenExtractor {
   /**
    * Create token metadata from style
    */
-  private createTokenMetadata(style: BaseStyle): TokenMetadata {
+  private createTokenMetadata(_style: BaseStyle): TokenMetadata {
     return {
       createdAt: new Date(),
       modifiedAt: new Date(),
@@ -1246,7 +1246,7 @@ export class TokenExtractor {
   /**
    * Create token metadata from variable
    */
-  private createVariableMetadata(variable: Variable): TokenMetadata {
+  private createVariableMetadata(_variable: Variable): TokenMetadata {
     return {
       createdAt: new Date(),
       modifiedAt: new Date(),

@@ -44,7 +44,7 @@ export async function mainWithGitPush(): Promise<void> {
       console.warn(`⚠️ Extraction completed with ${extractionResult.metadata.errors.length} errors`);
     }
 
-    const totalTokens = extractionResult.tokens.length + extractionResult.variables.length;
+    // const totalTokens = extractionResult.tokens.length + extractionResult.variables.length;
     console.log(`📊 Extracted: ${extractionResult.tokens.length} tokens, ${extractionResult.variables.length} variables`);
 
     // Step 4: Push to GitHub

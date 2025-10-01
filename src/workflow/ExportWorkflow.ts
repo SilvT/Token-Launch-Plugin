@@ -7,7 +7,8 @@
 
 import { ExtractionResult, TokenExtractor } from '../TokenExtractor';
 import { DocumentInfo } from '../types/CommonTypes';
-import { ExportChoiceUI, ExportChoice, ExportChoiceUIOptions } from '../ui/ExportChoiceUI';
+import { UnifiedExportUI, UnifiedExportUIOptions, ExportChoice } from '../ui/UnifiedExportUI';
+import { GitHubSetupUI } from '../ui/GitHubSetupUI';
 import { TokenPushService } from '../github/TokenPushService';
 import { GitHubAuth } from '../github/GitHubAuth';
 
@@ -56,20 +57,17 @@ export class ExportWorkflow {
     try {
       console.log('🚀 Starting export workflow...');
 
-      // Step 1: Initialize services
-      await this.initializeServices();
+      // Step 1: Initialize GitHub services only (no setup wizard)
+      await this.initializeGitHubServices();
 
       // Step 2: Extract tokens
       figma.notify('Extracting design tokens...', { timeout: 2000 });
       const extractionResult = await this.extractTokens();
 
-      // Step 3: Check Git status
-      const gitStatus = await this.checkGitStatus();
+      // Step 3: Show unified UI (includes both export options and GitHub setup)
+      const userChoice = await this.showUnifiedUI(extractionResult);
 
-      // Step 4: Show choice UI
-      const userChoice = await this.showChoiceUI(extractionResult, gitStatus);
-
-      // Step 5: Handle user choice
+      // Step 4: Handle user choice
       const result = await this.handleUserChoice(userChoice, extractionResult);
 
       const duration = Date.now() - startTime;
@@ -93,38 +91,52 @@ export class ExportWorkflow {
   }
 
   /**
-   * Initialize all required services
+   * Initialize GitHub services without running setup wizard
    */
-  private async initializeServices(): Promise<void> {
+  private async initializeGitHubServices(): Promise<void> {
     try {
-      console.log('🔧 ExportWorkflow.initializeServices - Starting...');
+      console.log('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - START');
 
-      console.log('🔧 Initializing GitHubAuth...');
+      console.log('🐛 DEBUG: Initializing GitHubAuth...');
       await this.githubAuth.initialize();
-      console.log('🔧 GitHubAuth initialized, has client:', this.githubAuth.hasClient());
+      console.log('🐛 DEBUG: GitHubAuth initialized');
 
-      console.log('🔧 Initializing TokenPushService...');
+      const authState = this.githubAuth.getState();
+      console.log('🐛 DEBUG: GitHubAuth state after init:', {
+        isConfigured: authState.isConfigured,
+        isConnected: authState.isConnected,
+        hasConfig: !!authState.config,
+        hasClient: this.githubAuth.hasClient(),
+        errors: authState.errors
+      });
+
+      console.log('🐛 DEBUG: Initializing TokenPushService...');
       await this.pushService.initialize();
-      console.log('🔧 TokenPushService initialized');
+      console.log('🐛 DEBUG: TokenPushService initialized');
 
       // Verify the complete initialization chain
       if (this.githubAuth.hasClient()) {
+        console.log('🐛 DEBUG: Verifying client availability...');
         const client = this.githubAuth.getClient();
-        console.log('🔧 Verification - Client available:', !!client);
-        console.log('🔧 Verification - Client ID:', client.getClientId());
-        console.log('🔧 Verification - Client methods:', {
-          fileExists: typeof client.fileExists,
-          createFile: typeof client.createFile,
-          getRepository: typeof client.getRepository
+        console.log('🐛 DEBUG: Client verification:', {
+          available: !!client,
+          clientId: client.getClientId(),
+          methodTypes: {
+            fileExists: typeof client.fileExists,
+            createFile: typeof client.createFile,
+            getRepository: typeof client.getRepository
+          }
         });
+      } else {
+        console.log('🐛 DEBUG: No client available after initialization');
       }
 
-      console.log('✅ Services initialized successfully');
+      console.log('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - END, SUCCESS');
     } catch (error) {
-      console.error('❌ Service initialization failed:', error);
-      console.error('❌ Error type:', typeof error);
-      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
-      console.warn('⚠️ Service initialization partial:', error);
+      console.error('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - ERROR:', error);
+      console.error('🐛 DEBUG: Error type:', typeof error);
+      console.error('🐛 DEBUG: Error stack:', error instanceof Error ? error.stack : 'No stack');
+      console.warn('⚠️ GitHub service initialization partial, continuing anyway');
       // Continue anyway - Git operations might not be available
     }
   }
@@ -147,63 +159,23 @@ export class ExportWorkflow {
     return result;
   }
 
-  /**
-   * Check Git configuration status
-   */
-  private async checkGitStatus(): Promise<{
-    configured: boolean;
-    connected: boolean;
-    repository?: string;
-    error?: string;
-  }> {
-    try {
-      const authState = this.githubAuth.getState();
-
-      if (!authState.isConfigured) {
-        return {
-          configured: false,
-          connected: false
-        };
-      }
-
-      // Test connection
-      const connectionTest = await this.pushService.testConnection();
-
-      return {
-        configured: true,
-        connected: connectionTest.success,
-        repository: this.getRepositoryString(),
-        error: connectionTest.error
-      };
-
-    } catch (error) {
-      return {
-        configured: false,
-        connected: false,
-        error: error instanceof Error ? error.message : 'Git check failed'
-      };
-    }
-  }
 
   /**
-   * Show the choice UI and wait for user selection
+   * Show the unified UI with export options and GitHub setup
    */
-  private async showChoiceUI(
-    extractionResult: ExtractionResult,
-    gitStatus: any
+  private async showUnifiedUI(
+    extractionResult: ExtractionResult
   ): Promise<ExportChoice> {
     const extractionDuration = Date.now() - new Date(extractionResult.metadata.extractedAt).getTime();
 
-    const uiOptions: ExportChoiceUIOptions = {
+    const uiOptions: UnifiedExportUIOptions = {
       extractionResult,
       documentInfo: this.documentInfo,
-      extractionDuration,
-      hasGitConfigured: gitStatus.configured && gitStatus.connected,
-      gitRepository: gitStatus.repository
+      extractionDuration
     };
 
-    const choiceUI = new ExportChoiceUI(uiOptions);
-    return await choiceUI.showChoice();
+    const unifiedUI = new UnifiedExportUI(uiOptions);
+    return await unifiedUI.showChoice();
   }
 
   /**
@@ -241,25 +213,78 @@ export class ExportWorkflow {
     choice: ExportChoice
   ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
     try {
-      console.log('🚀 Starting Git push workflow...');
-      console.log('🔧 ExportWorkflow.handleGitPush - pushService type:', typeof this.pushService);
-      console.log('🔧 ExportWorkflow.handleGitPush - pushService.quickPush type:', typeof this.pushService.quickPush);
+      console.log('🐛 DEBUG: ExportWorkflow.handleGitPush() - START');
+      console.log('🐛 DEBUG: Choice has gitConfig:', !!choice.gitConfig);
+
+      // Log current state before any changes
+      const preState = this.githubAuth.getState();
+      console.log('🐛 DEBUG: Pre-configure GitHubAuth state:', {
+        isConfigured: preState.isConfigured,
+        isConnected: preState.isConnected,
+        hasConfig: !!preState.config,
+        hasClient: this.githubAuth.hasClient()
+      });
+
+      // Configure GitHub services with the provided configuration
+      if (choice.gitConfig) {
+        console.log('🐛 DEBUG: Configuring with provided config:', {
+          hasToken: !!choice.gitConfig.credentials?.token,
+          tokenPreview: choice.gitConfig.credentials?.token?.substring(0, 10) + '...',
+          repository: choice.gitConfig.repository?.owner + '/' + choice.gitConfig.repository?.name
+        });
+
+        const configResult = await this.githubAuth.configure(choice.gitConfig);
+        console.log('🐛 DEBUG: Configure result:', configResult);
+
+        if (!configResult.success) {
+          throw new Error(configResult.error || 'Failed to configure GitHub services');
+        }
+
+        // Log state after configuration
+        const postState = this.githubAuth.getState();
+        console.log('🐛 DEBUG: Post-configure GitHubAuth state:', {
+          isConfigured: postState.isConfigured,
+          isConnected: postState.isConnected,
+          hasConfig: !!postState.config,
+          hasClient: this.githubAuth.hasClient()
+        });
+
+      } else {
+        console.log('🐛 DEBUG: No gitConfig provided, using existing configuration');
+        const currentState = this.githubAuth.getState();
+        console.log('🐛 DEBUG: Current existing state:', {
+          isConfigured: currentState.isConfigured,
+          isConnected: currentState.isConnected,
+          hasConfig: !!currentState.config,
+          hasClient: this.githubAuth.hasClient()
+        });
+      }
 
       // Create feedback interface
       const feedback = TokenPushService.createFigmaFeedback();
-      console.log('🔧 Feedback interface created');
+      console.log('🐛 DEBUG: Feedback interface created');
+
+      // Verify client is available before push
+      console.log('🐛 DEBUG: Verifying client before push...');
+      try {
+        const client = this.githubAuth.getClient();
+        console.log('🐛 DEBUG: Client verified, ID:', client.getClientId());
+      } catch (clientError) {
+        console.error('🐛 DEBUG: Client verification failed:', clientError);
+        throw clientError;
+      }
 
       // Use quick push or custom configuration
-      console.log('🔧 About to call pushService.quickPush...');
+      console.log('🐛 DEBUG: About to call pushService.quickPush...');
       let pushResult;
       try {
         pushResult = await this.pushService.quickPush(extractionResult, feedback);
-        console.log('🔧 quickPush completed with result:', pushResult.success ? 'SUCCESS' : 'FAILED');
+        console.log('🐛 DEBUG: quickPush completed with result:', pushResult.success ? 'SUCCESS' : 'FAILED');
       } catch (quickPushError) {
-        console.error('❌ quickPush failed:', quickPushError);
-        console.error('❌ quickPush error type:', typeof quickPushError);
-        console.error('❌ quickPush error message:', quickPushError instanceof Error ? quickPushError.message : String(quickPushError));
-        console.error('❌ quickPush error stack:', quickPushError instanceof Error ? quickPushError.stack : 'No stack trace');
+        console.error('🐛 DEBUG: quickPush failed:', quickPushError);
+        console.error('🐛 DEBUG: quickPush error type:', typeof quickPushError);
+        console.error('🐛 DEBUG: quickPush error message:', quickPushError instanceof Error ? quickPushError.message : String(quickPushError));
+        console.error('🐛 DEBUG: quickPush error stack:', quickPushError instanceof Error ? quickPushError.stack : 'No stack trace');
         throw quickPushError;
       }
 
@@ -495,8 +520,46 @@ export class ExportWorkflow {
   }
 
   /**
-   * Get repository string for display
+   * Run GitHub setup wizard for dynamic configuration
+   * @deprecated - This method is no longer used but kept for reference
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async runGitHubSetup(): Promise<void> {
+    try {
+      console.log('🔧 Starting GitHub setup wizard...');
+      figma.notify('Setting up GitHub integration...', { timeout: 3000 });
+
+      const setupUI = new GitHubSetupUI();
+      const setupResult = await setupUI.runSetup();
+
+      if (setupResult.success && setupResult.config) {
+        console.log('✅ GitHub setup completed successfully');
+
+        // Configure GitHubAuth with the new configuration
+        const configResult = await this.githubAuth.configure(setupResult.config);
+
+        if (!configResult.success) {
+          throw new Error(configResult.error || 'Failed to apply GitHub configuration');
+        }
+
+        console.log('✅ GitHub configuration applied and stored');
+        figma.notify('GitHub integration configured successfully!', { timeout: 2000 });
+      } else {
+        throw new Error(setupResult.error || 'GitHub setup was cancelled or failed');
+      }
+    } catch (error) {
+      console.error('❌ GitHub setup failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Setup failed';
+      figma.notify(`GitHub setup failed: ${errorMessage}`, { error: true, timeout: 5000 });
+      throw error;
+    }
+  }
+
+  /**
+   * Get repository string for display
+   * @deprecated - This method is no longer used but kept for reference
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private getRepositoryString(): string | undefined {
     const config = this.githubAuth.getPublicConfig();
     return config?.repository
