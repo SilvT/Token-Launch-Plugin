@@ -1395,6 +1395,12 @@ export class UnifiedExportUI {
               completeButton.disabled = true;
             }
 
+            // Hide "GitHub Already Configured" status card
+            const configuredCard = document.getElementById('github-configured-card');
+            if (configuredCard) {
+              configuredCard.style.display = 'none';
+            }
+
             // Clear storage
             parent.postMessage({
               pluginMessage: { type: 'clear-storage' }
@@ -1563,17 +1569,15 @@ export class UnifiedExportUI {
     const branch = repo?.branch || 'main';
 
     return `
-      <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #28a745;">
+      <div class="gitConfigured" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #28a745;">
         <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <div style="font-size: 28px; margin-right: 12px;">✅</div>
+          <div style="font-size: 20px; margin-right: 12px;">✅</div>
           <div>
-            <h3 style="margin: 0; color: #155724; font-size: 18px;">GitHub Already Configured</h3>
-            <p style="margin: 4px 0 0 0; color: #155724; opacity: 0.9; font-size: 14px;">
-              Your credentials are stored and ready to use
-            </p>
+            <h3 style="margin: 0; color: #155724; font-size: 16px;">GitHub Configured</h3>
+
           </div>
         </div>
-        <div style="background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; margin-top: 12px;">
+        <div style="display:none; background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; margin-top: 12px;">
           <div style="font-size: 13px; color: #155724; margin-bottom: 6px;">
             <strong>📁 Repository:</strong> ${repoPath}
           </div>
