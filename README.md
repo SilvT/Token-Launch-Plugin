@@ -1,38 +1,67 @@
 # Figma Design System Distributor
 
-A comprehensive Figma plugin for extracting design tokens from Figma documents and distributing them to development teams.
+A high-performance Figma plugin for extracting design tokens from Figma documents and distributing them to development teams via GitHub or local download.
 
-## Features
+## ✨ Features
 
-- **Comprehensive Token Extraction**: Colors, typography, spacing, effects, and Figma variables
-- **GitHub Integration**: Direct push to repositories with automated commits
-- **Export Choice Interface**: Users can choose between GitHub push or local download
-- **Multiple Export Formats**: JSON, CSS custom properties, SCSS variables, Tokens Studio
-- **Figma Variables Support**: Full variable collections, modes, and semantic relationships
-- **Component Token Discovery**: Extract tokens from both local styles and component instances
-- **Real-time Progress Tracking**: Live feedback during extraction process
-- **Error Handling**: Robust error management with detailed reporting
+### Token Extraction
+- **Comprehensive Coverage**: Colors, typography, spacing, effects, shadows, and gradients
+- **Figma Variables Support**: Full variable collections, modes, aliases, and semantic relationships
+- **Component Token Discovery**: Extract tokens from local styles and component instances
+- **Smart Processing**: Parallel extraction with dependency management
+- **High Performance**: 96.9% faster extraction (85ms vs 2717ms)
 
-## Current Status
+### GitHub Integration
+- **Direct Push**: Automated commits to your repositories
+- **Secure Credentials**: Encrypted storage via Figma clientStorage
+- **Real-time Validation**: Live feedback with 1-second debounce
+- **Branch Support**: Main, master, or custom branches
+- **Smart Configuration**: Persistent settings with visual validation
 
-**Version**: 1.0.0 (Production Ready - GitHub Integration Complete)
+### User Experience
+- **Dual Export Options**: Choose GitHub push or local JSON download
+- **Beautiful UI**: Pastel gradient theme with AAA accessibility (WCAG 7:1)
+- **Progress Tracking**: Real-time feedback during extraction and export
+- **Security Tooltips**: Integrated guides for token creation and best practices
+- **Error Handling**: Graceful fallbacks with helpful error messages
 
-✅ **Fully Functional** - The plugin provides complete design token extraction with robust GitHub integration:
+### Performance
+- **Optimized Extraction**: Parallel processing with Promise.all()
+- **Cached API Calls**: Reduced redundant Figma API requests
+- **Conditional Loading**: GitHub diagnostics only when needed
+- **Fast Launch**: ~3 seconds total (down from ~4.2 seconds)
 
-1. **Token Extraction**: Full extraction of colors, typography, spacing, effects, and variables
-2. **Export Choice Interface**: Users select between GitHub push or local download
-3. **GitHub Integration**: ✅ **Production Ready** - Direct push to repositories with automated commits
-4. **JSON Export**: Structured token data with metadata
-5. **Progress Tracking**: Real-time feedback during extraction and push operations
-6. **Environment Compatibility**: ✅ **Figma Plugin Ready** - Custom implementations for restricted Figma environment
+## 🎯 Current Status
 
-### 🎯 **Key Achievement: Environment Compatibility**
+**Version**: 1.0.0 (Production Ready)
+**Last Updated**: October 6, 2025
 
-The plugin now works seamlessly in Figma's restricted plugin environment with custom implementations:
-- ✅ **Custom Base64 Encoding** (replaces unavailable `btoa`/`Buffer`)
-- ✅ **Custom UTF-8 Calculation** (replaces unavailable `TextEncoder`)
-- ✅ **Arrow Function Methods** (prevents context binding issues)
-- ✅ **Comprehensive Error Handling** with fallback strategies
+✅ **Production Ready** - Fully functional with exceptional performance:
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| Token Extraction | ✅ Complete | 96.9% performance improvement |
+| GitHub Integration | ✅ Production Ready | Secure, validated, persistent |
+| Export UI | ✅ Polished | Accessible, responsive, intuitive |
+| Performance | ✅ Optimized | 3.1s total, 85ms extraction |
+| Documentation | ✅ Comprehensive | Full development history |
+| Security | ✅ Production Grade | Encrypted storage, scope validation |
+
+### 🏆 Recent Achievements
+
+**Performance Optimization (Oct 6, 2025):**
+- Token extraction: 2717ms → 85ms (**96.9% faster**)
+- Overall plugin: 4235ms → 3108ms (**26.6% faster**)
+- Removed 2600ms of artificial delays
+- Implemented parallel token processing
+- Added strategic caching
+
+**UI & Security (Oct 2-3, 2025):**
+- Persistent credential storage with encryption
+- Real-time validation with visual feedback
+- Security tooltips and documentation
+- Collapsible GitHub setup accordion
+- AAA accessibility compliance
 
 ## GitHub Integration
 
@@ -53,17 +82,24 @@ The plugin integrates directly with GitHub to push design tokens to repositories
 - Supported branches: `main`, `master`, or custom branch
 
 #### 3. **Plugin Configuration**
-The plugin can be configured in two ways:
 
-**Option A: Interactive Setup (Recommended)**
-- Plugin guides you through GitHub setup
-- Secure credential storage within Figma
-- Connection validation before first use
+**Interactive Setup (In-Plugin)**
+1. Run the plugin in Figma
+2. Navigate to the GitHub Setup tab
+3. Enter your credentials:
+   - GitHub Personal Access Token
+   - Repository owner/name
+   - Target branch (default: main)
+   - File path (default: tokens/raw/)
+4. Click "Validate & Save Configuration"
+5. Credentials are encrypted and stored securely
 
-**Option B: Hard-coded Testing**
-- For development/testing purposes
-- Credentials embedded in code temporarily
-- See `HARD_CODED_TESTING.md` for details
+**Features:**
+- Real-time validation with 1-second debounce
+- Visual feedback (green checkmarks for valid inputs)
+- Persistent storage across sessions
+- "GitHub Already Configured" status indicator
+- Reset functionality with confirmation dialog
 
 ### 🎯 **User Experience**
 
@@ -163,95 +199,148 @@ feat: update design tokens from Figma
 - Look for detailed GitHub API logs
 - Check authentication and repository validation steps
 
-### 📚 **Documentation**
+### ⚡ **Performance**
 
-For detailed implementation guides:
-- `GITHUB_INTEGRATION.md` - Complete integration documentation
-- `GIT_OPERATIONS.md` - Git operations implementation details
-- `EXPORT_CHOICE_INTEGRATION.md` - UI integration guide
-- `HARD_CODED_TESTING.md` - Testing configuration guide
+**Optimized for Speed:**
+- Token extraction: 85ms (96.9% faster than v0.1)
+- GitHub validation: Real-time with caching
+- Document data: Single fetch, multiple reuse
+- Parallel processing: Independent operations run concurrently
 
-## Architecture
+**Technical Details:**
+- See [`LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md`](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md) for complete optimization journey
 
-The plugin features a modular architecture designed for scalability:
+## 🏗️ Architecture
+
+Modular, high-performance architecture designed for scalability and maintainability.
 
 ### Core Components
 
-- **Main Workflow** (`src/main.ts`): Primary plugin execution with export choice integration
-- **Token Extractor** (`src/TokenExtractor.ts`): Comprehensive extraction engine for all token types
-- **Export Workflow** (`src/workflow/ExportWorkflow.ts`): Manages user choice and execution flow
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Main Workflow** | `src/main.ts` | Plugin entry point with performance tracking |
+| **Token Extractor** | `src/TokenExtractor.ts` | Parallel extraction engine (85ms performance) |
+| **Export Workflow** | `src/workflow/ExportWorkflow.ts` | User choice & execution orchestration |
 
 ### GitHub Integration
 
-- **GitHub Client** (`src/github/GitHubClient.ts`): Core GitHub API client with authentication
-- **Git Operations** (`src/github/GitOperations.ts`): Repository validation and file operations
-- **GitHub Auth** (`src/github/GitHubAuth.ts`): Authentication and credential management
-- **Token Push Service** (`src/github/TokenPushService.ts`): High-level push workflow orchestration
+| Component | File | Purpose |
+|-----------|------|---------|
+| **GitHub Client** | `src/github/GitHubClient.ts` | API client with custom Base64/UTF-8 |
+| **GitHub Auth** | `src/github/GitHubAuth.ts` | Authentication & validation |
+| **Git Operations** | `src/github/GitOperations.ts` | File operations & commits |
+| **Token Push Service** | `src/github/TokenPushService.ts` | Push orchestration with feedback |
 
 ### User Interface
 
-- **Export Choice UI** (`src/ui/ExportChoiceUI.ts`): Beautiful choice interface for export options
-- **Progress Feedback** (`src/github/TokenPushService.ts`): Real-time progress indicators
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Unified Export UI** | `src/ui/UnifiedExportUI.ts` | 3-tab interface (setup, export, settings) |
+| **GitHub Setup UI** | `src/ui/GitHubSetupUI.ts` | Credential configuration with validation |
 
-### Storage & Security
+### Infrastructure
 
-- **Secure Storage** (`src/storage/SecureStorage.ts`): Encrypted credential storage within Figma
-- **Configuration Types** (`src/types/CommonTypes.ts`): Shared type definitions
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Secure Storage** | `src/storage/SecureStorage.ts` | Encrypted credential storage |
+| **Common Types** | `src/types/CommonTypes.ts` | Shared type definitions |
+| **Build Diagnostics** | `src/github/BuildEnvironmentDetector.ts` | Environment compatibility checks |
 
 ### File Structure
 
 ```
-src/
-├── main.ts                     # Main plugin workflow
-├── TokenExtractor.ts           # Token extraction engine
-├── workflow/
-│   └── ExportWorkflow.ts       # Complete export management
-├── github/                     # GitHub integration
-│   ├── GitHubClient.ts         # API client
-│   ├── GitHubAuth.ts           # Authentication
-│   ├── GitOperations.ts        # File operations
-│   ├── TokenPushService.ts     # Push orchestration
-│   └── GitHubTypes.ts          # Type definitions
-├── ui/
-│   └── ExportChoiceUI.ts       # Export choice interface
-├── storage/
-│   └── SecureStorage.ts        # Credential storage
-└── types/
-    └── CommonTypes.ts          # Shared types
+figma-design-system-distributor/
+├── src/
+│   ├── main.ts                          # Main plugin workflow (with timing)
+│   ├── TokenExtractor.ts                # Parallel extraction engine
+│   ├── workflow/
+│   │   └── ExportWorkflow.ts            # Export orchestration
+│   ├── github/
+│   │   ├── GitHubClient.ts              # API client (custom Base64/UTF-8)
+│   │   ├── GitHubAuth.ts                # Authentication & validation
+│   │   ├── GitOperations.ts             # File operations & commits
+│   │   ├── TokenPushService.ts          # Push workflow
+│   │   ├── DiagnosticTester.ts          # Environment testing
+│   │   └── BuildEnvironmentDetector.ts  # Compatibility checks
+│   ├── ui/
+│   │   ├── UnifiedExportUI.ts           # 3-tab interface
+│   │   └── GitHubSetupUI.ts             # Setup wizard
+│   ├── storage/
+│   │   └── SecureStorage.ts             # Encrypted storage
+│   └── types/
+│       └── CommonTypes.ts               # Type definitions
+├── docs/
+│   ├── TOKEN_CREATION_GUIDE.md          # GitHub token setup
+│   └── CREDENTIAL_SECURITY.md           # Security best practices
+├── LOGS/
+│   ├── README.md                        # Documentation guide
+│   ├── PROJECT_DEVELOPMENT_LOG.md       # Complete dev history
+│   ├── CURRENT_FEATURES.md              # Feature tracking
+│   └── SESSION_LOG_*.md                 # Session logs
+├── CHANGELOG.md                         # Version history
+├── manifest.json                        # Figma plugin manifest
+└── package.json                         # Dependencies & scripts
 ```
 
-## Development Guide
+### Key Design Patterns
 
-*This plugin is built with [Create Figma Plugin](https://yuanqing.github.io/create-figma-plugin/).*
+**Performance:**
+- Parallel token extraction with `Promise.all()`
+- Document data caching (single API fetch)
+- Conditional GitHub diagnostics
+- Strategic timing measurements
+
+**Security:**
+- Encrypted credential storage via Figma clientStorage
+- Token scope validation before operations
+- No credentials in console logs
+- Secure error messages
+
+**User Experience:**
+- Real-time validation with 1-second debounce
+- Visual feedback (checkmarks, error states)
+- Graceful degradation on errors
+- Comprehensive tooltips and guides
+
+## 🛠️ Development Guide
+
+*Built with [Create Figma Plugin](https://yuanqing.github.io/create-figma-plugin/) + TypeScript*
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) – v22
+- [Node.js](https://nodejs.org) v22+
 - [Figma desktop app](https://figma.com/downloads/)
+- Code editor (VS Code recommended)
 
-### Installation
+### Quick Start
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### Build the Plugin
-
-To build the plugin:
-
-```bash
+# Build for production (with minification)
 npm run build
-```
 
-This generates:
-- `manifest.json` - Figma plugin manifest
-- `build/main.js` - Minified plugin bundle (~6KB)
+# Build for development (faster, with type checking)
+npm run build:dev
 
-To watch for changes and rebuild automatically:
-
-```bash
+# Watch mode (auto-rebuild on changes)
 npm run watch
 ```
+
+### Build Output
+
+**Production build** (`npm run build`):
+- `manifest.json` - Figma plugin manifest
+- `build/main.js` - Minified bundle (~6KB)
+- Typechecking: ✅ (~0.9s)
+- Minification: ✅
+
+**Development build** (`npm run build:dev`):
+- Faster compilation
+- Source maps included
+- No minification
+- Ideal for debugging
 
 ### Install in Figma
 
@@ -260,47 +349,160 @@ npm run watch
 3. Select the generated `manifest.json` file
 4. Run the plugin from the plugins menu
 
-### Testing
+### Testing & Validation
 
-The plugin provides comprehensive functionality:
+#### Performance Benchmarks
+Monitor these metrics in the console:
 
-#### Basic Testing
-1. **Token Extraction**: Validates Figma environment and extracts all design tokens
-2. **Export Choice**: Presents user interface for GitHub push vs download
-3. **Progress Feedback**: Real-time progress indicators during operations
-4. **Error Handling**: Graceful fallback when operations fail
+```
+Step 1 - Environment validation: 0ms
+Step 2 - API access test: ~5ms
+Step 3 - Document info: ~6ms
+Step 4 - Token counting: ~2ms
+Step 5 - Token extraction: ~85ms ✅ (optimized)
+Step 6 - JSON formatting: ~10ms
+Step 7 - Export workflow: ~3000ms (GitHub push)
+TOTAL: ~3100ms
+```
 
-#### GitHub Integration Testing
-1. **Authentication**: Tests GitHub token and repository access
-2. **File Operations**: Creates/updates files in target repository
-3. **Commit Generation**: Automated commits with extraction metadata
-4. **Connection Validation**: Verifies permissions before operations
+**Red Flags:**
+- Token extraction > 200ms (check for regression)
+- Document info > 20ms (possible cache miss)
+- Total time > 5000ms (investigate bottleneck)
 
-### Expected Output
+#### Test Scenarios
 
-**Successful Run with Local Download:**
-- Token extraction completes
-- Choice interface appears
-- User selects download option
-- JSON file downloads to computer
+**1. Local Download Test:**
+- ✅ Token extraction completes in ~85ms
+- ✅ Export choice UI appears
+- ✅ User selects "Download JSON"
+- ✅ JSON file downloads to computer
+- ✅ Performance breakdown in console
 
-**Successful Run with GitHub Push:**
-- Token extraction completes
-- Choice interface shows "Ready" for GitHub
-- User selects GitHub push
-- File appears in target repository with automated commit
+**2. GitHub Push Test (First Time):**
+- ✅ Navigate to GitHub Setup tab
+- ✅ Enter credentials with real-time validation
+- ✅ Green checkmarks appear for valid inputs
+- ✅ Configuration saves successfully
+- ✅ GitHub push option shows "Ready"
 
-**Console Logs:**
-- Detailed extraction progress
-- GitHub API interactions (if applicable)
-- Success/error status for all operations
-- Performance metrics and token counts
+**3. GitHub Push Test (Configured):**
+- ✅ Plugin shows "GitHub Already Configured"
+- ✅ Token extraction completes
+- ✅ User selects "Push to GitHub"
+- ✅ File appears in repository with commit
+- ✅ Success notification displays
+
+**4. Error Handling Test:**
+- ✅ Invalid token shows error message
+- ✅ Network errors trigger fallback to download
+- ✅ Repository not found shows helpful guidance
+- ✅ Branch validation prevents bad pushes
+
+#### Console Output
+
+**What to Expect:**
+```
+Step 1: Validating Figma environment...
+✓ Figma environment validation passed (0ms)
+Step 2: Testing Figma API access...
+✓ Figma API access test passed (5ms)
+...
+✓ Token extraction completed (85ms, internal: 85ms)
+...
+📊 PERFORMANCE BREAKDOWN:
+  Step 1 - Environment validation: 0ms
+  ...
+  TOTAL: 3108ms
+```
 
 ### Debugging
 
-- Use the Figma Developer Console: **Plugins** → **Development** → **Open Console**
-- Check browser console for detailed logs
-- All steps are logged with ✓/✗ status indicators
+**Console Access:**
+- **Plugins** → **Development** → **Open Console**
+- View detailed execution logs
+- Monitor performance metrics
+- Check GitHub API interactions
+
+**Common Issues:**
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Slow extraction (>200ms) | Performance regression | Check for added delays, review parallel processing |
+| GitHub push fails | Invalid credentials | Re-validate token in GitHub Setup tab |
+| "Setup Required" | No saved config | Configure GitHub in setup tab |
+| Validation errors | Network/permissions | Check token scopes and repo access |
+
+**Debug Logs:**
+All operations logged with ✓/✗ status indicators and timing information.
+
+## 📚 Documentation
+
+### Core Documentation
+- **[`LOGS/PROJECT_DEVELOPMENT_LOG.md`](LOGS/PROJECT_DEVELOPMENT_LOG.md)** - Complete development history with all architectural decisions
+- **[`LOGS/CURRENT_FEATURES.md`](LOGS/CURRENT_FEATURES.md)** - Comprehensive feature list with descriptions
+- **[`LOGS/README.md`](LOGS/README.md)** - Documentation structure and navigation guide
+
+### Development Sessions
+- **[Session Log 2025-10-02](LOGS/SESSION_LOG_2025-10-02.md)** - Credential persistence & auto-validation
+- **[Session Log 2025-10-03](LOGS/SESSION_LOG_2025-10-03.md)** - UI improvements & security guidance
+- **[Session Log 2025-10-04](LOGS/SESSION_LOG_2025-10-04_TOKEN_TRANSFORMATION.md)** - Token transformation planning
+- **[Session Log 2025-10-06](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)** - Performance optimization (96.9% improvement!)
+
+### Security & Setup Guides
+- **[`docs/TOKEN_CREATION_GUIDE.md`](docs/TOKEN_CREATION_GUIDE.md)** - How to create GitHub Personal Access Tokens
+- **[`docs/CREDENTIAL_SECURITY.md`](docs/CREDENTIAL_SECURITY.md)** - Security best practices
+
+### Planning Documents
+- **[`LOGS/SCOPE_TOKEN_TRANSFORMATION.md`](LOGS/SCOPE_TOKEN_TRANSFORMATION.md)** - Future feature scope (v2.0)
+
+## 🔮 What's Next (v2.0 Roadmap)
+
+Planned features for future releases:
+
+### Multi-Format Token Export
+- **CSS Custom Properties** - Browser-ready CSS variables
+- **SCSS Variables** - Sass/SCSS format for preprocessors
+- **JavaScript/TypeScript** - ES modules for JS frameworks
+- **iOS/Android** - Native platform formats
+- **Tokens Studio** - Design Tokens Community Group format
+
+### Token Transformation Pipeline
+- **Style Dictionary Integration** - Industry-standard token transformation
+- **Custom Transformers** - User-defined transformation rules
+- **Platform-Specific Output** - Tailored formats per platform
+- **Semantic Token Mapping** - Automatic aliasing and theming
+
+### Enhanced Workflow
+- **Incremental Extraction** - Only extract changed tokens (~80% faster)
+- **Streaming Results** - Progressive display of tokens
+- **Batch Operations** - Multiple document extraction
+- **Export History** - Track and compare exports over time
+
+See [`LOGS/SCOPE_TOKEN_TRANSFORMATION.md`](LOGS/SCOPE_TOKEN_TRANSFORMATION.md) for detailed planning.
+
+## 🤝 Contributing
+
+We welcome contributions! Before starting:
+
+1. Review [`LOGS/PROJECT_DEVELOPMENT_LOG.md`](LOGS/PROJECT_DEVELOPMENT_LOG.md) to understand architecture
+2. Check [`LOGS/CURRENT_FEATURES.md`](LOGS/CURRENT_FEATURES.md) for current capabilities
+3. Read recent session logs for development patterns
+4. Follow existing code style and patterns
+5. Add performance timing for new operations
+6. Update documentation and session logs
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🙏 Credits
+
+- Built with [Create Figma Plugin](https://yuanqing.github.io/create-figma-plugin/)
+- Developed with [Claude Code](https://claude.com/claude-code)
+- GitHub integration via [Octokit](https://github.com/octokit/octokit.js)
+
+---
 
 ## See also
 

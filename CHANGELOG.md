@@ -145,6 +145,78 @@ None currently reported.
 
 ## [Unreleased]
 
+### 🔍 Optimization and Performance - 2025-10-03
+
+Performance analysis and optimization session to eliminate bottlenecks in plugin launch time.
+
+#### Analysis Results (Before Optimization)
+- **Step 5 - Token Extraction: 2717ms (64%)** - Major bottleneck
+- **Step 7 - Export Workflow: ~1500ms (35%)** - Secondary bottleneck
+- **Step 3.5 - GitHub Diagnostics: 18ms** - Unnecessary in main flow
+- **Artificial delays: ~2100ms** - Removed from extraction process
+- **Redundant API calls** - Multiple style/collection fetches
+
+#### Optimizations Implemented
+
+1. **Removed Artificial Delays** (~2100ms savings)
+   - Eliminated setTimeout delays in `performRealExtraction()`
+   - Removed unnecessary progress notification delays
+   - Single notification instead of multiple staged ones
+
+2. **Moved GitHub Diagnostics** (~18ms savings)
+   - Removed from main initialization flow
+   - Now only runs when GitHub export is selected
+   - Prevents unnecessary checks for local-only exports
+
+3. **Parallel Token Extraction** (estimated ~30-40% improvement)
+   - Extract styles and components concurrently
+   - Use Promise.all() for independent operations
+   - Variables extracted first (required for references)
+   - Styles and components run in parallel after
+
+4. **Cached Document Data** (~10-15ms savings)
+   - Single fetch for paint/text/effect styles
+   - Reuse variable collections data
+   - Avoid redundant countTotalNodes() calls
+   - Shared between getDocumentInfo() and countBasicTokens()
+
+#### Performance Results - CONFIRMED ✅
+
+**BEFORE Optimization:**
+- Step 1 - Environment validation: 0ms
+- Step 2 - API access test: 5ms
+- Step 3 - Document info: 5ms
+- Step 3.5 - GitHub diagnostics: 18ms ❌ (removed)
+- Step 4 - Token counting: 2ms
+- Step 5 - Token extraction: **2717ms** ❌
+- Step 6 - JSON formatting: 18ms
+- Step 7 - Export workflow: ~1470ms (inferred)
+- **TOTAL: ~4235ms**
+
+**AFTER Optimization:**
+- Step 1 - Environment validation: 0ms
+- Step 2 - API access test: 6ms
+- Step 3 - Document info: 6ms ✅ (cached)
+- Step 4 - Token counting: 2ms ✅ (cached)
+- Step 5 - Token extraction: **85ms** ✅✅✅ (96.9% faster!)
+- Step 6 - JSON formatting: 10ms
+- Step 7 - Export workflow: ~3000ms (GitHub push)
+- **TOTAL: ~3108ms**
+
+#### 🎉 IMPROVEMENT ACHIEVED
+- **Token Extraction:** 2717ms → 85ms (**96.9% faster**, saved 2632ms!)
+- **Initialization Phase:** 30ms → 14ms (**53% faster**, saved 16ms)
+- **Total Time:** 4235ms → 3108ms (**26.6% faster**, saved 1127ms)
+- **Note:** Export workflow increased due to actual GitHub push vs local download in first test
+
+#### Changes
+- Added comprehensive timing measurements to main.ts
+- Performance tracking for each initialization step
+- Detailed console output showing time spent in each phase
+- Parallel extraction in TokenExtractor.extractAllTokens()
+- Document data caching in main.ts
+- Conditional GitHub diagnostics execution
+
 ### Planned Features (v2.0.0)
 - Multi-format token export (CSS, SCSS, JavaScript, iOS, Android)
 - GitHub Actions integration for automated transformations

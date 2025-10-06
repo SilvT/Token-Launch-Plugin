@@ -335,24 +335,43 @@ export class TokenExtractor {
         await this.populateVariableRegistry();
       }
 
-      // Extract Figma variables (now with duplicates prevention)
+      // Extract tokens in parallel for better performance
+      const extractionPromises: Promise<any>[] = [];
+
+      // Extract Figma variables (must complete before styles for proper references)
       if (this.config.includeVariables) {
-        const { variables, collections } = await this.extractVariables();
-        result.variables = variables;
-        result.collections = collections;
+        const variablesPromise = this.extractVariables().then(({ variables, collections }) => {
+          result.variables = variables;
+          result.collections = collections;
+        });
+        extractionPromises.push(variablesPromise);
       }
 
-      // Extract local styles (now with variable reference support)
+      // Wait for variables to complete before extracting styles (they may reference variables)
+      if (this.config.includeVariables) {
+        await Promise.all(extractionPromises);
+        extractionPromises.length = 0;
+      }
+
+      // Now extract styles and components in parallel (they can run independently)
       if (this.config.includeLocalStyles) {
-        const styleTokens = await this.extractStyleTokens();
-        result.tokens.push(...styleTokens);
+        extractionPromises.push(
+          this.extractStyleTokens().then(styleTokens => {
+            result.tokens.push(...styleTokens);
+          })
+        );
       }
 
-      // Extract component-level tokens
       if (this.config.includeComponentTokens) {
-        const componentTokens = await this.extractComponentTokens();
-        result.tokens.push(...componentTokens);
+        extractionPromises.push(
+          this.extractComponentTokens().then(componentTokens => {
+            result.tokens.push(...componentTokens);
+          })
+        );
       }
+
+      // Wait for all parallel extractions to complete
+      await Promise.all(extractionPromises);
 
       // Update metadata
       result.metadata.processedNodes = this.processedNodes;

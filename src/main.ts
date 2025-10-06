@@ -68,15 +68,32 @@ function countTotalNodes(node: BaseNode): number {
 }
 
 /**
- * Get basic document information
+ * Cached style and collection data to avoid redundant API calls
  */
-function getDocumentInfo(): DocumentInfo {
+interface CachedDocumentData {
+  paintStyles: PaintStyle[];
+  textStyles: TextStyle[];
+  effectStyles: EffectStyle[];
+  variableCollections: VariableCollection[];
+  totalVariables: number;
+  totalNodes: number;
+}
+
+let cachedDocData: CachedDocumentData | null = null;
+
+/**
+ * Get or compute cached document data (only fetch once)
+ */
+function getCachedDocumentData(): CachedDocumentData {
+  if (cachedDocData) {
+    return cachedDocData;
+  }
+
   const paintStyles = figma.getLocalPaintStyles();
   const textStyles = figma.getLocalTextStyles();
   const effectStyles = figma.getLocalEffectStyles();
   const variableCollections = figma.variables.getLocalVariableCollections();
 
-  // Count all local variables across collections
   let totalVariables = 0;
   try {
     variableCollections.forEach(collection => {
@@ -86,16 +103,34 @@ function getDocumentInfo(): DocumentInfo {
     console.warn('Error counting variables:', error);
   }
 
+  cachedDocData = {
+    paintStyles,
+    textStyles,
+    effectStyles,
+    variableCollections,
+    totalVariables,
+    totalNodes: countTotalNodes(figma.root)
+  };
+
+  return cachedDocData;
+}
+
+/**
+ * Get basic document information
+ */
+function getDocumentInfo(): DocumentInfo {
+  const data = getCachedDocumentData();
+
   return {
     name: figma.root.name,
     id: figma.fileKey || 'unknown',
     pageCount: figma.root.children.length,
-    totalNodes: countTotalNodes(figma.root),
-    paintStyles: paintStyles.length,
-    textStyles: textStyles.length,
-    effectStyles: effectStyles.length,
-    variableCollections: variableCollections.length,
-    localVariables: totalVariables
+    totalNodes: data.totalNodes,
+    paintStyles: data.paintStyles.length,
+    textStyles: data.textStyles.length,
+    effectStyles: data.effectStyles.length,
+    variableCollections: data.variableCollections.length,
+    localVariables: data.totalVariables
   };
 }
 
@@ -103,26 +138,14 @@ function getDocumentInfo(): DocumentInfo {
  * Count basic tokens available in the document
  */
 function countBasicTokens(): BasicTokenCount {
-  const paintStyles = figma.getLocalPaintStyles();
-  const textStyles = figma.getLocalTextStyles();
-  const effectStyles = figma.getLocalEffectStyles();
-  const collections = figma.variables.getLocalVariableCollections();
-
-  let totalVariables = 0;
-  try {
-    collections.forEach(collection => {
-      totalVariables += collection.variableIds.length;
-    });
-  } catch (error) {
-    console.warn('Error counting variables:', error);
-  }
+  const data = getCachedDocumentData();
 
   return {
-    paintStyles: paintStyles.length,
-    textStyles: textStyles.length,
-    effectStyles: effectStyles.length,
-    variables: totalVariables,
-    collections: collections.length
+    paintStyles: data.paintStyles.length,
+    textStyles: data.textStyles.length,
+    effectStyles: data.effectStyles.length,
+    variables: data.totalVariables,
+    collections: data.variableCollections.length
   };
 }
 
@@ -261,26 +284,13 @@ async function performRealExtraction(): Promise<ExtractionResult> {
       includeMetadata: true
     };
 
-    // Real progress notifications
-    figma.notify('Initializing TokenExtractor...', { timeout: 1000 });
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Create extractor
+    // Create extractor and perform extraction without artificial delays
+    figma.notify('Extracting design tokens...', { timeout: 2000 });
     const extractor = new TokenExtractor(config);
 
-    figma.notify('Analyzing document structure...', { timeout: 1000 });
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    figma.notify('Extracting design tokens...', { timeout: 1500 });
-    await new Promise(resolve => setTimeout(resolve, 700));
-
-    // Perform actual extraction
     const startTime = Date.now();
     const result = await extractor.extractAllTokens();
     const extractionTime = Date.now() - startTime;
-
-    figma.notify('Processing extraction results...', { timeout: 1000 });
-    await new Promise(resolve => setTimeout(resolve, 600));
 
     console.log(`✓ Real extraction completed in ${extractionTime}ms`);
     console.log(`✓ Found ${result.tokens.length} tokens, ${result.variables.length} variables, ${result.collections.length} collections`);
@@ -530,6 +540,7 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
  * Main plugin entry point - Simplified for testing
  */
 async function main(): Promise<void> {
+  const mainStartTime = Date.now();
   console.log('='.repeat(80));
   console.log('FIGMA DESIGN SYSTEM DISTRIBUTOR - BASIC TEST MODE');
   console.log('='.repeat(80));
@@ -537,49 +548,58 @@ async function main(): Promise<void> {
 
   try {
     // Step 1: Validate Figma environment
+    const step1Start = Date.now();
     console.log('Step 1: Validating Figma environment...');
     if (!validateFigmaEnvironment()) {
       throw new Error('Invalid Figma environment. Please open a Figma document and try again.');
     }
-    console.log('✓ Figma environment validation passed');
+    const step1Duration = Date.now() - step1Start;
+    console.log(`✓ Figma environment validation passed (${step1Duration}ms)`);
     figma.notify('✓ Environment validated', { timeout: 1500 });
 
     // Step 2: Test API access
+    const step2Start = Date.now();
     console.log('Step 2: Testing Figma API access...');
     if (!testFigmaAPIAccess()) {
       throw new Error('Figma API access test failed');
     }
-    console.log('✓ Figma API access test passed');
+    const step2Duration = Date.now() - step2Start;
+    console.log(`✓ Figma API access test passed (${step2Duration}ms)`);
 
     // Step 3: Get document information
+    const step3Start = Date.now();
     console.log('Step 3: Gathering document information...');
     const documentInfo = getDocumentInfo();
     displayDocumentInfo(documentInfo);
-
-    // Step 3.5: Run GitHub diagnostics
-    console.log('Step 3.5: Running GitHub integration diagnostics...');
-    await runGitHubDiagnostics();
-    console.log('✓ Document information gathered');
+    const step3Duration = Date.now() - step3Start;
+    console.log(`✓ Document information gathered (${step3Duration}ms)`);
 
     // Step 4: Count basic tokens
+    const step4Start = Date.now();
     console.log('Step 4: Counting available tokens...');
     const tokenCount = countBasicTokens();
     displayTokenSummary(tokenCount);
-    console.log('✓ Token counting completed');
+    const step4Duration = Date.now() - step4Start;
+    console.log(`✓ Token counting completed (${step4Duration}ms)`);
 
     // Step 5: Extract design tokens
+    const step5Start = Date.now();
     console.log('Step 5: Extracting design tokens...');
     const extractionStartTime = Date.now();
     const extractionResult = await performRealExtraction();
     const extractionDuration = Date.now() - extractionStartTime;
-    console.log('✓ Token extraction completed');
+    const step5Duration = Date.now() - step5Start;
+    console.log(`✓ Token extraction completed (${step5Duration}ms, internal: ${extractionDuration}ms)`);
 
     // Step 6: Format and output JSON
+    const step6Start = Date.now();
     console.log('Step 6: Formatting tokens as JSON...');
     outputJSONToConsole(extractionResult, documentInfo, extractionDuration);
-    console.log('✓ JSON output completed');
+    const step6Duration = Date.now() - step6Start;
+    console.log(`✓ JSON output completed (${step6Duration}ms)`);
 
     // Step 7: Show export choice and handle user selection
+    const step7Start = Date.now();
     console.log('Step 7: Starting export choice workflow...');
 
     // Create TokenExtractor with the same config used for extraction
@@ -600,19 +620,22 @@ async function main(): Promise<void> {
     });
 
     const workflowResult = await workflow.runWorkflow();
+    const step7Duration = Date.now() - step7Start;
 
     if (workflowResult.success) {
-      console.log(`✅ Export completed via ${workflowResult.choice}`);
+      console.log(`✅ Export completed via ${workflowResult.choice} (${step7Duration}ms)`);
     } else {
-      console.error(`❌ Export failed: ${workflowResult.error}`);
+      console.error(`❌ Export failed: ${workflowResult.error} (${step7Duration}ms)`);
       figma.notify(`Export failed: ${workflowResult.error}`, { error: true });
     }
-    console.log('✓ Export workflow completed');
+    console.log(`✓ Export workflow completed (${step7Duration}ms)`);
 
     // Step 8: Final summary (only if workflow didn't handle closing)
     if (workflowResult.choice !== 'cancel') {
+      const step8Start = Date.now();
       console.log('Step 8: Generating final summary...');
       const totalTokens = extractionResult.tokens.length;
+      const totalDuration = Date.now() - mainStartTime;
 
       console.log('\n' + '='.repeat(80));
       console.log('🎉 TOKEN EXTRACTION AND EXPORT COMPLETED');
@@ -622,8 +645,20 @@ async function main(): Promise<void> {
       console.log(`🎯 Extracted Tokens: ${totalTokens}`);
       console.log(`🔧 Variables: ${extractionResult.variables.length}`);
       console.log(`📚 Collections: ${extractionResult.collections.length}`);
-      console.log(`⏱️  Total Time: ${extractionDuration}ms`);
+      console.log(`⏱️  Extraction Time: ${extractionDuration}ms`);
+      console.log(`⏱️  Total Plugin Time: ${totalDuration}ms`);
       console.log(`✅ Export Method: ${workflowResult.choice.toUpperCase()}`);
+      console.log('='.repeat(80));
+      console.log('\n📊 PERFORMANCE BREAKDOWN:');
+      console.log(`  Step 1 - Environment validation: ${step1Duration}ms`);
+      console.log(`  Step 2 - API access test: ${step2Duration}ms`);
+      console.log(`  Step 3 - Document info: ${step3Duration}ms`);
+      console.log(`  Step 4 - Token counting: ${step4Duration}ms`);
+      console.log(`  Step 5 - Token extraction: ${step5Duration}ms`);
+      console.log(`  Step 6 - JSON formatting: ${step6Duration}ms`);
+      console.log(`  Step 7 - Export workflow: ${step7Duration}ms`);
+      console.log(`  Step 8 - Final summary: ${Date.now() - step8Start}ms`);
+      console.log(`  TOTAL: ${totalDuration}ms`);
       console.log('='.repeat(80));
     }
 
