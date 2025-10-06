@@ -69,15 +69,11 @@ export function getTestCredentials(): GitHubCredentials {
 }
 
 /**
- * Generate test filename with timestamp
+ * Generate test filename (static, no timestamp)
+ * Git commit history tracks changes, no need for timestamped files
  */
 export function generateTestFileName(): string {
-  const timestamp = new Date().toISOString()
-    .replace(/:/g, '-')
-    .replace(/\..+/, '')
-    .replace('T', '-');
-
-  return `figma-tokens-${timestamp}.json`;
+  return `figma-tokens.json`;
 }
 
 /**

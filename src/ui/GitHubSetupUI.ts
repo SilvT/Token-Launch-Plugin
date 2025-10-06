@@ -597,7 +597,7 @@ export class GitHubSetupUI {
           value="${paths.rawTokens || 'tokens/raw/'}"
           placeholder="tokens/raw/"
         >
-        <div class="form-help">Directory where raw token files will be stored</div>
+        <div class="form-help">Directory where raw token files will be stored (filename: figma-tokens.json)</div>
       </div>
 
       <div class="form-group">

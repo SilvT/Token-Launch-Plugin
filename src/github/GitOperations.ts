@@ -754,15 +754,11 @@ export class GitOperations {
   // =============================================================================
 
   /**
-   * Generate filename with timestamp
+   * Generate static filename (without timestamp)
+   * Git commit history tracks changes, no need for timestamped files
    */
   static generateFileName(prefix: string = 'figma-tokens', extension: string = 'json'): string {
-    const timestamp = new Date().toISOString()
-      .replace(/:/g, '-')
-      .replace(/\..+/, '')
-      .replace('T', '-');
-
-    return `${prefix}-${timestamp}.${extension}`;
+    return `${prefix}.${extension}`;
   }
 
   /**
