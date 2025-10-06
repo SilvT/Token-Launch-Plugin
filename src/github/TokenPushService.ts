@@ -10,6 +10,7 @@ import { GitHubAuth } from './GitHubAuth';
 import { ClientTracker } from '../debug/ClientTracker';
 import { ExtractionResult } from '../TokenExtractor';
 import { isHardCodedMode, getTestConfig, getTestFilePath } from './HardCodedConfig';
+import { TokenTransformer } from '../TokenTransformer';
 
 // =============================================================================
 // TYPES FOR TOKEN PUSH SERVICE
@@ -366,34 +367,25 @@ export class TokenPushService {
    * Create structured token data for GitHub storage
    */
   private createStructuredTokenData(tokenData: ExtractionResult): any {
-    return {
+    // Use TokenTransformer to create clean output
+    const transformer = new TokenTransformer();
+
+    const rawData = {
       metadata: {
-        exportTimestamp: new Date().toISOString(),
-        extractionDuration: tokenData.metadata.extractedAt ?
-          Date.now() - new Date(tokenData.metadata.extractedAt).getTime() : 0,
         sourceDocument: {
-          name: tokenData.metadata.documentName,
-          id: tokenData.metadata.documentId,
-          totalNodes: tokenData.metadata.totalNodes,
-          processedNodes: tokenData.metadata.processedNodes
+          name: tokenData.metadata.documentName
         },
         tokenCounts: {
           totalTokens: tokenData.tokens.length,
-          totalVariables: tokenData.variables.length,
-          totalCollections: tokenData.collections.length,
-          errors: tokenData.metadata.errors.length,
-          warnings: tokenData.metadata.warnings.length
-        },
-        extraction: {
-          errors: tokenData.metadata.errors,
-          warnings: tokenData.metadata.warnings
+          totalVariables: tokenData.variables.length
         }
       },
-      // Order matters: variables first, then design tokens
       variables: tokenData.variables,
       collections: tokenData.collections,
       designTokens: tokenData.tokens
     };
+
+    return transformer.transform(rawData);
   }
 
   // =============================================================================

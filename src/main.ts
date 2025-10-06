@@ -10,6 +10,7 @@
 import { TokenExtractor, ExtractionConfig, ExtractionResult } from './TokenExtractor';
 import { DocumentInfo, BasicTokenCount } from './types/CommonTypes';
 import { ExportWorkflow } from './workflow/ExportWorkflow';
+import { TokenTransformer, CleanTokenOutput } from './TokenTransformer';
 
 // =============================================================================
 // BASIC INTERFACES
@@ -308,29 +309,26 @@ async function performRealExtraction(): Promise<ExtractionResult> {
 /**
  * Create structured JSON dataset from extraction results
  */
-function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): ExtractedTokenDataset {
-  return {
+function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): CleanTokenOutput {
+  // Transform to clean format
+  const transformer = new TokenTransformer();
+
+  const rawData = {
     metadata: {
-      exportTimestamp: new Date().toISOString(),
-      extractionDuration,
       sourceDocument: {
-        name: documentInfo.name,
-        id: documentInfo.id,
-        totalNodes: documentInfo.totalNodes,
-        pageCount: documentInfo.pageCount
+        name: documentInfo.name
       },
       tokenCounts: {
         totalTokens: result.tokens.length,
-        totalVariables: result.variables.length,
-        totalCollections: result.collections.length,
-        errors: result.metadata.errors.length,
-        warnings: result.metadata.warnings.length
+        totalVariables: result.variables.length
       }
     },
     variables: result.variables,
     collections: result.collections,
     designTokens: result.tokens
   };
+
+  return transformer.transform(rawData);
 }
 
 /**
@@ -341,7 +339,7 @@ function outputJSONToConsole(result: ExtractionResult, documentInfo: DocumentInf
 
   // Output with professional formatting
   console.log('\n' + '='.repeat(80));
-  console.log('📊 EXTRACTED DESIGN TOKENS (JSON DATASET)');
+  console.log('📊 EXTRACTED DESIGN TOKENS (CLEAN JSON FORMAT)');
   console.log('='.repeat(80));
 
   // Output the complete JSON
@@ -350,10 +348,10 @@ function outputJSONToConsole(result: ExtractionResult, documentInfo: DocumentInf
   console.log('\n' + '='.repeat(80));
   console.log('✅ JSON EXPORT SUMMARY');
   console.log('='.repeat(80));
-  console.log(`📅 Export Time: ${dataset.metadata.exportTimestamp}`);
-  console.log(`🎯 Total Tokens: ${dataset.metadata.tokenCounts.totalTokens}`);
-  console.log(`🔧 Variables: ${dataset.metadata.tokenCounts.totalVariables}`);
-  console.log(`📚 Collections: ${dataset.metadata.tokenCounts.totalCollections}`);
+  console.log(`📅 Export Time: ${dataset.generatedAt}`);
+  console.log(`🎯 Total Collections: ${Object.keys(dataset.collections).length}`);
+  console.log(`🔧 Source Variables: ${dataset.source.originalVariableCount}`);
+  console.log(`📚 Source Tokens: ${dataset.source.originalTokenCount}`);
   console.log(`⏱️  Extraction Duration: ${extractionDuration}ms`);
   console.log(`📏 JSON Size: ${JSON.stringify(dataset).length.toLocaleString()} characters`);
   console.log('='.repeat(80));
@@ -442,8 +440,8 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
           <div class="file-info">
             <strong>File:</strong> ${filename}<br>
             <strong>Size:</strong> ${(jsonString.length / 1024).toFixed(1)} KB<br>
-            <strong>Tokens:</strong> ${dataset.metadata.tokenCounts.totalTokens}<br>
-            <strong>Variables:</strong> ${dataset.metadata.tokenCounts.totalVariables}
+            <strong>Collections:</strong> ${Object.keys(dataset.collections).length}<br>
+            <strong>Variables:</strong> ${dataset.source.originalVariableCount}
           </div>
           <button id="downloadBtn" class="download-btn">
             📥 Download JSON File

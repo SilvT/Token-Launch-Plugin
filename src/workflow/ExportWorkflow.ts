@@ -11,6 +11,7 @@ import { UnifiedExportUI, UnifiedExportUIOptions, ExportChoice } from '../ui/Uni
 import { GitHubSetupUI } from '../ui/GitHubSetupUI';
 import { TokenPushService } from '../github/TokenPushService';
 import { GitHubAuth } from '../github/GitHubAuth';
+import { TokenTransformer } from '../TokenTransformer';
 
 // =============================================================================
 // TYPES
@@ -455,27 +456,25 @@ export class ExportWorkflow {
    * Create JSON dataset for download
    */
   private createJSONDataset(result: ExtractionResult, extractionDuration: number): any {
-    return {
+    // Use TokenTransformer to create clean output
+    const transformer = new TokenTransformer();
+
+    const rawData = {
       metadata: {
-        exportTimestamp: new Date().toISOString(),
-        extractionDuration: extractionDuration,
         sourceDocument: {
-          name: this.documentInfo.name,
-          id: this.documentInfo.id,
-          totalNodes: this.documentInfo.totalNodes
+          name: this.documentInfo.name
         },
         tokenCounts: {
           totalTokens: result.tokens.length,
-          totalVariables: result.variables.length,
-          totalCollections: result.collections.length,
-          errors: result.metadata.errors.length,
-          warnings: result.metadata.warnings.length
+          totalVariables: result.variables.length
         }
       },
       variables: result.variables,
       collections: result.collections,
       designTokens: result.tokens
     };
+
+    return transformer.transform(rawData);
   }
 
   /**

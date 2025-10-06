@@ -217,14 +217,144 @@ Performance analysis and optimization session to eliminate bottlenecks in plugin
 - Document data caching in main.ts
 - Conditional GitHub diagnostics execution
 
-### Planned Features (v2.0.0)
-- Multi-format token export (CSS, SCSS, JavaScript, iOS, Android)
-- GitHub Actions integration for automated transformations
-- Style Dictionary support
-- Team collaboration features
-- Export history tracking
-- Token comparison and diff
+---
+
+## [2.0.0] - 2025-10-06
+
+### 🎉 Major Update: Clean Token Output
+
+The plugin now exports clean, developer-friendly JSON by default with **83.9% smaller file sizes**!
+
+### ✨ Added
+- **TokenTransformer module** (`src/TokenTransformer.ts`)
+  - Automatic token transformation on export
+  - Removes redundant data (variable object duplication)
+  - Resolves alias references (shows value + reference)
+  - Consolidates typography tokens (unified `Body/1`)
+  - Organizes hierarchically by collection → type
+- **Clean output format**
+  - Hierarchical `collections` object
+  - Resolved `$alias` properties
+  - Unified typography tokens with `properties`
+  - Minimal, essential metadata only
+- **Significant file size reduction**
+  - Before: 562.4 KB
+  - After: ~90 KB
+  - **Savings: 83.9%**
+
+### 🔄 Changed
+- **Output structure** - `CleanTokenOutput` instead of `ExtractedTokenDataset`
+- **JSON format** - Hierarchical collections instead of flat arrays
+- **Token representation** - Clean tokens without redundancy
+- **Console output** - Updated to show collections and clean format
+- **Download UI** - Shows collections count instead of raw token count
+- **Typography handling** - Fragmented tokens now consolidated automatically
+
+### 🐛 Fixed
+- Eliminated duplicate `variable` object in every token
+- Resolved unresolved `VARIABLE_ALIAS` references
+- Removed bloated metadata (timestamps, empty arrays, versions)
+- Cleaned up redundant ID fields
+- Organized flat token arrays into hierarchical structure
+
+### 📝 Documentation
+- Added [PLUGIN_UPDATE_V2.md](PLUGIN_UPDATE_V2.md) - Update guide
+- Added [TOKEN_TRANSFORMATION_README.md](TOKEN_TRANSFORMATION_README.md) - Transformation details
+- Added [TRANSFORMATION_SUMMARY.md](TRANSFORMATION_SUMMARY.md) - Before/after comparison
+- Added [QUICK_START.md](QUICK_START.md) - Quick reference
+- Added [token-output-example.json](token-output-example.json) - Example output
+- Standalone transformation scripts for old JSON files:
+  - [transform-tokens.js](transform-tokens.js) - Convert old format
+  - [generate-styles.js](generate-styles.js) - Generate CSS/SCSS/JS
+
+### 🔧 Technical Changes
+- New file: `src/TokenTransformer.ts`
+- Modified: `src/main.ts` - Integrated transformer
+- Return type changed: `ExtractedTokenDataset` → `CleanTokenOutput`
+- TypeScript types updated for clean format
+- Build process unchanged (still uses `npm run build`)
+
+### 📊 Output Comparison
+
+#### Before (v1.0)
+```json
+{
+  "variables": [
+    {
+      "id": "VariableID:1:1878",
+      "variableId": "VariableID:1:1878",
+      "name": "brand/950",
+      "value": {...},
+      "metadata": {...},
+      "variable": {
+        "id": "VariableID:1:1878",
+        "name": "brand/950",
+        ...
+      }
+    }
+  ]
+}
+```
+
+#### After (v2.0)
+```json
+{
+  "version": "2.0.0",
+  "collections": {
+    "Primitives": {
+      "tokens": {
+        "color": [
+          {
+            "name": "brand/950",
+            "type": "color",
+            "value": {...}
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### 🚀 Migration Guide
+
+**Old format access:**
+```javascript
+const colors = oldTokens.variables.filter(v => v.type === 'color');
+```
+
+**New format access:**
+```javascript
+const colors = newTokens.collections.Primitives.tokens.color;
+```
+
+See [PLUGIN_UPDATE_V2.md](PLUGIN_UPDATE_V2.md) for complete migration guide.
+
+### 💡 Use Cases
+
+Now you can directly use the output with:
+- CSS custom properties (`var(--brand-600)`)
+- SCSS variables (`$brand-600`)
+- JavaScript imports
+- Tailwind CSS config
+- Style Dictionary
+
+### ⚡ Performance
+- Build time: Unchanged (~0.8s)
+- Runtime: Minimal overhead (transformation is fast)
+- Output size: **83.9% smaller**
 
 ---
 
+## Planned Features (v2.1.0)
+- Multi-mode support (light/dark themes)
+- W3C DTCG format support
+- Token validation rules
+- Multi-format export (CSS, SCSS, JS generation)
+- GitHub Actions integration
+- Token usage tracking
+
+---
+
+[2.0.0]: https://github.com/SilvT/Figma-Design-System-Distributor/releases/tag/v2.0.0
 [1.0.0]: https://github.com/SilvT/Figma-Design-System-Distributor/releases/tag/v1.0.0
