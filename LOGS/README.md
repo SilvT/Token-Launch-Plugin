@@ -319,30 +319,33 @@ Link related documents:
 
 **Start here:**
 
-1. Read [`README.md`](../README.md) in project root
-2. Review [`CURRENT_FEATURES.md`](CURRENT_FEATURES.md) to understand capabilities
-3. Skim [`PROJECT_DEVELOPMENT_LOG.md`](PROJECT_DEVELOPMENT_LOG.md) table of contents
-4. Read the most recent session log
-5. Reference PROJECT_DEVELOPMENT_LOG.md as needed for deep dives
+1. Read [`README.md`](../README.md) in project root for quick overview
+2. Read [`TECHNICAL_README.md`](../TECHNICAL_README.md) for detailed architecture
+3. Review [`CURRENT_FEATURES.md`](CURRENT_FEATURES.md) to understand capabilities
+4. Skim [`PROJECT_DEVELOPMENT_LOG.md`](PROJECT_DEVELOPMENT_LOG.md) table of contents
+5. Read the most recent session log
+6. Reference PROJECT_DEVELOPMENT_LOG.md as needed for deep dives
 
 **To understand a specific feature:**
-1. Check CURRENT_FEATURES.md for overview
-2. Search PROJECT_DEVELOPMENT_LOG.md for implementation details
-3. Check relevant session log for development context
+1. Check README.md for high-level overview
+2. Check CURRENT_FEATURES.md for detailed feature description
+3. Search TECHNICAL_README.md for architecture details
+4. Search PROJECT_DEVELOPMENT_LOG.md for implementation history
+5. Check relevant session log for development context
 
 ---
 
 ## 📊 Documentation Stats
 
-**Total Active Documents:** 7
-- Core Documentation: 2
+**Total Active Documents:** 8
+- Core Documentation: 3 (README.md, TECHNICAL_README.md, PROJECT_DEVELOPMENT_LOG.md, CURRENT_FEATURES.md)
 - Session Logs: 4
 - Planning Documents: 1
 
 **Archived Documents:** 8
 - Implementation guides: 8
 
-**Last Cleanup:** October 6, 2025
+**Last Updated:** October 6, 2025
 
 ---
 
