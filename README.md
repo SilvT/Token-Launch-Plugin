@@ -13,11 +13,13 @@ A high-performance Figma plugin that bridges the gap between design and developm
 ## ✨ What It Does
 
 1. **Extract** design tokens from your Figma document (colors, typography, spacing, effects, variables)
-2. **Choose** how to export: push to GitHub or download as JSON
-3. **Done** — your tokens are in your repository with an automated commit
+2. **Preview** token summary with counts and collections
+3. **Review** and customize commit message and PR title
+4. **Create PR** — tokens pushed to a feature branch with a GitHub Pull Request
 
 **Fast:** Extracts tokens in ~85ms (96.9% faster than v0.1)
 **Secure:** Encrypted credential storage with validation
+**Safe:** PR-based workflow with user confirmation at every step
 **Easy:** Beautiful UI with real-time feedback
 
 ---
@@ -55,17 +57,29 @@ A high-performance Figma plugin that bridges the gap between design and developm
 - **96.9% faster extraction** (optimized with parallel processing)
 
 ### Export Options
-- **GitHub Push:** Automated commits to your repository
+- **GitHub PR Workflow:** Safe pull request creation with user confirmation
 - **Local Download:** JSON file for manual processing
 - Real-time progress tracking
 - Graceful error handling with fallbacks
 
 ### GitHub Integration
+- **PR-Based Workflow:** Never pushes directly to main branch
+- **User Confirmation:** Preview tokens before creating PR
+- **Customizable:** Edit commit messages and PR titles
+- **Safe Branch Creation:** Auto-generates timestamped feature branches
+- **Collision Avoidance:** Automatically handles duplicate branch names
 - Secure encrypted credential storage
 - Real-time validation (token, repository, branch)
 - Visual feedback (green checkmarks, error messages)
 - Persistent configuration across sessions
-- One-click reset with confirmation
+
+### Pull Request Workflow
+- **Preview Modal:** See token counts, collections, and file size before pushing
+- **Commit Details:** Customize commit message and PR title
+- **Branch Creation:** Auto-generated branch name (tokens/update-YYYY-MM-DD-HH-MM-SS)
+- **GitHub PR:** Creates pull request with detailed metadata and review checklist
+- **Success Feedback:** Clickable link to view PR on GitHub
+- **Cancel Anytime:** Abort at preview or details step without side effects
 
 ### User Experience
 - Beautiful pastel gradient theme

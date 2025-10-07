@@ -2,7 +2,7 @@
 
 This document tracks all implemented and actively running features in the plugin. Updated as features are added or modified.
 
-**Last Updated:** October 4, 2025
+**Last Updated:** October 7, 2025
 
 ---
 
@@ -32,21 +32,40 @@ This document tracks all implemented and actively running features in the plugin
 
 ### 2. Export Options
 **Status:** ✅ Running Smoothly
+**Last Updated:** October 7, 2025
 **Description:** Two export methods for distributing design tokens.
 
-#### 2A. GitHub Push
+#### 2A. GitHub PR Workflow ⭐ NEW
 **Features:**
-- Pushes tokens directly to GitHub repository
-- Supports custom branch selection with validation
-- Custom commit messages with timestamp placeholders
-- Automatic file path configuration
-- Real-time validation of credentials, repository, and branch
+- **Pull Request-based:** Never pushes directly to main branch
+- **User Confirmation:** 3-step workflow with preview and customization
+- **Preview Modal:** Shows token counts, collections, and file size
+- **Commit Details Form:** Customize commit message and PR title
+- **Auto Branch Creation:** Generates timestamped feature branches (tokens/update-YYYY-MM-DD-HH-MM-SS)
+- **Collision Avoidance:** Auto-appends -2, -3 if branch name exists
+- **GitHub PR Creation:** Creates pull request via GitHub API
+- **Rich PR Body:** Includes token summary, file changes, and review checklist
+- **Success Feedback:** Clickable link to view PR on GitHub
+- **Cancel Anytime:** Abort at preview or details step without side effects
+
+**Workflow Steps:**
+1. Preview tokens (counts, collections, size)
+2. Customize commit message and PR title
+3. Create branch and push to it
+4. Create GitHub Pull Request
+5. View PR on GitHub
 
 **Configuration:**
 - Repository: owner/name
-- Branch: customizable (default: main) - validated via GitHub API
-- File paths: customizable token directory
+- Branch: customizable (default: main) - used as PR base branch
+- File paths: `tokens/raw/figma-tokens.json` (static, no timestamp)
 - Commit message templates
+
+**Technical Files:**
+- `src/ui/PRWorkflowUI.ts` - 3-step modal UI
+- `src/github/PullRequestService.ts` - GitHub PR API integration
+- `src/github/GitOperations.ts` - Branch creation and operations
+- `src/workflow/ExportWorkflow.ts` - Workflow orchestration
 
 #### 2B. Local Download
 **Features:**
