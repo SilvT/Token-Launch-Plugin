@@ -4,9 +4,10 @@
 
 A high-performance Figma plugin that bridges the gap between design and development by extracting design tokens and distributing them to your codebase.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-production%20ready-green.svg)]()
 [![Performance](https://img.shields.io/badge/performance-96.9%25%20faster-brightgreen.svg)](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)
+[![Safety](https://img.shields.io/badge/workflow-PR%20based-success.svg)](LOGS/SESSION_LOG_2025-10-07_PR_WORKFLOW.md)
 
 ---
 

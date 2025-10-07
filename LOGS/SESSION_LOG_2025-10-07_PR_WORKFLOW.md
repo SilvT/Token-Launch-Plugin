@@ -554,12 +554,20 @@ Commit: 76382b0
 - Managing UI state across 3 different modals
 - GitHub API authentication with proper headers
 - Branch name collision detection and handling
+- **Bug discovered in testing:** Blob constructor not available in Figma sandbox
 
 ### Lessons Learned
 - PR-based workflows significantly improve safety
 - User confirmation at multiple steps builds trust
 - Rich PR bodies improve team collaboration
 - Consistent file naming reduces repository clutter
+- **Always test in actual Figma environment** - sandbox restrictions differ from browsers
+
+### Post-Implementation Bug Fix (Commit: c2666ba)
+**Issue:** Plugin crashed with `TypeError: Blob is not a constructor`
+**Cause:** PRWorkflowUI.estimateFileSize() used `new Blob()` which isn't available in Figma
+**Fix:** Replaced with custom UTF-8 byte counter (same approach as GitOperations)
+**Result:** File size estimation now works correctly in Figma's restricted environment
 
 ---
 
@@ -576,8 +584,45 @@ Commit: 76382b0
 
 ---
 
+---
+
+## 🐛 Bug Fix (Post-Testing)
+
+### Commit 4: Fix Blob Constructor Error
+```
+fix: replace Blob with custom UTF-8 byte counter in PRWorkflowUI
+
+Fixed 'Blob is not a constructor' error in Figma plugin environment.
+
+Issue:
+- PRWorkflowUI.estimateFileSize() was using 'new Blob()'
+- Blob constructor not available in Figma's plugin sandbox
+- Caused PR workflow to fail with TypeError
+
+Solution:
+- Replaced Blob-based size calculation with custom UTF-8 byte counting
+- Uses same approach as GitOperations.getUTF8ByteLength()
+- Properly handles all UTF-8 character types (1-4 bytes)
+
+Files modified:
+- src/ui/PRWorkflowUI.ts: Added inline UTF-8 byte counter
+
+Commit: c2666ba
+```
+
+**Final Commit History:**
+```
+c2666ba - fix: replace Blob with custom UTF-8 byte counter in PRWorkflowUI
+f5af300 - docs: update README and features documentation for PR workflow
+76382b0 - feat: implement PR-based workflow with user confirmation
+759d8a6 - fix: remove timestamp from token filenames to prevent repository clutter
+```
+
+---
+
 **End of Session Log**
 
 *Generated on October 7, 2025*
-*Total session time: ~2 hours*
-*Status: ✅ Complete*
+*Last updated: October 7, 2025 (bug fix)*
+*Total session time: ~2.5 hours*
+*Status: ✅ Complete & Tested*

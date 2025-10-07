@@ -35,7 +35,8 @@ This document tracks all implemented and actively running features in the plugin
 **Last Updated:** October 7, 2025
 **Description:** Two export methods for distributing design tokens.
 
-#### 2A. GitHub PR Workflow ⭐ NEW
+#### 2A. GitHub PR Workflow ⭐ NEW (Tested & Working)
+**Status:** ✅ Bug fixed - fully operational
 **Features:**
 - **Pull Request-based:** Never pushes directly to main branch
 - **User Confirmation:** 3-step workflow with preview and customization
@@ -47,6 +48,10 @@ This document tracks all implemented and actively running features in the plugin
 - **Rich PR Body:** Includes token summary, file changes, and review checklist
 - **Success Feedback:** Clickable link to view PR on GitHub
 - **Cancel Anytime:** Abort at preview or details step without side effects
+
+**Bug Fixes:**
+- Fixed `Blob is not a constructor` error by using custom UTF-8 byte counter
+- Properly handles Figma's sandbox environment restrictions
 
 **Workflow Steps:**
 1. Preview tokens (counts, collections, size)
