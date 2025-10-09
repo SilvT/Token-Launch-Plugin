@@ -8,6 +8,7 @@ A high-performance Figma plugin that bridges the gap between design and developm
 [![Status](https://img.shields.io/badge/status-production%20ready-green.svg)]()
 [![Performance](https://img.shields.io/badge/performance-96.9%25%20faster-brightgreen.svg)](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)
 [![Safety](https://img.shields.io/badge/workflow-PR%20based-success.svg)](LOGS/SESSION_LOG_2025-10-07_PR_WORKFLOW.md)
+[![UX](https://img.shields.io/badge/UI-streamlined-purple.svg)](LOGS/SESSION_LOG_2025-10-09_UI_IMPROVEMENTS.md)
 
 ---
 
@@ -74,17 +75,21 @@ A high-performance Figma plugin that bridges the gap between design and developm
 - Visual feedback (green checkmarks, error messages)
 - Persistent configuration across sessions
 
-### Pull Request Workflow
-- **Single-Step UI:** Streamlined workflow in one compact modal (no scrolling)
-- **Dual Workflow:** Choose between "Push to Branch" or "Create Pull Request"
-- **Smart Branch Selection:** Dropdown with existing branches from repository
-- **Easy Branch Creation:** Select "+ Create new branch" option with visual NEW tag
-- **Collection Insights:** Token count badges for each collection
-- **Compact Stats:** Essential token/variable/collection counts
-- **Branch Creation:** Auto-generated branch name (tokens/update-YYYY-MM-DD-HH-MM-SS)
+### Pull Request Workflow (v1.2.0)
+- **Single-Step UI:** Streamlined workflow in one compact 600x700 modal (no scrolling)
+- **Dual Workflow Options:** Choose between:
+  - **Push to Branch**: Direct push to selected/new branch
+  - **Create Pull Request**: Push + automated PR creation
+- **Smart Branch Dropdown:** Fetches existing branches from your repository
+- **Easy Branch Creation:** "+ Create new branch" option with visual green NEW tag
+- **Collection Insights:** Token count badges for each collection (purple badges)
+- **Compact Stats:** Essential token/variable/collection counts (minimized display)
+- **Static Filename:** Single file `figma-tokens.json` (no timestamp clutter)
+- **Auto-Generated Branch:** Timestamped branch names (tokens/update-YYYY-MM-DD-HH-MM-SS)
 - **GitHub PR:** Creates pull request with detailed metadata and review checklist
-- **Success Feedback:** Clickable link to view PR or branch on GitHub
+- **Success Feedback:** Clickable links to view PR or branch on GitHub
 - **Cancel Anytime:** Abort at any time without side effects
+- **User Confirmation:** Preview tokens before any GitHub action
 
 ### User Experience
 - Beautiful pastel gradient theme
@@ -171,6 +176,8 @@ npm run watch
 - **[Documentation Guide](LOGS/README.md)** - How to navigate all docs
 
 ### Recent Updates
+- **[v1.2.0 - UI Streamlining](LOGS/SESSION_LOG_2025-10-09_UI_IMPROVEMENTS.md)** - Smart branch dropdown, token count badges, no scrolling
+- **[v1.1.0 - PR Workflow](LOGS/SESSION_LOG_2025-10-07_PR_WORKFLOW.md)** - Safe PR-based workflow, static filename
 - **[Performance Optimization](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)** - 96.9% improvement achieved
 - **[UI Improvements](LOGS/SESSION_LOG_2025-10-03.md)** - Security tooltips and accordion
 - **[Credential Persistence](LOGS/SESSION_LOG_2025-10-02.md)** - Auto-validation UX
@@ -234,4 +241,15 @@ MIT License - See [LICENSE](LICENSE) for details
 
 **Made with ❤️ for design systems**
 
-*Version 1.2.0 - Production Ready - Last Updated: October 9, 2025*
+*Version 1.2.0 - Production Ready*
+*Last Updated: October 9, 2025*
+
+---
+
+## 📝 Version History
+
+- **v1.2.0** (Oct 9, 2025) - Streamlined PR UI with smart branch dropdown
+- **v1.1.0** (Oct 7, 2025) - PR-based workflow, static filename
+- **v1.0.0** (Oct 6, 2025) - Performance optimization (96.9% faster)
+- **v0.9.0** (Oct 3, 2025) - UI polish, security tooltips
+- **v0.8.0** (Oct 2, 2025) - Credential persistence

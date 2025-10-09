@@ -3,6 +3,7 @@
 This document tracks all implemented and actively running features in the plugin. Updated as features are added or modified.
 
 **Last Updated:** October 9, 2025
+**Current Version:** 1.2.0
 
 ---
 

@@ -2107,6 +2107,526 @@ Currently validates token, repository, and branch separately:
 
 ---
 
+## Session 11: PR-Based Workflow & Safe Push Implementation (October 7, 2025)
+
+### Objective
+Implement a safe, review-based workflow that prevents direct pushes to main branch and eliminates repository clutter from timestamped files.
+
+### Problem Statement
+Two critical issues needed addressing:
+1. **Repository Clutter**: Plugin created new timestamped files on every push (20+ files accumulating)
+2. **Direct Main Branch Pushes**: No review process or user confirmation before changes went live
+
+### Issues Resolved
+
+#### 1. Timestamped Filename Removal ✅
+
+**Root Cause**: Every push generated a new file like `figma-tokens-2025-10-06-19-48-00.json`
+
+**Solution**: Changed to static filename `figma-tokens.json`
+- File now overwrites on each push
+- Git tracks all changes via commits (timestamps redundant)
+- One canonical file location
+
+**Files Modified**:
+- `src/github/GitOperations.ts` - Simplified `generateFileName()` method
+- `src/github/HardCodedConfig.ts` - Updated test filename generation
+- `src/ui/GitHubSetupUI.ts` - Updated help text to reflect static filename
+
+#### 2. PR-Based Workflow Implementation ✅
+
+**Previous Behavior**:
+```
+Extract tokens → Push to main → Changes live immediately
+```
+
+**New Safe Workflow**:
+```
+Extract tokens → User confirms → Create feature branch → Push to branch → Create PR → Changes require review
+```
+
+**Key Features**:
+- **User Confirmation Modal**: Preview tokens before any GitHub action
+- **Automatic Branch Creation**: Generates timestamped feature branches (`tokens/update-YYYY-MM-DD-HH-MM-SS`)
+- **Collision Avoidance**: Timestamp ensures unique branch names
+- **PR Creation**: Automated pull request with detailed description
+- **No Direct Main Push**: Impossible to push directly to main/master branches
+
+### New Components Created
+
+#### PRWorkflowUI Class
+**File**: `src/ui/PRWorkflowUI.ts`
+
+Three-step user confirmation process:
+
+**Step 1: Token Preview**
+- Shows token counts, collections, file size
+- User can cancel before any GitHub action
+- Confirms they want to proceed
+
+**Step 2: PR Details**
+- Auto-generated branch name (editable)
+- Commit message input (pre-filled)
+- PR title input (pre-filled)
+- Base branch selection
+
+**Step 3: Success Confirmation**
+- Direct link to created PR
+- Link to new branch
+- Summary of what was created
+
+### Architecture Changes
+
+#### ExportWorkflow Enhancement
+**File**: `src/workflow/ExportWorkflow.ts`
+
+New method: `runPRWorkflow()`
+- Replaces direct `TokenPushService.pushTokens()`
+- Shows confirmation UI before any GitHub operations
+- User can cancel at any time
+- Returns `PRSuccess` with PR URL and branch name
+
+#### GitOperations Branch Management
+**File**: `src/github/GitOperations.ts`
+
+New capabilities:
+- `createBranch()` - Creates new Git references
+- `createPullRequest()` - Creates PRs via GitHub API
+- Branch existence checking before creation
+- Collision avoidance with timestamped names
+
+### User Experience Flow
+
+```
+1. User clicks "Push to GitHub"
+2. [STOP] Preview modal appears
+3. User reviews: 150 tokens, 3 collections, 25.5 KB
+4. User clicks "Looks good, create PR!"
+5. [STOP] Details modal appears
+6. User edits branch name/commit message (optional)
+7. User confirms "Create Pull Request"
+8. GitHub operations execute:
+   - Create branch: tokens/update-2025-10-07-14-32-00
+   - Push tokens to new branch
+   - Create PR: main ← tokens/update-2025-10-07-14-32-00
+9. Success modal with links:
+   - View PR: https://github.com/user/repo/pull/123
+   - View Branch: https://github.com/user/repo/tree/tokens/update-...
+```
+
+### Technical Implementation Details
+
+#### Auto-Generated Content
+
+**Branch Name**:
+```typescript
+generateBranchName(): string {
+  const timestamp = new Date().toISOString()
+    .replace(/[-:]/g, '-')
+    .replace(/\..+/, '')
+    .replace('T', '-');
+  return `tokens/update-${timestamp}`;
+}
+```
+
+**Commit Message**:
+```
+feat: update design tokens from Figma
+
+- 150 design tokens
+- 12 variables
+- 3 collections
+- Exported: 2025-10-07
+
+🤖 Generated with Figma Design System Distributor
+```
+
+**PR Description**:
+```markdown
+## Design Token Update
+
+Automated export from Figma Design System Distributor
+
+### Changes
+- **150 tokens** across 3 collections
+- **12 variables**
+- Exported: 2025-10-07 14:32:00
+
+### Review Checklist
+- [ ] Verify token values are correct
+- [ ] Check for breaking changes
+- [ ] Update dependent systems
+- [ ] Test in staging environment
+
+---
+🤖 Generated with [Figma Design System Distributor](https://github.com/...)
+```
+
+### GitHub API Endpoints Added
+
+```
+POST /repos/:owner/:repo/git/refs
+  - Create new branch reference
+  - Body: { ref: "refs/heads/branch-name", sha: "base-branch-sha" }
+
+POST /repos/:owner/:repo/pulls
+  - Create pull request
+  - Body: { title, head, base, body }
+
+GET /repos/:owner/:repo/git/refs/heads/:branch
+  - Get branch SHA for base branch
+```
+
+### Custom Base64 Implementation
+
+**Challenge**: Figma environment lacks standard `btoa()` function
+
+**Solution**: Implemented custom Base64 encoder
+```typescript
+private customBase64Encode(str: string): string {
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  let i = 0;
+
+  while (i < str.length) {
+    const a = str.charCodeAt(i++);
+    const b = i < str.length ? str.charCodeAt(i++) : 0;
+    const c = i < str.length ? str.charCodeAt(i++) : 0;
+
+    const b1 = a >> 2;
+    const b2 = ((a & 3) << 4) | (b >> 4);
+    const b3 = ((b & 15) << 2) | (c >> 6);
+    const b4 = c & 63;
+
+    output += CHARS[b1] + CHARS[b2] +
+              (isNaN(b) ? '=' : CHARS[b3]) +
+              (isNaN(c) ? '=' : CHARS[b4]);
+  }
+
+  return output;
+}
+```
+
+### Custom UTF-8 Byte Counting
+
+**Challenge**: Figma lacks `Blob` and `TextEncoder` APIs
+
+**Solution**: Manual UTF-8 byte calculation
+```typescript
+private calculateUtf8Bytes(str: string): number {
+  let bytes = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code < 0x80) bytes += 1;
+    else if (code < 0x800) bytes += 2;
+    else if (code < 0x10000) bytes += 3;
+    else bytes += 4;
+  }
+  return bytes;
+}
+```
+
+### Testing Results
+
+**Before Changes**:
+- 20+ files in `tokens/raw/` directory
+- Direct pushes to main branch
+- No user confirmation
+- Risk of accidental overwrites
+
+**After Changes**:
+- Single file: `tokens/raw/figma-tokens.json`
+- All changes go through PR process
+- User confirms before any GitHub action
+- Safe, reviewable workflow
+
+### Lessons Learned
+
+#### 1. Environment Compatibility
+Figma plugin environment is more restricted than expected:
+- Missing standard Web APIs (Blob, TextEncoder, btoa)
+- Custom implementations required for common operations
+- Always test in actual Figma environment
+
+#### 2. User Control is Critical
+Previous implementation was too automatic:
+- Users want to review before pushing
+- Preview builds confidence
+- Cancel option is essential
+
+#### 3. Git Best Practices
+Single file with commit history > Multiple timestamped files:
+- Git already tracks all changes
+- Timestamps in filenames are redundant
+- One canonical file location is cleaner
+
+### Version Information
+
+**Version**: 1.1.0 (minor version bump)
+**Release Type**: Feature addition
+**Breaking Changes**: None (graceful workflow enhancement)
+
+---
+
+## Session 12: PR Workflow UI Improvements (October 9, 2025)
+
+### Objective
+Streamline PR workflow UI based on user feedback - eliminate scrolling and reduce cognitive load.
+
+### User Feedback Summary
+
+**Pain Points**:
+- Too much scrolling required
+- Information overload (file size, excessive stats)
+- Confusing two-step process
+- Checkbox + input redundancy for branch creation
+- Collections taking too much space
+
+**Requested Changes**:
+- Larger window with no scrolling
+- Much smaller stats display
+- Remove file size completely
+- Single-step process
+- Smart branch dropdown
+- Collection token counts in badges
+
+### Implementation
+
+#### 1. Window Expansion ✅
+**Change**: 500x600 → 600x700
+**Result**: All content fits without scrolling
+
+#### 2. Dual Workflow Actions ✅
+**Previous**: Single "Create Pull Request" action
+**New**: Two action tabs
+- **Push to Branch**: Direct push to selected/new branch
+- **Create Pull Request**: Push + PR creation
+
+**Benefits**:
+- Flexibility for different workflows
+- Power users can skip PR creation
+- Teams can still enforce PR reviews
+
+#### 3. Smart Branch Dropdown ✅
+
+**Previous**: Text input + "create new branch" checkbox
+**New**: Dropdown populated from repository
+- Shows all existing branches
+- "+ Create new branch" option at bottom
+- Visual "NEW" tag when selected
+- Auto-generates branch name
+
+**Implementation**:
+```typescript
+// Fetch branches from GitHub
+async listBranches(repository: RepositoryConfig): Promise<string[]> {
+  const url = `https://api.github.com/repos/${repository.owner}/${repository.name}/branches`;
+  const response = await fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+  const branches = await response.json();
+  return branches.map((branch: any) => branch.name);
+}
+```
+
+**Dropdown HTML**:
+```html
+<select id="base-branch">
+  ${availableBranches.map(branch =>
+    `<option value="${branch}">${branch}</option>`
+  ).join('')}
+  <option value="__create_new__">+ Create new branch</option>
+</select>
+```
+
+**NEW Tag Display**:
+```html
+<span class="branch-tag" id="new-tag" style="display: none;">NEW</span>
+```
+
+**JavaScript Handler**:
+```javascript
+baseBranchSelect.addEventListener('change', function() {
+  if (this.value === '__create_new__') {
+    isNewBranch = true;
+    newTag.style.display = 'inline-block';
+    branchNameInput.focus();
+  } else {
+    isNewBranch = false;
+    newTag.style.display = 'none';
+  }
+});
+```
+
+#### 4. Collection Token Count Badges ✅
+
+**Previous**: Just collection names
+**New**: Name + count in purple badge
+
+```typescript
+${collections.map(col => {
+  const tokenCount = col.variables?.length || 0;
+  return `
+    <div class="collection-item">
+      <span>${col.name}</span>
+      <span class="collection-count">${tokenCount}</span>
+    </div>
+  `;
+}).join('')}
+```
+
+**CSS**:
+```css
+.collection-count {
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+}
+```
+
+#### 5. Minimized Statistics ✅
+
+**Previous**: Large display with file size
+**New**: Compact display without file size
+
+**Font Sizes**:
+- Values: 24px → 20px
+- Labels: 12px → 10px
+
+**Removed**:
+- File size display
+- Info notes ("Next step: create pull request")
+- Excessive padding and margins
+
+#### 6. Collections Collapsed by Default ✅
+
+**Change**: Accordion starts collapsed
+**Benefit**: Saves vertical space
+**User Control**: Can expand to see details
+
+### Files Modified
+
+| File | Changes | Lines |
+|------|---------|-------|
+| `src/github/GitOperations.ts` | Added `listBranches()` | +29 |
+| `src/ui/PRWorkflowUI.ts` | Complete UI rewrite | ~150 |
+| `src/workflow/ExportWorkflow.ts` | Branch fetching integration | +15 |
+| `README.md` | Updated features | ~10 |
+| `LOGS/CURRENT_FEATURES.md` | Added feature #12 | +50 |
+
+**Total**: ~254 lines modified across 5 files
+
+### GitHub API Integration
+
+**New Endpoint**:
+```
+GET /repos/:owner/:repo/branches
+```
+
+**Purpose**: Fetch list of all branches
+**Response**: Array of `{ name, commit, protected }`
+**Rate Limit**: Standard API quota
+
+### Performance Considerations
+
+**Branch Fetching**:
+- Happens once when modal opens
+- Not cached (future optimization opportunity)
+- Fallback to default branch if fetch fails
+- Adds ~200-500ms delay (acceptable)
+
+**Future Optimization**:
+- Cache branches for 5 minutes
+- Reduce API calls on rapid re-opens
+
+### Design Decisions
+
+#### Action Tabs vs Radio Buttons
+**Choice**: Tabs
+**Reasoning**:
+- Better visual hierarchy
+- More familiar pattern
+- Better use of space
+
+#### Dropdown vs Input
+**Choice**: Dropdown
+**Reasoning**:
+- Prevents typos
+- Shows existing branches
+- Reduces decision fatigue
+- Still flexible with create option
+
+#### NEW Tag Placement
+**Choice**: Inline with branch input
+**Reasoning**:
+- Clear visual indicator
+- Green = "new/create"
+- Doesn't clutter dropdown
+- Shows only when relevant
+
+### User Experience Improvements
+
+**Before**:
+- Scroll to see all fields
+- Confusing checkbox + input
+- File size distraction
+- Excessive info notes
+
+**After**:
+- All fields visible at once
+- Clean dropdown selection
+- Focus on essential info
+- Minimal distractions
+
+### Version Information
+
+**Version**: 1.2.0 (minor version bump)
+**Previous**: 1.1.0
+**Release Type**: Feature addition + UX improvements
+**Breaking Changes**: None
+
+### Testing Checklist
+
+Required manual testing:
+- ✅ Branches fetch from repository
+- ✅ Dropdown populates correctly
+- ✅ "+ Create new branch" works
+- ✅ NEW tag appears/disappears
+- ✅ "Push to Branch" workflow
+- ✅ "Create Pull Request" workflow
+- ✅ Collection accordion toggles
+- ✅ Token count badges display
+- ✅ No scrolling required
+- ✅ Cancel works correctly
+
+### Lessons Learned
+
+#### TypeScript Type Safety
+Initially tried to access `col.modes[0].variables` but TypeScript caught the error. Variables are at collection level, not mode level.
+
+**Takeaway**: Always verify interface structure first
+
+#### Specific User Feedback
+User's detailed feedback made implementation straightforward:
+- "avoid scroll at all costs" → 600x700 window
+- "quite irrelevant information" → minimized stats
+- "eliminate the info note" → removed hints
+
+**Takeaway**: Specific feedback = precise implementation
+
+#### API Error Handling
+Branch fetching could fail, so implemented graceful fallback to just showing default branch.
+
+**Takeaway**: Always plan for API failures
+
+---
+
 *This document serves as the complete development history and architectural guide for the Figma Design System Distributor plugin. It should be consulted for understanding design decisions, debugging complex issues, and planning future enhancements.*
 
-*Last Updated: October 6, 2025*
+*Last Updated: October 9, 2025*
