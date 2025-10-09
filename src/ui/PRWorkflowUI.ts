@@ -19,16 +19,19 @@ export interface PRWorkflowOptions {
 }
 
 export interface PRDetails {
+  action: 'push-to-branch' | 'create-pr';
   branchName: string;
   commitMessage: string;
-  prTitle: string;
-  prBody: string;
+  prTitle?: string;
+  prBody?: string;
+  isNewBranch: boolean;
 }
 
 export interface PRSuccess {
-  prNumber: number;
-  prUrl: string;
+  prNumber?: number;
+  prUrl?: string;
   branchName: string;
+  action: 'push-to-branch' | 'create-pr';
 }
 
 // =============================================================================
@@ -75,10 +78,12 @@ export class PRWorkflowUI {
       .replace('T', '-');
 
     this.prDetails = {
+      action: 'create-pr',
       branchName: `tokens/update-${timestamp}`,
       commitMessage: 'Update design tokens from Figma',
       prTitle: `Update design tokens - ${new Date().toLocaleDateString()}`,
-      prBody: this.generatePRBody()
+      prBody: this.generatePRBody(),
+      isNewBranch: true
     };
   }
 
@@ -456,6 +461,7 @@ export class PRWorkflowUI {
    * Show success modal with PR link
    */
   private showSuccessModal(success: PRSuccess): void {
+    const isPR = success.action === 'create-pr';
     const html = `
 <!DOCTYPE html>
 <html>
@@ -553,23 +559,27 @@ export class PRWorkflowUI {
   <div class="modal-container">
     <div class="modal-content">
       <div class="success-icon">✅</div>
-      <h1 class="success-title">Pull Request Created!</h1>
-      <p class="success-subtitle">Your design tokens are ready for review</p>
+      <h1 class="success-title">${isPR ? 'Pull Request Created!' : 'Pushed to Branch!'}</h1>
+      <p class="success-subtitle">${isPR ? 'Your design tokens are ready for review' : 'Your tokens have been committed'}</p>
 
       <div class="pr-details">
-        <div class="pr-detail-row">
-          <span class="pr-detail-label">PR Number</span>
-          <span class="pr-detail-value">#${success.prNumber}</span>
-        </div>
+        ${isPR && success.prNumber ? `
+          <div class="pr-detail-row">
+            <span class="pr-detail-label">PR Number</span>
+            <span class="pr-detail-value">#${success.prNumber}</span>
+          </div>
+        ` : ''}
         <div class="pr-detail-row">
           <span class="pr-detail-label">Branch</span>
           <span class="pr-detail-value">${success.branchName}</span>
         </div>
       </div>
 
-      <a href="${success.prUrl}" class="pr-link" target="_blank">
-        🔗 View Pull Request on GitHub
-      </a>
+      ${success.prUrl ? `
+        <a href="${success.prUrl}" class="pr-link" target="_blank">
+          🔗 View ${isPR ? 'Pull Request' : 'Branch'} on GitHub
+        </a>
+      ` : ''}
 
       <div class="next-steps">
         <div class="next-steps-title">📋 Next Steps</div>

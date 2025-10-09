@@ -280,20 +280,26 @@ export class ExportWorkflow {
         };
       }
 
-      console.log('✅ User confirmed PR details:', {
-        branchName: prDetails.branchName,
-        prTitle: prDetails.prTitle
+      console.log('✅ User confirmed details:', {
+        action: prDetails.action,
+        branchName: prDetails.branchName
       });
 
-      // Execute PR workflow
-      const prResult = await this.executePRWorkflow(
-        extractionResult,
-        repository,
-        prDetails,
-        baseBranch
-      );
-
-      return prResult;
+      // Execute workflow based on action
+      if (prDetails.action === 'push-to-branch') {
+        return await this.executePushToBranch(
+          extractionResult,
+          repository,
+          prDetails
+        );
+      } else {
+        return await this.executeCreatePR(
+          extractionResult,
+          repository,
+          prDetails,
+          baseBranch
+        );
+      }
 
     } catch (error) {
       console.error('❌ PR workflow failed:', error);
@@ -316,9 +322,81 @@ export class ExportWorkflow {
   }
 
   /**
-   * Execute the complete PR workflow: create branch, push tokens, create PR
+   * Execute push to branch workflow (no PR)
    */
-  private async executePRWorkflow(
+  private async executePushToBranch(
+    extractionResult: ExtractionResult,
+    repository: any,
+    prDetails: PRDetails
+  ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
+    try {
+      const branchName = prDetails.branchName;
+
+      figma.notify(`Pushing to branch: ${branchName}...`, { timeout: 2000 });
+      console.log(`📤 Pushing tokens to branch: ${branchName}`);
+
+      // If creating new branch, create it first
+      if (prDetails.isNewBranch) {
+        console.log(`🌿 Creating new branch: ${branchName}`);
+        const branchResult = await this.gitOps.createBranch(repository, branchName);
+
+        if (!branchResult.success) {
+          throw new Error(branchResult.error || 'Failed to create branch');
+        }
+      }
+
+      // Push tokens to branch
+      const fileConfig: TokenFileConfig = {
+        path: 'tokens/raw/figma-tokens.json',
+        content: this.prepareTokenData(extractionResult),
+        message: prDetails.commitMessage
+      };
+
+      const pushResult = await this.gitOps.pushToBranch(
+        repository,
+        branchName,
+        fileConfig
+      );
+
+      if (!pushResult.success) {
+        throw new Error(pushResult.error || 'Failed to push tokens');
+      }
+
+      console.log(`✅ Tokens pushed to branch: ${branchName}`);
+      figma.notify(`✅ Pushed to ${branchName}`, { timeout: 3000 });
+
+      // Show success
+      const prUI = new PRWorkflowUI({
+        tokenData: extractionResult,
+        onComplete: () => {},
+        onCancel: () => {}
+      });
+
+      prUI.showSuccess({
+        action: 'push-to-branch',
+        branchName: branchName,
+        prUrl: `https://github.com/${repository.owner}/${repository.name}/tree/${branchName}`
+      });
+
+      return {
+        success: true,
+        choice: 'git-push',
+        gitResult: {
+          branchName,
+          pushResult
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Push to branch failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute create PR workflow: create branch, push tokens, create PR
+   */
+  private async executeCreatePR(
     extractionResult: ExtractionResult,
     repository: any,
     prDetails: PRDetails,
@@ -389,6 +467,7 @@ export class ExportWorkflow {
 
       // Step 5: Show success
       const prSuccess: PRSuccess = {
+        action: 'create-pr',
         prNumber: prResult.prNumber!,
         prUrl: prResult.prUrl!,
         branchName: prDetails.branchName

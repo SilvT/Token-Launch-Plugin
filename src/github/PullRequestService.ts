@@ -90,10 +90,10 @@ export class PullRequestService {
       }
 
       const request: CreatePullRequestRequest = {
-        title: prDetails.prTitle,
+        title: prDetails.prTitle || 'Update design tokens',
         head: prDetails.branchName,
         base: baseBranch,
-        body: prDetails.prBody
+        body: prDetails.prBody || ''
       };
 
       ClientTracker.log('PullRequestService.createPullRequest - Creating PR', request);
