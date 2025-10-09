@@ -7,6 +7,8 @@
 
 import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
+import { getSharedStyles } from './styles/theme';
+
 
 export interface GitHubSetupOptions {
   onComplete: (config: GitHubConfig) => void;
@@ -88,7 +90,8 @@ export class GitHubSetupUI {
     const htmlContent = `
       <!DOCTYPE html>
       <html>
-      <head>
+       <head>
+        ${getSharedStyles()}
         <style>
           * {
             margin: 0;

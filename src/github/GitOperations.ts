@@ -780,6 +780,35 @@ export class GitOperations {
     return await response.json();
   }
 
+  /**
+   * List all branches in a repository
+   */
+  async listBranches(repository: RepositoryConfig): Promise<string[]> {
+    if (!this.boundClient) {
+      throw new Error('GitHub bound client not initialized');
+    }
+
+    const token = this.auth.getState().config?.credentials?.token;
+    if (!token) {
+      throw new Error('GitHub token not available');
+    }
+
+    const url = `https://api.github.com/repos/${repository.owner}/${repository.name}/branches`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to list branches: ${response.statusText}`);
+    }
+
+    const branches = await response.json();
+    return branches.map((branch: any) => branch.name);
+  }
+
   // =============================================================================
   // COMMIT MESSAGE GENERATION
   // =============================================================================

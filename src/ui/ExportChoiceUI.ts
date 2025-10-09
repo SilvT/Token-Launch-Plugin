@@ -7,6 +7,7 @@
 
 import { ExtractionResult } from '../TokenExtractor';
 import { DocumentInfo } from '../types/CommonTypes';
+import { getSharedStyles } from './styles/theme';
 
 // =============================================================================
 // TYPES
@@ -63,52 +64,22 @@ export class ExportChoiceUI {
     const htmlContent = `
       <!DOCTYPE html>
       <html>
-      <head>
+       <head>
+        ${getSharedStyles()}
         <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-
-          body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f8f9fa;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-          }
-
-          .header {
-            text-align: center;
-            margin-bottom: 24px;
-          }
-
-          .header h2 {
-            color: #1a1a1a;
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-          }
-
-          .header p {
-            color: #666;
-            font-size: 14px;
-          }
-
+          /* Estilos específicos de ExportChoiceUI */
           .stats {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
-            border: 1px solid #e5e5e5;
+            background: var(--color-background-primary);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--color-border);
           }
 
           .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: var(--spacing-md);
           }
 
           .stat-item {
@@ -116,15 +87,15 @@ export class ExportChoiceUI {
           }
 
           .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #18a0fb;
-            margin-bottom: 4px;
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-xs);
           }
 
           .stat-label {
-            font-size: 12px;
-            color: #666;
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
           }
@@ -132,132 +103,80 @@ export class ExportChoiceUI {
           .choices {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
           }
 
           .choice-button {
-            background: white;
-            border: 2px solid #e5e5e5;
-            border-radius: 8px;
-            padding: 20px;
+            background: var(--color-background-primary);
+            border: 2px solid var(--color-border);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-default);
             text-align: left;
             position: relative;
           }
 
           .choice-button:hover {
-            border-color: #18a0fb;
+            border-color: var(--color-primary);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(24, 160, 251, 0.15);
+            box-shadow: var(--shadow-md);
           }
 
           .choice-button.primary {
-            background: linear-gradient(135deg, #18a0fb 0%, #0066cc 100%);
+            background: var(--color-gradient);
             color: white;
-            border-color: #0066cc;
-          }
-
-          .choice-button.primary:hover {
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            border-color: #0052a3;
+            border-color: var(--color-primary-dark);
           }
 
           .choice-button.disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            background: #f5f5f5;
-          }
-
-          .choice-button.disabled:hover {
-            transform: none;
-            box-shadow: none;
-            border-color: #e5e5e5;
-          }
-
-          .choice-icon {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            vertical-align: middle;
-          }
-
-          .choice-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-          }
-
-          .choice-description {
-            font-size: 13px;
-            opacity: 0.8;
-            line-height: 1.4;
+            background: var(--color-background-secondary);
           }
 
           .choice-status {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 12px;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-full);
             background: rgba(0, 0, 0, 0.1);
           }
 
           .git-info {
-            background: #f0f7ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #0066cc;
+            background: var(--color-info-light);
+            border: 1px solid var(--color-info);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+            color: var(--color-info-dark);
           }
 
           .git-info.error {
-            background: #fff0f0;
-            border-color: #ffb3b3;
-            color: #cc0000;
-          }
-
-          .footer {
-            margin-top: auto;
-            padding-top: 16px;
-            border-top: 1px solid #e5e5e5;
-            text-align: center;
-          }
-
-          .cancel-btn {
-            background: none;
-            border: 1px solid #e5e5e5;
-            border-radius: 6px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #666;
-          }
-
-          .cancel-btn:hover {
-            background: #f5f5f5;
+            background: var(--color-error-light);
+            border-color: var(--color-error);
+            color: var(--color-error-dark);
           }
 
           .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: var(--spacing-lg);
           }
 
           .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #18a0fb;
-            border-radius: 50%;
+            border: 3px solid var(--color-background-secondary);
+            border-top: 3px solid var(--color-primary);
+            border-radius: var(--border-radius-full);
             animation: spin 1s linear infinite;
-            margin-right: 8px;
+            margin-right: var(--spacing-sm);
           }
 
           @keyframes spin {

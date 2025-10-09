@@ -2,7 +2,7 @@
 
 This document tracks all implemented and actively running features in the plugin. Updated as features are added or modified.
 
-**Last Updated:** October 4, 2025
+**Last Updated:** October 9, 2025
 
 ---
 
@@ -284,7 +284,48 @@ This document tracks all implemented and actively running features in the plugin
 
 ## Workflow Management
 
-### 12. Export Workflow Orchestration
+### 12. PR Workflow UI (Single-Step)
+**Status:** ✅ Running Smoothly
+**Description:** Streamlined single-step interface for GitHub push operations.
+
+**Features:**
+- **Single-Step Modal:** All inputs and actions in one 600x700 window (no scrolling)
+- **Dual Workflow Options:**
+  - Push to Branch: Direct push to selected/new branch
+  - Create Pull Request: Push + PR creation
+- **Smart Branch Selection:**
+  - Dropdown populated with existing repository branches
+  - "+ Create new branch" option
+  - Visual NEW tag when creating branch
+  - Auto-generated branch names (tokens/update-YYYY-MM-DD-HH-MM-SS)
+- **Collection Insights:**
+  - Collapsed accordion with collection list
+  - Token count badge for each collection
+  - Purple badge styling
+- **Compact Statistics:**
+  - Token count, variable count, collection count
+  - Minimal 20px font size
+  - No file size display
+- **Form Fields:**
+  - Branch name input with NEW tag
+  - Base branch dropdown
+  - Commit message textarea
+  - PR title input (visible only for Create PR action)
+- **Visual Design:**
+  - Action tabs for workflow selection
+  - Purple gradient header
+  - Clean form styling
+  - Single submit button (text changes based on action)
+
+**Technical Details:**
+- File: `src/ui/PRWorkflowUI.ts`
+- Branch fetching: `GitOperations.listBranches()`
+- Dynamic UI based on selected action
+- JavaScript event handlers for tab switching
+
+---
+
+### 13. Export Workflow Orchestration
 **Status:** ✅ Running Smoothly
 **Description:** Manages complete export process from extraction to delivery.
 
@@ -308,7 +349,7 @@ This document tracks all implemented and actively running features in the plugin
 
 ---
 
-### 13. Progress Feedback System
+### 14. Progress Feedback System
 **Status:** ✅ Running Smoothly
 **Description:** Real-time progress updates during operations.
 
@@ -330,7 +371,7 @@ This document tracks all implemented and actively running features in the plugin
 
 ## Error Handling & Resilience
 
-### 14. Comprehensive Error Recovery
+### 15. Comprehensive Error Recovery
 **Status:** ✅ Running Smoothly
 **Description:** Robust error handling with user-friendly messages.
 
@@ -357,7 +398,7 @@ This document tracks all implemented and actively running features in the plugin
 
 ---
 
-### 15. Storage Corruption Detection
+### 16. Storage Corruption Detection
 **Status:** ✅ Running Smoothly
 **Description:** Automatic detection and cleanup of corrupted storage.
 
@@ -377,7 +418,7 @@ This document tracks all implemented and actively running features in the plugin
 
 ## Development & Debugging
 
-### 16. Diagnostic System
+### 17. Diagnostic System
 **Status:** ✅ Running Smoothly
 **Description:** Comprehensive debugging and diagnostic tools.
 
@@ -403,7 +444,7 @@ This document tracks all implemented and actively running features in the plugin
 
 ## Documentation
 
-### 17. Organized Documentation Structure
+### 18. Organized Documentation Structure
 **Status:** ✅ Running Smoothly
 **Description:** Clean, organized documentation system.
 
@@ -431,7 +472,7 @@ LOGS/
 
 ## Performance Optimizations
 
-### 18. Asynchronous Token Extraction
+### 19. Asynchronous Token Extraction
 **Status:** ✅ Running Smoothly
 **Description:** Non-blocking token processing for large documents.
 
@@ -443,7 +484,7 @@ LOGS/
 
 ---
 
-### 19. Network Request Optimization
+### 20. Network Request Optimization
 **Status:** ✅ Running Smoothly
 **Description:** Efficient GitHub API communication.
 
@@ -457,7 +498,7 @@ LOGS/
 
 ## Known Working Integrations
 
-### 20. Figma API Integration
+### 21. Figma API Integration
 **Status:** ✅ Running Smoothly
 **APIs Used:**
 - `figma.clientStorage` - Secure credential storage
@@ -469,14 +510,18 @@ LOGS/
 
 ---
 
-### 21. GitHub API Integration
+### 22. GitHub API Integration
 **Status:** ✅ Running Smoothly
 **Endpoints Used:**
 - `GET /user` - Token validation
 - `GET /repos/:owner/:repo` - Repository verification
+- `GET /repos/:owner/:repo/branches` - List all branches
+- `GET /repos/:owner/:repo/branches/:branch` - Branch validation
 - `GET /repos/:owner/:repo/contents/:path` - File existence check
 - `PUT /repos/:owner/:repo/contents/:path` - File creation/update
-- `GET /repos/:owner/:repo/branches/:branch` - Branch validation
+- `POST /repos/:owner/:repo/pulls` - Create pull request
+- `GET /repos/:owner/:repo/git/refs/:ref` - Get Git reference
+- `POST /repos/:owner/:repo/git/refs` - Create Git reference (branch)
 
 **Authentication:**
 - Personal Access Tokens (PAT)
@@ -490,19 +535,29 @@ LOGS/
 **Core Functionality:** 2 features
 **GitHub Integration:** 3 features
 **User Interface:** 6 features
-**Workflow Management:** 2 features
+**Workflow Management:** 3 features (added PR Workflow UI)
 **Error Handling:** 2 features
 **Development Tools:** 1 feature
 **Documentation:** 1 feature
 **Performance:** 2 features
 **API Integrations:** 2 features
 
-**Total Features Running Smoothly:** 21
+**Total Features Running Smoothly:** 22
 
 ---
 
-## Recent Additions (October 3, 2025)
+## Recent Additions (October 9, 2025)
 
+### PR Workflow UI Improvements (v1.2.0)
+1. ✅ Single-Step Workflow Modal - Streamlined from 3-step to 1-step UI
+2. ✅ Dual Workflow Options - Choose "Push to Branch" or "Create Pull Request"
+3. ✅ Smart Branch Dropdown - Fetches existing branches from repository
+4. ✅ Easy Branch Creation - "+ Create new branch" option with visual NEW tag
+5. ✅ Collection Token Counts - Badge display showing token count per collection
+6. ✅ Compact Statistics - Minimal display of essential metrics
+7. ✅ No Scrolling Design - 600x700 window with all content visible
+
+### Previous Additions (October 3, 2025)
 1. ✅ Token Creation Tooltip (#9A)
 2. ✅ Security Information Tooltip (#9B)
 3. ✅ Smart Accordion Behavior (auto-collapse validated sections)

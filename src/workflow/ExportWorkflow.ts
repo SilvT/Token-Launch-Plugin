@@ -258,11 +258,23 @@ export class ExportWorkflow {
       console.log('   Repository:', `${repository.owner}/${repository.name}`);
       console.log('   Base branch:', baseBranch);
 
+      // Fetch available branches
+      let availableBranches: string[] = [];
+      try {
+        availableBranches = await this.gitOps.listBranches(repository);
+        console.log('   Available branches:', availableBranches);
+      } catch (error) {
+        console.warn('⚠️ Could not fetch branches:', error);
+        // Continue with just the base branch if fetch fails
+        availableBranches = [baseBranch];
+      }
+
       // Show PR workflow UI and wait for user confirmation
       const prDetails = await new Promise<PRDetails | null>((resolve) => {
         const prUI = new PRWorkflowUI({
           tokenData: extractionResult,
           defaultBranch: baseBranch,
+          availableBranches,
           onComplete: (details) => resolve(details),
           onCancel: () => resolve(null)
         });

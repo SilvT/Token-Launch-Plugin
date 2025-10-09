@@ -4,7 +4,7 @@
 
 A high-performance Figma plugin that bridges the gap between design and development by extracting design tokens and distributing them to your codebase.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-production%20ready-green.svg)]()
 [![Performance](https://img.shields.io/badge/performance-96.9%25%20faster-brightgreen.svg)](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)
 [![Safety](https://img.shields.io/badge/workflow-PR%20based-success.svg)](LOGS/SESSION_LOG_2025-10-07_PR_WORKFLOW.md)
@@ -75,12 +75,16 @@ A high-performance Figma plugin that bridges the gap between design and developm
 - Persistent configuration across sessions
 
 ### Pull Request Workflow
-- **Preview Modal:** See token counts, collections, and file size before pushing
-- **Commit Details:** Customize commit message and PR title
+- **Single-Step UI:** Streamlined workflow in one compact modal (no scrolling)
+- **Dual Workflow:** Choose between "Push to Branch" or "Create Pull Request"
+- **Smart Branch Selection:** Dropdown with existing branches from repository
+- **Easy Branch Creation:** Select "+ Create new branch" option with visual NEW tag
+- **Collection Insights:** Token count badges for each collection
+- **Compact Stats:** Essential token/variable/collection counts
 - **Branch Creation:** Auto-generated branch name (tokens/update-YYYY-MM-DD-HH-MM-SS)
 - **GitHub PR:** Creates pull request with detailed metadata and review checklist
-- **Success Feedback:** Clickable link to view PR on GitHub
-- **Cancel Anytime:** Abort at preview or details step without side effects
+- **Success Feedback:** Clickable link to view PR or branch on GitHub
+- **Cancel Anytime:** Abort at any time without side effects
 
 ### User Experience
 - Beautiful pastel gradient theme
@@ -230,4 +234,4 @@ MIT License - See [LICENSE](LICENSE) for details
 
 **Made with ❤️ for design systems**
 
-*Version 1.0.0 - Production Ready - Last Updated: October 6, 2025*
+*Version 1.2.0 - Production Ready - Last Updated: October 9, 2025*
