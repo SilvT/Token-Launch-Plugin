@@ -100,8 +100,8 @@ export class GitHubSetupUI {
           }
 
           body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
             padding: 20px;
             min-height: 100vh;
             display: flex;
@@ -119,8 +119,8 @@ export class GitHubSetupUI {
           }
 
           .setup-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
+            color: #4a1d5c;
             padding: 24px;
             text-align: center;
           }
@@ -168,7 +168,7 @@ export class GitHubSetupUI {
           }
 
           .step-circle.active {
-            background: #667eea;
+            background: #510081;
             color: white;
           }
 
@@ -225,8 +225,9 @@ export class GitHubSetupUI {
           }
 
           .form-input:focus {
-            outline: none;
-            border-color: #667eea;
+            outline: 2px solid #d7adf0;
+            outline-offset: 2px;
+            border-color: #510081;
           }
 
           .form-help {
@@ -255,7 +256,7 @@ export class GitHubSetupUI {
           }
 
           .preview-value {
-            color: #667eea;
+            color: #510081;
             font-family: 'Monaco', monospace;
             font-size: 12px;
           }
@@ -288,12 +289,19 @@ export class GitHubSetupUI {
           }
 
           .btn-primary {
-            background: #667eea;
-            color: white;
+            background: #d7adf0;
+            color: #333;
+            font-weight: 600;
           }
 
           .btn-primary:hover {
-            background: #5a6fd8;
+            background: #9d174d;
+            color: white;
+          }
+
+          .btn-primary:focus {
+            outline: 2px solid #d7adf0;
+            outline-offset: 2px;
           }
 
           .btn:disabled {

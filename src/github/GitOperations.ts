@@ -100,7 +100,7 @@ export class GitOperations {
       console.log('🔧 GitOperations.initialize - Client ID:', clientId);
       console.log('🔧 GitOperations.initialize - Client prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.client || {})));
 
-      // Check specific methods with ClientTracker
+      // Check specific methods with ClientTracker (without calling them)
       if (this.client) {
         ClientTracker.inspectObject('GitOperations.client', this.client);
         ClientTracker.inspectObject('GitOperations.boundClient', this.boundClient);
@@ -110,34 +110,11 @@ export class GitOperations {
         console.log('  - createFile:', typeof this.client.createFile);
         console.log('  - updateFile:', typeof this.client.updateFile);
         console.log('  - getFile:', typeof this.client.getFile);
+        console.log('  - getUser:', typeof this.client.getUser);
 
         // Additional debugging - check if methods exist at all
         console.log('🔧 Instance properties:', Object.getOwnPropertyNames(this.client));
         console.log('🔧 Instance methods in prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.client)));
-
-        // Try to call a simple method that should always work using ClientTracker
-        try {
-          ClientTracker.log('GitOperations.initialize - Testing getUser method');
-          const user = await this.client.getUser();
-          ClientTracker.log('GitOperations.initialize - getUser test SUCCESS', { login: user.login });
-          console.log('✅ Test method getUser() works:', user.login);
-        } catch (testError) {
-          ClientTracker.log('GitOperations.initialize - getUser test FAILED', testError);
-          console.error('❌ Test method getUser() failed:', testError);
-        }
-
-        // Test bound client methods
-        if (this.boundClient) {
-          try {
-            ClientTracker.log('GitOperations.initialize - Testing bound client getUser');
-            const boundUser = await this.boundClient.getUser();
-            ClientTracker.log('GitOperations.initialize - Bound client getUser SUCCESS', { login: boundUser.login });
-            console.log('✅ Bound client getUser() works:', boundUser.login);
-          } catch (boundTestError) {
-            ClientTracker.log('GitOperations.initialize - Bound client getUser FAILED', boundTestError);
-            console.error('❌ Bound client getUser() failed:', boundTestError);
-          }
-        }
       }
     } else {
       ClientTracker.log('GitOperations.initialize - Auth does not have client');

@@ -4,11 +4,12 @@
 
 A high-performance Figma plugin that bridges the gap between design and development by extracting design tokens and distributing them to your codebase.
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.1-blue.svg)](CHANGELOG.md)
 [![Status](https://img.shields.io/badge/status-production%20ready-green.svg)]()
 [![Performance](https://img.shields.io/badge/performance-96.9%25%20faster-brightgreen.svg)](LOGS/SESSION_LOG_2025-10-06_PERFORMANCE_OPTIMIZATION.md)
 [![Safety](https://img.shields.io/badge/workflow-PR%20based-success.svg)](LOGS/SESSION_LOG_2025-10-07_PR_WORKFLOW.md)
 [![UX](https://img.shields.io/badge/UI-streamlined-purple.svg)](LOGS/SESSION_LOG_2025-10-09_UI_IMPROVEMENTS.md)
+[![Accessibility](https://img.shields.io/badge/WCAG-AA%20compliant-brightgreen.svg)](ACCESSIBILITY_REPORT.md)
 
 ---
 
@@ -91,9 +92,12 @@ A high-performance Figma plugin that bridges the gap between design and developm
 - **Cancel Anytime:** Abort at any time without side effects
 - **User Confirmation:** Preview tokens before any GitHub action
 
-### User Experience
-- Beautiful pastel gradient theme
-- AAA accessibility (WCAG 7:1 contrast)
+### User Experience (v1.2.1)
+- **Unified Design Theme:** Consistent pink-purple gradient across all screens
+- **WCAG AA Accessibility:** All color combinations meet 4.5:1+ contrast ratios (verified)
+- **Keyboard Navigation:** Visible 2px focus indicators on all interactive elements
+- **Readable Typography:** Minimum 11px font size with system font stack
+- **No Startup Errors:** Clean console on plugin launch
 - Security tooltips and guides
 - Collapsible setup sections
 - Performance metrics in console

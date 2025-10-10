@@ -136,7 +136,7 @@ export class PRWorkflowUI {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .container {
@@ -147,8 +147,8 @@ export class PRWorkflowUI {
     }
 
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
+      color: #4a1d5c;
       padding: 16px 20px;
       flex-shrink: 0;
     }
@@ -183,12 +183,12 @@ export class PRWorkflowUI {
     .stat-value {
       font-size: 20px;
       font-weight: 600;
-      color: #667eea;
+      color: #510081;
       margin-bottom: 2px;
     }
 
     .stat-label {
-      font-size: 10px;
+      font-size: 11px;
       color: #666;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -252,11 +252,11 @@ export class PRWorkflowUI {
     }
 
     .collection-count {
-      background: #667eea;
+      background: #510081;
       color: white;
       padding: 2px 8px;
       border-radius: 10px;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
     }
 
@@ -290,12 +290,12 @@ export class PRWorkflowUI {
     }
 
     .action-tab:hover {
-      border-color: #667eea;
+      border-color: #d7adf0;
     }
 
     .action-tab.active {
-      border-color: #667eea;
-      background: #f0f3ff;
+      border-color: #510081;
+      background: rgba(215, 173, 240, 0.1);
     }
 
     .tab-title {
@@ -339,8 +339,9 @@ export class PRWorkflowUI {
     .form-input:focus,
     .form-select:focus,
     .form-textarea:focus {
-      outline: none;
-      border-color: #667eea;
+      outline: 2px solid #d7adf0;
+      outline-offset: 2px;
+      border-color: #510081;
     }
 
     .branch-tag {
@@ -411,12 +412,19 @@ export class PRWorkflowUI {
     }
 
     .btn-submit {
-      background: #667eea;
-      color: white;
+      background: #d7adf0;
+      color: #333;
+      font-weight: 600;
     }
 
     .btn-submit:hover {
-      background: #5a6fd8;
+      background: #9d174d;
+      color: white;
+    }
+
+    .btn-submit:focus {
+      outline: 2px solid #d7adf0;
+      outline-offset: 2px;
     }
   </style>
 </head>
@@ -721,18 +729,24 @@ export class PRWorkflowUI {
 
     .link-btn {
       display: block;
-      background: #667eea;
-      color: white;
+      background: #d7adf0;
+      color: #333;
       text-decoration: none;
       padding: 14px;
       border-radius: 8px;
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 16px;
       transition: background 0.2s;
     }
 
     .link-btn:hover {
-      background: #5a6fd8;
+      background: #510081;
+      color: white;
+    }
+
+    .link-btn:focus {
+      outline: 2px solid #d7adf0;
+      outline-offset: 2px;
     }
 
     .btn-done {
