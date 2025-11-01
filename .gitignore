@@ -8,6 +8,7 @@ node_modules/
 # Logs
 logs
 LOGS/
+docs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -28,3 +29,12 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/ 
+ACCESSIBILITY_REPORT.md*
+FIGMA_SUBMISSION_CHECKLIST.md*
+ASSETS_SPECIFICATIONS.md*
+CLAUDE.md*
+CONTRIBUTING.md*
+MARKETPLACE_LISTING.md*
+PROJECT_STATUS_REPORT.md*
+SUBMISSION_READY_SUMMARY.md*
+TECHNICAL_README.md*

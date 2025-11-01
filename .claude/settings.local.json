@@ -5,7 +5,13 @@
       "Read(//Users/silvia/Library/CloudStorage/Dropbox/marca_comercial/**)",
       "Bash(npm run build:*)",
       "WebFetch(domain:www.figma.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git tag -a v1.3.0 -m \"$(cat <<''EOF''\nRelease v1.3.0 - Major Performance and Documentation Update\n\nThis release includes comprehensive improvements across performance, error handling, \ndocumentation, and code quality. The plugin is now production-ready and prepared \nfor Figma Community submission.\n\n## Major Features & Improvements\n\n### Performance Optimizations (96.9% faster)\n- Optimized startup time with lazy loading and dynamic page access\n- Token extraction now completes in ~85ms (down from 2.7s)\n- Implemented efficient code splitting and modular architecture\n- Added instant loading screen for better UX\n\n### Error Handling & Reliability\n- Comprehensive error handling system with ErrorHandler and ErrorTypes\n- User-friendly ErrorDialog for graceful error display\n- Centralized logging configuration with configurable log levels\n- Graceful fallbacks for all operations\n\n### Documentation\n- Complete Figma submission checklist and marketplace listing\n- Detailed status reports and project documentation\n- Technical documentation for all optimizations\n- Asset specifications and submission guide\n\n### Code Quality\n- Migrated to async API methods for dynamic-page mode\n- Improved TypeScript type safety across codebase\n- Better separation of concerns and modular structure\n- UI constants extraction for consistency\n\n### UI/UX Improvements\n- Resizable plugin window support\n- Standardized UI components across all screens\n- Enhanced GitHub workflow interface\n- Improved validation and user feedback\n\n## Files Changed\n109 files changed, 28,994 insertions(+), 2,849 deletions(-)\n\n## Ready for Production\n✅ Plugin tested and working\n✅ Performance optimized (<100ms extraction)\n✅ Security implemented (encrypted credentials)\n✅ Accessibility compliant (WCAG AA)\n✅ Documentation complete\n✅ Build verified (266KB minified)\n\nStatus: 90% ready for Figma Community submission\nRemaining: Visual assets (icon, cover, screenshots)\n\nFor detailed changes, see CHANGELOG.md, PROJECT_STATUS_REPORT.md, and SUBMISSION_READY_SUMMARY.md\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(gh release create:*)",
+      "Bash(mkdir:*)",
+      "Bash(zip:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
