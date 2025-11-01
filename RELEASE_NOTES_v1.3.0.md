@@ -4,6 +4,18 @@
 
 This is a major release featuring comprehensive improvements across performance, reliability, documentation, and code quality. The plugin is now production-ready and prepared for Figma Community submission.
 
+## 📥 Quick Installation
+
+**Install the plugin locally right now (no Figma Community approval needed):**
+
+1. **Download** [figma-design-system-distributor-v1.3.0.zip](https://github.com/SilvT/Figma-Design-System-Distributor/releases/download/v1.3.0/figma-design-system-distributor-v1.3.0.zip) (64KB)
+2. **Extract** the ZIP file to any folder
+3. **In Figma Desktop:** Plugins → Development → Import plugin from manifest...
+4. **Select** the `manifest.json` file from the extracted folder
+5. **Run** from Plugins → Development → Design System Distributor
+
+📖 **Detailed instructions:** See [INSTALLATION.md](INSTALLATION.md)
+
 ---
 
 ## ✨ Highlights
@@ -142,21 +154,29 @@ All documentation is included in this release:
 
 ## 🚀 Getting Started
 
-### Installation
-1. Clone the repository
-2. Run `npm install`
-3. Run `npm run build`
-4. Load plugin in Figma desktop app
+### For Users (Quick Install)
+1. **Download** the ZIP file from releases (see "Quick Installation" section above)
+2. **Extract** and import `manifest.json` in Figma Desktop
+3. **Run** the plugin from Plugins → Development → Design System Distributor
+
+### For Developers (Build from Source)
+1. Clone the repository: `git clone https://github.com/SilvT/Figma-Design-System-Distributor.git`
+2. Install dependencies: `npm install`
+3. Build the plugin: `npm run build`
+4. Import `manifest.json` in Figma Desktop
 
 ### Usage
-1. Open a Figma file with design tokens
+1. Open a Figma file with design tokens (colors, typography, spacing, effects)
 2. Run the "Design System Distributor" plugin
-3. Extract tokens and export to GitHub or download locally
+3. Choose your export method:
+   - **GitHub PR:** Push tokens directly to a GitHub repository
+   - **Download:** Save tokens as JSON file locally
 
 ### Configuration
-- GitHub integration requires a personal access token
-- Credentials are encrypted and stored locally
-- Network access limited to api.github.com
+- **GitHub integration** requires a personal access token (PAT)
+- **Credentials** are encrypted and stored securely in Figma's client storage
+- **Network access** is limited to api.github.com only
+- **No data collection** - everything stays on your machine
 
 ---
 
