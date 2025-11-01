@@ -2,11 +2,12 @@
 *.log
 *.css.d.ts
 /build/
-/manifest.json
+# /manifest.json  # Commented out - we want to track manifest.json for releases
 node_modules/
 
 # Logs
 logs
+LOGS/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
