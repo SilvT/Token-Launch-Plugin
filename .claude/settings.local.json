@@ -11,7 +11,9 @@
       "Bash(gh release create:*)",
       "Bash(mkdir:*)",
       "Bash(zip:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(unzip:*)"
     ],
     "deny": [],
     "ask": []
