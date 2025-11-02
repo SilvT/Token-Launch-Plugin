@@ -131,9 +131,14 @@ export class SecureStorage {
   static async storeConfig(config: GitHubConfig): Promise<void> {
     try {
       // Store config without credentials (they're stored separately)
+      // Trim whitespace from repository owner and name to prevent API errors
       const configWithoutCredentials = {
         ...config,
-        credentials: undefined
+        credentials: undefined,
+        repository: config.repository ? {
+          owner: config.repository.owner?.trim() || '',
+          name: config.repository.name?.trim() || ''
+        } : undefined
       };
 
       await figma.clientStorage.setAsync(

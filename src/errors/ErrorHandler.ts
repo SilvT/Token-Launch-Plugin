@@ -163,29 +163,29 @@ export class ErrorHandler {
 
   /**
    * Log error to console with formatting
+   * Note: Using console.log instead of console.group as Figma plugin environment doesn't support it
    */
   private static logError(metadata: ErrorMetadata, originalError: unknown): void {
     const severityEmoji = this.getSeverityEmoji(metadata.severity);
 
-    console.group(`${severityEmoji} ${metadata.title} [${metadata.code}]`);
+    console.error(`\n${severityEmoji} ${metadata.title} [${metadata.code}]`);
     console.error('Category:', metadata.category);
     console.error('Severity:', metadata.severity);
     console.error('User Message:', metadata.userMessage);
     console.error('Technical Message:', metadata.technicalMessage);
 
     if (metadata.solutions.length > 0) {
-      console.group('Solutions:');
+      console.error('\nSolutions:');
       metadata.solutions.forEach((solution) => {
-        console.log(`${solution.step}. ${solution.action}`);
+        console.error(`  ${solution.step}. ${solution.action}`);
         if (solution.details) {
-          console.log(`   ${solution.details}`);
+          console.error(`     ${solution.details}`);
         }
       });
-      console.groupEnd();
     }
 
-    console.error('Original Error:', originalError);
-    console.groupEnd();
+    console.error('\nOriginal Error:', originalError);
+    console.error('---\n');
   }
 
   /**

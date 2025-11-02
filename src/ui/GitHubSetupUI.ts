@@ -890,10 +890,14 @@ export class GitHubSetupUI {
    */
   private async handleRepositoryValidation(owner: string, name: string): Promise<void> {
     try {
-      console.log('🔍 Validating repository access:', `${owner}/${name}`);
+      // Trim whitespace from inputs to prevent API errors
+      const trimmedOwner = owner?.trim() || '';
+      const trimmedName = name?.trim() || '';
+
+      console.log('🔍 Validating repository access:', `${trimmedOwner}/${trimmedName}`);
 
       // Basic input validation
-      if (!owner || !name) {
+      if (!trimmedOwner || !trimmedName) {
         figma.ui.postMessage({
           type: 'repository-validation-result',
           success: false,
@@ -915,11 +919,19 @@ export class GitHubSetupUI {
       // Create a temporary client for validation
       const testClient = new GitHubClient(this.currentConfig.credentials);
 
-      // Test repository access
-      const testResult = await testClient.testConnection({ owner, name });
+      // Test repository access using trimmed values
+      const testResult = await testClient.testConnection({ owner: trimmedOwner, name: trimmedName });
 
       if (testResult.success) {
         console.log('✅ Repository validation successful');
+
+        // Update config with trimmed values
+        if (!this.currentConfig.repository) {
+          this.currentConfig.repository = { owner: '', name: '' };
+        }
+        this.currentConfig.repository.owner = trimmedOwner;
+        this.currentConfig.repository.name = trimmedName;
+
         figma.ui.postMessage({
           type: 'repository-validation-result',
           success: true,
