@@ -12,18 +12,15 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 [![Accessible](https://img.shields.io/badge/WCAG-AA%20compliant-brightgreen.svg)]()
 
 ---
+[What](#-what-this-plugin-does) | [How](#-security-&-privacy)
+---
 
 ## ✨ What This Plugin Does
 
 **For Designers:**
-- Extract your colors, typography, spacing, and effects from Figma
+- Extract your variales and styles from Figma
 - Send them directly to your development team's codebase
 - No need to manually copy values or create handoff documents
-
-**For Teams:**
-- Keep design and code perfectly in sync
-- Developers get design updates instantly
-- Reduce back-and-forth communication about design specifications
 
 **It's That Simple:**
 1. **Run the plugin** in your Figma document
@@ -34,11 +31,11 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 
 ## 🎯 Perfect For
 
-✅ **UI/UX Designers** who want to streamline handoffs
-✅ **Design System Teams** managing design tokens
-✅ **Product Managers** coordinating design-dev workflows
-✅ **Small Teams** wanting better design-code consistency
-✅ **Anyone** tired of manually copying design values
+✅ **UI/UX Designers** who want to streamline handoffs  
+✅ **Design System Teams** managing design tokens  
+✅ **Product Managers** coordinating design-dev workflows  
+✅ **Small Teams** wanting better design-code consistency  
+✅ **Anyone** tired of manually copying design values  
 
 ---
 
@@ -48,7 +45,7 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 *Coming Soon - Plugin submission in progress*
 
 ### Option 2: Install Manually (Available Now)
-1. **Download:** Get the plugin files from your development team
+1. **Download:** Get the [Manifest File](/manifest.json) from this repo
 2. **Install:** Figma → Plugins → Development → Import plugin from manifest
 3. **Run:** Find "Design System Distributor" in your plugins list
 
@@ -79,19 +76,6 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 1. Run the plugin
 2. Click "Download JSON File"
 3. Share the file with your developer
-
----
-
-## 💡 What Are Design Tokens?
-
-Design tokens are the basic building blocks of your design system:
-
-- **Colors:** Brand colors, text colors, backgrounds
-- **Typography:** Font sizes, weights, line heights
-- **Spacing:** Margins, padding, grid systems
-- **Effects:** Shadows, borders, gradients
-
-Think of them as a "design dictionary" that developers use to build your designs in code.
 
 ---
 
@@ -133,7 +117,7 @@ No special organization required - the plugin finds everything automatically!
 5. Code stays in sync with design
 
 **For GitHub Users:**
-- Creates a "Pull Request" (think of it as a proposed change)
+- Creates a "Pull Request" (think of it as a change suggestion)
 - Your developer reviews and applies the changes
 - Automatic history of all design updates
 
@@ -153,19 +137,6 @@ No special organization required - the plugin finds everything automatically!
 - Ask your developer for help with GitHub setup
 - Check the FAQ for Git/GitHub basics
 - The plugin includes helpful guides for every step
-
----
-
-## 🎉 Success Stories
-
-**"Finally, our design system stays in sync with code!"**
-*- Design Team at TechCorp*
-
-**"Cut our design handoff time from hours to minutes."**
-*- Product Manager at StartupCo*
-
-**"Developers love getting exact values instead of guessing from screenshots."**
-*- UI Designer at DesignStudio*
 
 ---
 
@@ -208,6 +179,7 @@ We're continuously improving the plugin based on user feedback:
 - **More Export Formats:** CSS, SCSS, mobile platforms
 - **Enhanced Automation:** Even smoother GitHub workflows
 - **Better Previews:** See exactly what will be exported
+- **More platforms** Bitbucket, Gitlab...
 
 ---
 

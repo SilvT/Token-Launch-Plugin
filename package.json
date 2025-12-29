@@ -19,6 +19,8 @@
   "dependencies": {
     "@create-figma-plugin/utilities": "^4.0.3",
     "octokit": "^5.0.3",
+    "phosphor-icons": "^1.4.2",
+    "phosphor-react": "^1.4.1",
     "simple-git": "^3.28.0",
     "task-master-ai": "^0.28.0"
   },
@@ -45,9 +47,10 @@
     "documentAccess": "current-page",
     "networkAccess": {
       "allowedDomains": [
-        "https://api.github.com"
+        "https://api.github.com",
+        "https://unpkg.com"
       ],
-      "reasoning": "Required for GitHub integration - pushing design tokens to repositories via GitHub API"
+      "reasoning": "Required for GitHub integration and Phosphor Icons CDN - GitHub API for pushing design tokens and unpkg.com for icon fonts"
     }
   }
 }

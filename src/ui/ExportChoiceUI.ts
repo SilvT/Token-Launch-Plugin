@@ -66,6 +66,7 @@ export class ExportChoiceUI {
       <!DOCTYPE html>
       <html>
        <head>
+        <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
         ${getSharedStyles()}
         <style>
           /* Estilos específicos de ExportChoiceUI */
@@ -189,7 +190,7 @@ export class ExportChoiceUI {
       <body>
         <div id="main-content">
           <div class="header">
-            <h2>🎉 Tokens Extracted Successfully!</h2>
+            <h2><i class="ph-party-popper" data-weight="duotone"></i> Tokens Extracted Successfully!</h2>
             <p>Choose how you'd like to export your design tokens</p>
           </div>
 
@@ -209,7 +210,7 @@ export class ExportChoiceUI {
           <div class="choices">
             <div class="choice-button ${hasGitConfigured ? 'primary' : 'disabled'}" data-choice="git-push">
               <div class="choice-status">${hasGitConfigured ? 'Ready' : 'Setup Required'}</div>
-              <div class="choice-icon">🚀</div>
+              <div class="choice-icon"><i class="ph-rocket-launch" data-weight="duotone"></i></div>
               <div class="choice-title">Push to GitHub</div>
               <div class="choice-description">
                 ${hasGitConfigured
@@ -231,7 +232,7 @@ export class ExportChoiceUI {
 
             <div class="choice-button" data-choice="download">
               <div class="choice-status">Always Available</div>
-              <div class="choice-icon">💾</div>
+              <div class="choice-icon"><i class="ph-download-simple" data-weight="duotone"></i></div>
               <div class="choice-title">Download JSON File</div>
               <div class="choice-description">
                 Download tokens as a JSON file to your computer for manual processing

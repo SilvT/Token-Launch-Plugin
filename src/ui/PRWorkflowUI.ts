@@ -141,6 +141,7 @@ export class PRWorkflowUI {
 <!DOCTYPE html>
 <html>
 <head>
+  <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
   ${this.getSharedStyles()}
   <style>
     body {
@@ -158,10 +159,11 @@ export class PRWorkflowUI {
     }
 
     .header {
-      background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
-      color: #4a1d5c;
+      background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
+      color: #000000;
       padding: 16px 20px;
       flex-shrink: 0;
+      text-align: center;
     }
 
     .header h1 {
@@ -194,7 +196,7 @@ export class PRWorkflowUI {
     .stat-value {
       font-size: 20px;
       font-weight: 600;
-      color: #510081;
+      color: #000000;
       margin-bottom: 2px;
     }
 
@@ -222,7 +224,7 @@ export class PRWorkflowUI {
     }
 
     .collections-toggle:hover {
-      background: #f8f9fa;
+      background: var(--color-background-secondary);
     }
 
     .toggle-icon {
@@ -263,7 +265,7 @@ export class PRWorkflowUI {
     }
 
     .collection-count {
-      background: #510081;
+      background: #000000;
       color: white;
       padding: 2px 8px;
       border-radius: 10px;
@@ -301,12 +303,12 @@ export class PRWorkflowUI {
     }
 
     .action-tab:hover {
-      border-color: #d7adf0;
+      border-color: var(--color-primary-light);
     }
 
     .action-tab.active {
-      border-color: #510081;
-      background: rgba(215, 173, 240, 0.1);
+      border-color: var(--color-text-primary);
+      background: var(--color-primary-background);
     }
 
     .tab-title {
@@ -350,18 +352,18 @@ export class PRWorkflowUI {
     .form-input:focus,
     .form-select:focus,
     .form-textarea:focus {
-      outline: 2px solid #d7adf0;
+      outline: 2px solid var(--color-primary-light);
       outline-offset: 2px;
-      border-color: #510081;
+      border-color: var(--color-text-primary);
     }
 
     .form-input:disabled,
     .form-select:disabled,
     .form-textarea:disabled {
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--color-background-secondary);
+      color: var(--color-text-disabled);
       cursor: not-allowed;
-      border-color: #dee2e6;
+      border-color: var(--color-border);
     }
 
     .branch-tag {
@@ -423,27 +425,203 @@ export class PRWorkflowUI {
     }
 
     .btn-cancel {
-      background: #6c757d;
+      background: #1A1C1E;
       color: white;
     }
 
     .btn-cancel:hover {
-      background: #5a6268;
+      background: #404347;
+      color: white;
+    }
+
+    .btn-cancel:focus {
+      outline: 2px solid #1A1C1E;
+      outline-offset: 2px;
     }
 
     .btn-submit {
-      background: #d7adf0;
-      color: #333;
+      background: #DEE3FC;
+      color: var(--color-text-primary);
       font-weight: 600;
     }
 
     .btn-submit:hover {
-      background: #9d174d;
+      background: #7C2D92;
       color: white;
     }
 
     .btn-submit:focus {
-      outline: 2px solid #d7adf0;
+      outline: 2px solid var(--color-primary-light);
+      outline-offset: 2px;
+    }
+
+    /* CI/CD Tooltip Styles */
+    .tooltip-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 8888;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .tooltip-overlay.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    .tooltip-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 90%;
+      max-height: 500px;
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .tooltip-popup.visible {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .tooltip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .tooltip-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+    }
+
+    .tooltip-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .tooltip-close:hover {
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+    }
+
+    .tooltip-content {
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #374151;
+    }
+
+    .tooltip-content p {
+      margin: 0 0 8px 0;
+    }
+
+    .tooltip-content ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .tooltip-content li {
+      margin-bottom: 4px;
+    }
+
+    /* Information icon styling */
+    .learn-more {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .learn-more:hover {
+      transform: scale(1.1);
+    }
+
+    .learn-more i {
+      transition: all 0.2s ease;
+      padding: 4px;
+      border-radius: 50%;
+    }
+
+    .learn-more:hover i {
+      color: white !important;
+      background-color: #C084FC !important;
+    }
+
+    /* Custom checkbox styling */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      min-height: 16px;
+      border: 2px solid #DEE3FC;
+      border-radius: 3px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      margin-right: 8px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    input[type="checkbox"]:hover {
+      border-color: #C084FC;
+      background: #F3E8FF;
+    }
+
+    input[type="checkbox"]:checked {
+      background: #C084FC;
+      border-color: #C084FC;
+    }
+
+    input[type="checkbox"]:checked::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    input[type="checkbox"]:focus {
+      outline: 2px solid #E9D5FF;
       outline-offset: 2px;
     }
   </style>
@@ -452,7 +630,7 @@ export class PRWorkflowUI {
   <div class="container">
     <!-- Header -->
     <div class="header">
-      <h1>🚀 Push Tokens to GitHub</h1>
+      <h1><i class="ph-rocket-launch" data-weight="duotone"></i> Push Tokens to GitHub</h1>
     </div>
 
     <!-- Content -->
@@ -496,11 +674,11 @@ export class PRWorkflowUI {
       <div class="section">
         <div class="section-title">Choose Action</div>
         <div class="action-tabs">
-          <div class="action-tab" id="tab-branch" onclick="selectAction('push-to-branch')">
+          <div class="action-tab active" id="tab-branch" onclick="selectAction('push-to-branch')">
             <div class="tab-title">Push to Branch</div>
             <div class="tab-desc">Commit to branch</div>
           </div>
-          <div class="action-tab active" id="tab-pr" onclick="selectAction('create-pr')">
+          <div class="action-tab" id="tab-pr" onclick="selectAction('create-pr')">
             <div class="tab-title">Create Pull Request</div>
             <div class="tab-desc">Create PR with review</div>
           </div>
@@ -548,7 +726,7 @@ export class PRWorkflowUI {
       </div>
 
       <!-- PR-Only Fields -->
-      <div class="pr-only visible" id="pr-fields">
+      <div class="pr-only" id="pr-fields">
         <div class="section">
           <div class="section-title">Pull Request</div>
           <div class="form-group">
@@ -575,6 +753,7 @@ export class PRWorkflowUI {
               ${workflowSettings.workflowTriggerEnabled ? 'checked' : ''}
             >
             <span>Trigger CI/CD workflow after push</span>
+            <span class="learn-more" onclick="showCICDTooltip()" style="cursor: pointer; margin-left: 8px;"><i class="ph-info" data-weight="fill" style="color: #6c757d; font-size: 16px;"></i></span>
           </label>
         </div>
 
@@ -588,7 +767,7 @@ export class PRWorkflowUI {
               value="${workflowSettings.workflowFileName}"
               placeholder="transform-tokens.yml"
             >
-            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
               File must exist in <code>.github/workflows/</code>
             </div>
           </div>
@@ -598,13 +777,13 @@ export class PRWorkflowUI {
 
     <!-- Actions -->
     <div class="actions">
-      <button class="btn btn-cancel" onclick="handleCancel()">Cancel</button>
-      <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Create Pull Request</button>
+      <button class="btn btn-cancel" onclick="handleCancel()">← Go Back</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="handleSubmit()">Push to Branch</button>
     </div>
   </div>
 
   <script>
-    let currentAction = 'create-pr';
+    let currentAction = 'push-to-branch';
     let isNewBranch = true;
 
     function toggleCollections() {
@@ -742,7 +921,56 @@ export class PRWorkflowUI {
         }
       }, '*');
     }
+
+    // CI/CD Tooltip functions
+    function showCICDTooltip() {
+      const overlay = document.getElementById('cicd-tooltip-overlay');
+      const tooltip = document.getElementById('cicd-tooltip');
+      if (overlay && tooltip) {
+        overlay.classList.add('visible');
+        tooltip.classList.add('visible');
+      }
+    }
+
+    function hideCICDTooltip() {
+      const overlay = document.getElementById('cicd-tooltip-overlay');
+      const tooltip = document.getElementById('cicd-tooltip');
+      if (overlay && tooltip) {
+        overlay.classList.remove('visible');
+        tooltip.classList.remove('visible');
+      }
+    }
+
+    window.showCICDTooltip = showCICDTooltip;
+    window.hideCICDTooltip = hideCICDTooltip;
   </script>
+
+  <!-- CI/CD Workflow Tooltip -->
+  <div class="tooltip-overlay" id="cicd-tooltip-overlay" onclick="hideCICDTooltip()"></div>
+  <div class="tooltip-popup" id="cicd-tooltip">
+    <div class="tooltip-header">
+      <h3 class="tooltip-title">⚙️ What does this do?</h3>
+      <button class="tooltip-close" onclick="hideCICDTooltip()" aria-label="Close">×</button>
+    </div>
+    <div class="tooltip-content">
+      <p><strong>In simple terms:</strong></p>
+      <p>After you push your design tokens to GitHub, this feature automatically tells GitHub to "run the build process."</p>
+
+      <p style="margin-top: 12px;"><strong>What happens when enabled?</strong></p>
+      <ul>
+        <li>Your tokens get automatically converted into developer-friendly code</li>
+        <li>Developers get notified that new tokens are ready to use</li>
+        <li>Quality checks run automatically to catch any issues</li>
+      </ul>
+
+      <p style="margin-top: 12px;"><strong>When should I enable this?</strong></p>
+      <p>Enable if your development team has set up automation in GitHub. Ask your developer team if you're unsure!</p>
+
+      <p style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #0ea5e9; font-size: 12px;">
+        <strong>💡 Not sure?</strong> You can leave this unchecked. Developers can manually process tokens later if needed.
+      </p>
+    </div>
+  </div>
 </body>
 </html>`;
 
@@ -763,6 +991,7 @@ export class PRWorkflowUI {
 <!DOCTYPE html>
 <html>
 <head>
+  <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
   ${this.getSharedStyles()}
   <style>
     .container {
@@ -820,8 +1049,8 @@ export class PRWorkflowUI {
 
     .link-btn {
       display: block;
-      background: #d7adf0;
-      color: #333;
+      background: var(--color-primary-light);
+      color: var(--color-text-primary);
       text-decoration: none;
       padding: 14px;
       border-radius: 8px;
@@ -831,36 +1060,42 @@ export class PRWorkflowUI {
     }
 
     .link-btn:hover {
-      background: #510081;
+      background: var(--color-text-primary);
       color: white;
     }
 
     .link-btn:focus {
-      outline: 2px solid #d7adf0;
+      outline: 2px solid var(--color-primary-light);
       outline-offset: 2px;
     }
 
     .btn-done {
       width: 100%;
       padding: 12px;
-      background: #6c757d;
-      color: white;
+      background: #DEE3FC;
+      color: var(--color-text-primary);
       border: none;
       border-radius: 8px;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 14px;
       cursor: pointer;
       transition: background 0.2s;
     }
 
     .btn-done:hover {
-      background: #5a6268;
+      background: #7C2D92;
+      color: white;
+    }
+
+    .btn-done:focus {
+      outline: 2px solid #DEE3FC;
+      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">✅</div>
+    <div class="icon"><i class="ph-check-circle" data-weight="fill" style="color: #16a34a;"></i></div>
     <h1 class="title">${isPR ? 'Pull Request Created!' : 'Pushed to Branch!'}</h1>
     <p class="subtitle">${isPR ? 'Your tokens are ready for review' : 'Your tokens have been committed'}</p>
 
@@ -878,29 +1113,29 @@ export class PRWorkflowUI {
       ${success.workflowTrigger?.triggered ? `
         <div class="detail-row">
           <span class="detail-label">Workflow</span>
-          <span class="detail-value" style="color: ${success.workflowTrigger.success ? '#28a745' : '#dc3545'}">
-            ${success.workflowTrigger.success ? '✅ Triggered' : '⚠️ Failed'}
+          <span class="detail-value" style="color: ${success.workflowTrigger.success ? 'var(--color-success)' : 'var(--color-error)'}">
+            ${success.workflowTrigger.success ? '<i class="ph-check" data-weight="bold" style="color: #16a34a;"></i> Triggered' : '<i class="ph-warning" data-weight="fill" style="color: #d97706;"></i> Failed'}
           </span>
         </div>
       ` : ''}
     </div>
 
     ${success.workflowTrigger?.triggered && !success.workflowTrigger.success ? `
-      <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 16px; text-align: left; border-radius: 4px;">
-        <div style="font-weight: 600; color: #856404; margin-bottom: 4px;">Workflow Trigger Warning</div>
-        <div style="font-size: 12px; color: #856404;">${success.workflowTrigger.error || 'Failed to trigger workflow'}</div>
+      <div style="background: var(--color-warning-light); border-left: 4px solid var(--color-warning); padding: 12px; margin-bottom: 16px; text-align: left; border-radius: 4px;">
+        <div style="font-weight: 600; color: var(--color-warning-dark); margin-bottom: 4px;">Workflow Trigger Warning</div>
+        <div style="font-size: 12px; color: var(--color-warning-dark);">${success.workflowTrigger.error || 'Failed to trigger workflow'}</div>
       </div>
     ` : ''}
 
     ${success.prUrl ? `
       <a href="${success.prUrl}" class="link-btn" target="_blank">
-        🔗 View ${isPR ? 'Pull Request' : 'Branch'} on GitHub
+        <i class="ph-link" data-weight="bold"></i> View ${isPR ? 'Pull Request' : 'Branch'} on GitHub
       </a>
     ` : ''}
 
     ${success.workflowTrigger?.success && success.workflowTrigger.workflowUrl ? `
-      <a href="${success.workflowTrigger.workflowUrl}" class="link-btn" target="_blank" style="background: #b8e7ff;">
-        🚀 View Workflow Actions
+      <a href="${success.workflowTrigger.workflowUrl}" class="link-btn" target="_blank" style="background: var(--color-info-light);">
+        <i class="ph-rocket-launch" data-weight="bold"></i> View Workflow Actions
       </a>
     ` : ''}
 

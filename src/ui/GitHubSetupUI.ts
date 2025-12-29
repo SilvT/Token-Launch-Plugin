@@ -92,6 +92,7 @@ export class GitHubSetupUI {
       <!DOCTYPE html>
       <html>
        <head>
+        <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
         ${getSharedStyles()}
         <style>
           * {
@@ -102,7 +103,7 @@ export class GitHubSetupUI {
 
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
+            background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
             padding: 20px;
             min-height: 100vh;
             display: flex;
@@ -120,8 +121,8 @@ export class GitHubSetupUI {
           }
 
           .setup-header {
-            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
-            color: #4a1d5c;
+            background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
+            color: #000000;
             padding: 24px;
             text-align: center;
           }
@@ -169,7 +170,7 @@ export class GitHubSetupUI {
           }
 
           .step-circle.active {
-            background: #510081;
+            background: #000000;
             color: white;
           }
 
@@ -226,9 +227,9 @@ export class GitHubSetupUI {
           }
 
           .form-input:focus {
-            outline: 2px solid #d7adf0;
+            outline: 2px solid var(--color-primary-light);
             outline-offset: 2px;
-            border-color: #510081;
+            border-color: var(--color-text-primary);
           }
 
           .form-help {
@@ -257,7 +258,7 @@ export class GitHubSetupUI {
           }
 
           .preview-value {
-            color: #510081;
+            color: #000000;
             font-family: 'Monaco', monospace;
             font-size: 12px;
           }
@@ -286,22 +287,22 @@ export class GitHubSetupUI {
           }
 
           .btn-secondary:hover {
-            background: #5a6268;
+            background: var(--color-text-secondary);
           }
 
           .btn-primary {
-            background: #d7adf0;
-            color: #333;
+            background: var(--color-primary-light);
+            color: var(--color-text-primary);
             font-weight: 600;
           }
 
           .btn-primary:hover {
-            background: #9d174d;
+            background: var(--color-primary-dark);
             color: white;
           }
 
           .btn-primary:focus {
-            outline: 2px solid #d7adf0;
+            outline: 2px solid var(--color-primary-light);
             outline-offset: 2px;
           }
 
@@ -340,7 +341,7 @@ export class GitHubSetupUI {
       <body>
         <div class="setup-container">
           <div class="setup-header">
-            <h1>🚀 GitHub Integration Setup</h1>
+            <h1><i class="ph-rocket-launch" data-weight="duotone"></i> GitHub Integration Setup</h1>
             <p>Configure your repository for design token distribution</p>
           </div>
 
@@ -644,7 +645,7 @@ export class GitHubSetupUI {
 
     return `
       <div class="repository-preview">
-        <h3 style="margin-bottom: 16px; color: #333;">Configuration Summary</h3>
+        <h3 style="margin-bottom: 16px; color: var(--color-text-primary);">Configuration Summary</h3>
 
         <div class="preview-item">
           <span class="preview-label">Repository:</span>
@@ -667,7 +668,7 @@ export class GitHubSetupUI {
         </div>
       </div>
 
-      <p style="color: #666; font-size: 14px; margin-top: 16px;">
+      <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 16px;">
         Click "Complete Setup" to save this configuration and start using GitHub integration.
         You can change these settings later in the plugin preferences.
       </p>

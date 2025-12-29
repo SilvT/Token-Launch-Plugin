@@ -48,6 +48,7 @@ export class ExportWorkflow {
   private pushService: TokenPushService;
   private prService: PullRequestService;
   private gitOps: GitOperations;
+  private cancelCount: number = 0;
 
   constructor(options: WorkflowOptions) {
     this.tokenExtractor = options.tokenExtractor;
@@ -184,8 +185,6 @@ export class ExportWorkflow {
   private async showUnifiedUI(
     extractionResult: ExtractionResult
   ): Promise<ExportChoice> {
-    const extractionDuration = Date.now() - new Date(extractionResult.metadata.extractedAt).getTime();
-
     // Get existing GitHub configuration from storage
     const authState = this.githubAuth.getState();
     const existingConfig = authState.config;
@@ -193,7 +192,6 @@ export class ExportWorkflow {
     const uiOptions: UnifiedExportUIOptions = {
       extractionResult,
       documentInfo: this.documentInfo,
-      extractionDuration,
       existingGitConfig: existingConfig
     };
 
@@ -284,20 +282,42 @@ export class ExportWorkflow {
         prUI.show();
       });
 
-      // User cancelled
+      // User cancelled - return to landing page
       if (!prDetails) {
-        console.log('👋 User cancelled PR workflow');
-        figma.notify('Pull request cancelled');
-        return {
-          success: false,
-          choice: 'cancel'
-        };
+        this.cancelCount++;
+        console.log(`↩️ User cancelled PR workflow (attempt ${this.cancelCount}), returning to landing page...`);
+
+        // Prevent infinite loop - after 3 cancellations, end the workflow
+        if (this.cancelCount >= 3) {
+          console.log('⚠️ Maximum cancellations reached, ending workflow');
+          figma.notify('Workflow cancelled after multiple attempts');
+          return {
+            success: false,
+            choice: 'cancel'
+          };
+        }
+
+        figma.notify('Returning to export options...');
+
+        // Re-show the unified UI to let user choose again
+        const newChoice = await this.showUnifiedUI(extractionResult);
+
+        // Reset cancel counter if user chooses a different option
+        if (newChoice.type !== 'git-push') {
+          this.cancelCount = 0;
+        }
+
+        // Handle the new choice recursively
+        return await this.handleUserChoice(newChoice, extractionResult);
       }
 
       console.log('✅ User confirmed details:', {
         action: prDetails.action,
         branchName: prDetails.branchName
       });
+
+      // Reset cancel counter on successful confirmation
+      this.cancelCount = 0;
 
       // Execute workflow based on action
       if (prDetails.action === 'push-to-branch') {
@@ -671,28 +691,33 @@ export class ExportWorkflow {
       <!DOCTYPE html>
       <html>
       <head>
+        <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
         <style>
           body { font-family: Inter, sans-serif; padding: 20px; text-align: center; }
           .download-btn {
-            background: #18a0fb; color: white; border: none;
-            padding: 12px 24px; border-radius: 6px; cursor: pointer;
-            font-size: 14px; margin: 10px;
+            background: #000000; color: white; border: none;
+            padding: 12px 24px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: 600; margin: 10px;
+            transition: all 150ms ease;
+          }
+          .download-btn:hover {
+            background: #404040;
           }
           .file-info {
-            background: #f0f7ff; padding: 16px; border-radius: 8px;
+            background: #F5F5F5; padding: 16px; border-radius: 8px;
             margin: 16px 0; text-align: left;
           }
         </style>
       </head>
       <body>
-        <h2>📄 Download Design Tokens</h2>
+        <h2><i class="ph-file-text" data-weight="duotone"></i> Download Design Tokens</h2>
         <div class="file-info">
           <strong>File:</strong> ${filename}<br>
           <strong>Size:</strong> ${(jsonString.length / 1024).toFixed(1)} KB<br>
           <strong>Tokens:</strong> ${result.tokens.length + result.variables.length}
         </div>
         <button class="download-btn" onclick="downloadFile()">Download JSON File</button>
-        <button class="download-btn" onclick="closePlugin()" style="background: #666;">Close</button>
+        <button class="download-btn" onclick="closePlugin()" style="background: var(--color-text-secondary);">Close</button>
 
         <script>
           const jsonData = ${JSON.stringify(jsonString)};
@@ -767,18 +792,22 @@ export class ExportWorkflow {
         <!DOCTYPE html>
         <html>
         <head>
+          <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
           <style>
             body { font-family: Inter, sans-serif; padding: 20px; text-align: center; }
             .btn {
-              padding: 10px 20px; margin: 8px; border: none; border-radius: 6px;
-              cursor: pointer; font-size: 14px;
+              padding: 12px 24px; margin: 8px; border: none; border-radius: 8px;
+              cursor: pointer; font-size: 14px; font-weight: 600;
+              transition: all 150ms ease;
             }
-            .primary { background: #18a0fb; color: white; }
-            .secondary { background: #f0f0f0; color: #333; }
+            .primary { background: #000000; color: white; }
+            .primary:hover { background: #404040; }
+            .secondary { background: #F5F5F5; color: #000000; border: 2px solid #000000; }
+            .secondary:hover { background: #E5E5E5; }
           </style>
         </head>
         <body>
-          <h3>🚫 Git Push Failed</h3>
+          <h3><i class="ph-prohibit" data-weight="fill"></i> Git Push Failed</h3>
           <p>Would you like to download the tokens locally instead?</p>
           <button class="btn primary" onclick="fallback(true)">Yes, Download</button>
           <button class="btn secondary" onclick="fallback(false)">No, Cancel</button>

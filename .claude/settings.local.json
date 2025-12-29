@@ -31,7 +31,10 @@
       "Bash(claude --list-sessions:*)",
       "Bash(claude doctor)",
       "Bash(code:*)",
-      "Read(//Users/silvia/Library/**)"
+      "Read(//Users/silvia/Library/**)",
+      "Bash(git tag:*)",
+      "WebFetch(domain:phosphoricons.com)",
+      "WebFetch(domain:unpkg.com)"
     ],
     "deny": [],
     "ask": []

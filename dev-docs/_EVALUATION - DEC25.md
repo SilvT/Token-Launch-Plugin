@@ -93,16 +93,16 @@ The plugin is **technically production-ready** with excellent code quality, comp
 ## ⚠️ Recommended (Should Address)
 
 ### 1. UI/UX Improvements
-- [ ] **Tab Styling Enhancement**
+- [x] **Tab Styling Enhancement**
   - Open tab background: white
   - Inactive tab background: opacity 70%
 
-- [ ] **Export Options Section**
+- [x] **Export Options Section**
   - Add new section after the 2 main buttons
   - Include link to GitHub repository
   - Text: "Go to GitHub to read project and get more info"
 
-- [ ] **Documentation Split**
+- [x] **Documentation Split**
   - Create separate User README (for designers/end users)
   - Create separate Developer README (for technical contributors)
 
@@ -111,13 +111,13 @@ The plugin is **technically production-ready** with excellent code quality, comp
   - Content: Designer-friendly explanation of what CI/CD means
   - Example: "Automatically runs quality checks and deployment tasks when code is pushed"
 
-- [ ] **Tooltips: GitHub Actions**
+- [x] **Tooltips: GitHub Actions**
   - Add tooltip to "Push to branch" button
     - Explain: What pushing to a branch means in designer-friendly terms
   - Add tooltip to "Create a pull request" button
     - Explain: The difference between push and PR in plain language
 
-- [ ] **Navigation: Cancel Action**
+- [x] **Navigation: Cancel Action**
   - When "Push to branch" is cancelled, return to previous landing page
   - When "Create a pull request" is cancelled, return to previous landing page
 
@@ -1201,3 +1201,28 @@ npm run build
 
 **Document Version:** 1.0
 **Last Updated:** December 29, 2025
+
+
+
+**I also want to do:**
+- [x]eliminate "duration" from the higlight numbers on landing page
+- [x]eliminate left-behind emojis (like github configured has a green checkbox emoji)
+- [x]when hover on cards on landing--> change the effect (now it's intense color shadow)
+- [x]primary button = black bag with white text Secondary button --> outline style. Tertiary colour filled with brand colour - preserve acccesibility contrast ratios in all interactive states
+- [ ] icons on accordions should be from same library as the rest of the ui phosphor. when validated color mint 700, when not validated primary 900
+- [ ]buttons on "setup" tab are not following the same style as the ones on the push screen. Keep the Push screen styles and transfer them as the standard for buttons across the system.
+- [ ] change landing page cards icons bg to Black instead of colour coordinated with the card bg and label and etc
+- [ ] "Github confirmed" box - change copy to " GitHub setup" with a label tag with the status; 
+      -> if success == label = "Completed"; bg black and white text. Overall bg would be mint 100. No border
+      -->if no success == reminds me the logic, does it show at all this element? or does it only shows when success?
+- [ ] on Push Screen --> Choose action buttons should have a lavender gradient bg when hover over. Border should turn primary 800 when hover too.
+- [ ]check why loading screen isn't consistenlty showing when launching plugin first time.
+- [ ] general background on main screen and loading screen --> invert so pink is at the bottom and purple at the top.
+- [ ] I want landing page to be able to be seen without scrolling --> enlarge window size of the plugin overall
+
+
+
+**LATER ON**
+- verify json file is compatible to re-upload to figma - TBD have to check Figma's API requirements for uploading JSON files directly to variables
+- check size and speed of the pluging
+- read all logs and docs, compile and unify when and if needed to have a comprehensive documentation. archive instead of deleting for now.

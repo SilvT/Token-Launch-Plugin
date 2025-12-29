@@ -13,6 +13,7 @@ import { DocumentInfo, BasicTokenCount } from './types/CommonTypes';
 // import { ExportWorkflow } from './workflow/ExportWorkflow';
 import { TokenTransformer, CleanTokenOutput } from './TokenTransformer';
 import { LogLevel, log } from './config/logging';
+import { PLUGIN_DIMENSIONS } from './design-system/tokens';
 
 // =============================================================================
 // BASIC INTERFACES
@@ -399,51 +400,55 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
       <head>
         <meta charset="utf-8">
         <title>Download JSON</title>
+        <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
         <style>
           body {
-            font-family: system-ui, -apple-system, sans-serif;
-            padding: 20px;
-            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            padding: 24px;
+            background: linear-gradient(135deg, #DEE3FC 0%, #FFFFFF 100%);
             margin: 0;
+            min-height: 100vh;
           }
           .container {
             max-width: 400px;
             margin: 0 auto;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             text-align: center;
           }
           .download-btn {
-            background: #18a0fb;
+            background: #000000;
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            margin: 10px 0;
+            margin: 16px 0;
             display: inline-block;
             text-decoration: none;
+            transition: all 150ms ease;
           }
           .download-btn:hover {
-            background: #0d8ce8;
+            background: var(--color-text-secondary);
           }
           .file-info {
-            color: #666;
+            color: #525252;
             font-size: 12px;
-            margin: 10px 0;
+            margin: 16px 0;
           }
           .success {
-            color: #0d8a00;
-            margin: 10px 0;
+            color: #166534;
+            margin: 16px 0;
           }
         </style>
       </head>
       <body>
         <div class="container">
-          <h2>🎉 Tokens Extracted Successfully!</h2>
+          <h2><i class="ph-party-popper ph-duotone"></i> Tokens Extracted Successfully!</h2>
           <div class="file-info">
             <strong>File:</strong> ${filename}<br>
             <strong>Size:</strong> ${(jsonString.length / 1024).toFixed(1)} KB<br>
@@ -546,32 +551,40 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
  * Ultra-minimal HTML for fastest possible rendering (<1ms)
  */
 function showLoadingScreen(): void {
-  // Minimal HTML with fade-in animations for polish
+  // Minimal HTML with new design system styling
   const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
+<link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f0ff;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-.container{text-align:center;color:#510081;padding:20px}
-.logo{font-size:64px;margin-bottom:20px;animation:fadeIn 0.3s ease-in}
-.title{font-size:22px;font-weight:600;margin-bottom:12px;animation:fadeIn 0.5s ease-in}
-.spinner{width:40px;height:40px;border:3px solid #e0d0ff;border-top-color:#510081;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter","Roboto","Helvetica Neue",Arial,sans-serif;background:linear-gradient(135deg,#DEE3FC 0%,#FFFFFF 100%);display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;padding:24px}
+.container{text-align:center;color:#0F1112;padding:32px;background:white;border-radius:16px;box-shadow:0 2px 8px rgba(15,17,18,0.04);max-width:400px}
+.logo{font-size:64px;margin-bottom:24px;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+.title{font-size:24px;font-weight:700;margin-bottom:8px;animation:fadeIn 0.5s ease-out;color:#0F1112}
+.subtitle{font-size:14px;color:#B1B2B6;margin-bottom:24px;animation:fadeIn 0.7s ease-out}
+.spinner{width:24px;height:24px;border:3px solid #E5E7E9;border-top-color:#C084FC;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div class="container">
-<div class="logo">🎨</div>
+<div class="logo"><i class="ph-palette ph-duotone"></i></div>
 <div class="title">Design System Distributor</div>
+<div class="subtitle">Loading your design tokens...</div>
 <div class="spinner"></div>
 </div>
 </body>
 </html>`;
 
-  figma.showUI(html, { width: 640, height: 800, themeColors: true });
+  figma.showUI(html, {
+    width: PLUGIN_DIMENSIONS.DEFAULT_WIDTH,
+    height: PLUGIN_DIMENSIONS.DEFAULT_HEIGHT,
+    themeColors: true
+  });
 }
 
 /**

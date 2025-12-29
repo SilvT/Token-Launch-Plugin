@@ -2,20 +2,22 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f0ff;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden}
-.container{text-align:center;color:#510081;padding:20px}
-.logo{font-size:64px;margin-bottom:20px;animation:fadeIn 0.3s ease-in}
-.title{font-size:22px;font-weight:600;margin-bottom:12px;animation:fadeIn 0.5s ease-in}
-.spinner{width:40px;height:40px;border:3px solid #e0d0ff;border-top-color:#510081;border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter","Roboto","Helvetica Neue",Arial,sans-serif;background:linear-gradient(135deg,#F7E3E3 0%,#DEE3FC 100%);display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;padding:24px}
+.container{text-align:center;color:#404040;padding:32px;background:white;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04);max-width:400px}
+.logo{font-size:64px;margin-bottom:24px;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+.title{font-size:24px;font-weight:700;margin-bottom:8px;animation:fadeIn 0.5s ease-out;color:#000000}
+.spinner{width:24px;height:24px;border:3px solid #E5E5E5;border-top-color:#C084FC;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div class="container">
-<div class="logo">🎨</div>
+<div class="logo"><i class="ph-rocket-launch" data-weight="duotone"></i></div>
 <div class="title">Design System Distributor</div>
 <div class="spinner"></div>
 </div>

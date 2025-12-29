@@ -11,6 +11,7 @@ import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
 import { SecureStorage } from '../storage/SecureStorage';
 import { getWindowOptions } from './constants';
+import { getSharedStyles } from './styles/theme';
 
 // =============================================================================
 // TYPES
@@ -24,7 +25,6 @@ export interface ExportChoice {
 export interface UnifiedExportUIOptions {
   extractionResult: ExtractionResult;
   documentInfo: DocumentInfo;
-  extractionDuration: number;
   existingGitConfig?: GitHubConfig;
 }
 
@@ -67,7 +67,7 @@ export class UnifiedExportUI {
    * Create the unified UI with tabs
    */
   private createUI(): void {
-    const { extractionResult, extractionDuration } = this.options;
+    const { extractionResult } = this.options;
     const tokenCount = extractionResult.tokens?.length || 0;
     const variableCount = extractionResult.variables?.length || 0;
     const fileSize = Math.round((JSON.stringify(extractionResult).length / 1024) * 10) / 10;
@@ -79,48 +79,25 @@ export class UnifiedExportUI {
       <!DOCTYPE html>
       <html>
       <head>
+        <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
+        ${getSharedStyles()}
         <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 14px;
-            line-height: 1.4;
-            color: #333;
-            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
-            min-height: 100vh;
-            padding: 20px;
-          }
-
-          .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-          }
-
+          /* Additional styles specific to UnifiedExportUI using design system */
           .header {
-            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
-            color: #4a1d5c;
-            padding: 24px;
             text-align: center;
+            padding: 24px;
           }
 
           .header h1 {
             font-size: 24px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 0.5px;
           }
 
           .header p {
-            opacity: 0.9;
-            font-size: 16px;
+            color: #581C87;
+            font-size: 14.4px;
+            margin-top: 0;
           }
 
           .stats {
@@ -140,10 +117,12 @@ export class UnifiedExportUI {
             font-size: 20px;
             font-weight: 600;
             display: block;
+            color: #6B21A8;
           }
 
           .stat-label {
             font-size: 12px;
+            color: #581C87;
             opacity: 0.8;
           }
 
@@ -156,7 +135,7 @@ export class UnifiedExportUI {
             flex: 1;
             padding: 16px;
             text-align: center;
-            background: none;
+            background: rgba(255, 255, 255, 0.7);
             border: none;
             cursor: pointer;
             font-size: 14px;
@@ -166,22 +145,25 @@ export class UnifiedExportUI {
           }
 
           .tab.active {
-           color: #510081;
-    border-bottom: 2px solid #510081;
-    background: rgb(190 24 184 / 5%);
+            color: #0F1112;
+            border-bottom: 2px solid #0F1112;
+            background: white;
           }
 
           .tab:hover:not(.active) {
-            background: rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.85);
           }
 
           .tab-content {
             padding: 24px;
             min-height: 200px;
+            background: white;
+            border-radius: 0 0 12px 12px;
           }
 
           .tab-panel {
             display: none;
+            background: white;
           }
 
           .tab-panel.active {
@@ -203,9 +185,27 @@ export class UnifiedExportUI {
           }
 
           .export-option:hover {
-            border-color: #510081;
+            border-color: var(--color-text-primary);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgb(190 24 189 / 15%);
+            box-shadow: var(--shadow-lg);
+          }
+
+          /* GitHub card specific hover - green-mint gradient */
+          #github-export-option:hover:not(.disabled) {
+            background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f0fdfa 100%);
+            border-color: #16a34a;
+          }
+
+          /* Download card specific hover - lavender gradient */
+          .export-option:nth-child(2):hover {
+            background: linear-gradient(135deg, #ECEDF6 0%, #E8E9FD 50%, #DEE3FC 100%);
+            border-color: #8B5CF6;
+          }
+
+          /* Enhanced lavender status on download card hover */
+          .export-option:nth-child(2):hover .status-available {
+            background: #D7D9F6;
+            color: #4C1D95;
           }
 
           .export-option.disabled {
@@ -262,8 +262,9 @@ export class UnifiedExportUI {
           }
 
           .status-available {
-            background: #cce7ff;
-            color: #004085;
+            background: #E8E9FD;
+            color: #553C9A;
+            font-weight: 500;
           }
 
           .option-description {
@@ -285,11 +286,27 @@ export class UnifiedExportUI {
             border: 1px solid #e9ecef;
             border-radius: 8px;
             padding: 10px;
+            background: #ECEDF6;
+            transition: all 0.2s ease;
+          }
+
+          .setup-step:hover {
+            background: linear-gradient(135deg, #ECEDF6 0%, #E8E9FD 50%, #DEE3FC 100%);
+            border-color: #8B5CF6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
           }
 
           .setup-step.completed {
-            border-color: #28a745;
-            background: rgba(40, 167, 69, 0.05);
+            background: #F6FBFA;
+            border-color: #ECF6F4;
+          }
+
+          .setup-step.completed:hover {
+            background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f0fdfa 100%);
+            border-color: #16a34a;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
           }
 
           .step-header {
@@ -304,7 +321,7 @@ export class UnifiedExportUI {
           }
 
           .step-header:hover {
-            background: rgba(0, 0, 0, 0.02);
+            background: var(--color-hover-bg);
           }
 
           .step-header-arrow {
@@ -322,8 +339,8 @@ export class UnifiedExportUI {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #d7adf0;
-            color: black;
+            background: #D8B4FE;
+            color: #581C87;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -333,7 +350,8 @@ export class UnifiedExportUI {
           }
 
           .step-number.completed {
-            background: #d4edda;
+            background: #6FBFAD;
+            color: white;
           }
 
           .step-title {
@@ -378,7 +396,7 @@ export class UnifiedExportUI {
 
           .form-input:focus {
             outline: none;
-            border-color: #d7adf0;
+            border-color: var(--color-primary-light);
           }
 
           .form-input.validating {
@@ -416,24 +434,24 @@ export class UnifiedExportUI {
           }
 
           .btn-primary {
-            background: #d7adf0;
-            color: #510081;
+            background: var(--color-primary-light);
+            color: var(--color-text-primary);
           }
 
           .btn-primary:hover {
-            background: #9d174d;
+            background: var(--color-primary-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
-            color:white;
+            box-shadow: var(--shadow-md);
+            color: white;
           }
 
           .btn-secondary {
-            background: #6c757d;
+            background: #1A1C1E;
             color: white;
           }
 
           .btn-secondary:hover {
-            background: #212426;
+            background: #404347;
           }
 
           .btn-success {
@@ -442,7 +460,7 @@ export class UnifiedExportUI {
           }
 
           .btn-success:hover {
-            background: #218838;
+            background: var(--color-success-dark);
           }
 
           .validation-status {
@@ -507,7 +525,7 @@ export class UnifiedExportUI {
           }
 
           .guidance-toggle:hover {
-            background: rgba(0, 0, 0, 0.02);
+            background: var(--color-hover-bg);
           }
 
           .guidance-toggle-icon {
@@ -660,7 +678,7 @@ export class UnifiedExportUI {
           }
 
           .btn-link {
-            background: #510081;
+            background: #000000;
             color: white;
             padding: 8px 16px;
             border-radius: 6px;
@@ -672,7 +690,7 @@ export class UnifiedExportUI {
           }
 
           .btn-link:hover {
-            background: #9d174d;
+            background: var(--color-primary-dark);
           }
 
           .validation-auto-note {
@@ -684,7 +702,7 @@ export class UnifiedExportUI {
 
           /* Learn More Tooltip Styles */
           .learn-more {
-            color: #510081;
+            color: #000000;
             text-decoration: underline;
             cursor: pointer;
             font-size: 12px;
@@ -692,7 +710,7 @@ export class UnifiedExportUI {
           }
 
           .learn-more:hover {
-            color: #9d174d;
+            color: var(--color-primary-dark);
           }
 
           .tooltip-overlay {
@@ -769,8 +787,8 @@ export class UnifiedExportUI {
           }
 
           .tooltip-close:hover {
-            background: #f3f4f6;
-            color: #111827;
+            background: var(--color-background-secondary);
+            color: var(--color-text-primary);
           }
 
           .tooltip-content {
@@ -809,7 +827,7 @@ export class UnifiedExportUI {
             display: inline-block;
             margin-top: 12px;
             padding: 8px 16px;
-            background: #f9a8d4;
+            background: #C084FC;
             color: white;
             text-decoration: none;
             border-radius: 6px;
@@ -818,15 +836,74 @@ export class UnifiedExportUI {
           }
 
           .tooltip-link:hover {
-            background: #5a6fd8;
+            background: var(--color-primary-dark);
+          }
+
+          /* Info Section Styles */
+          .info-section {
+            margin-top: 24px;
+            padding: 16px;
+            background: linear-gradient(135deg, #DBEAFE 0%, #E0F2FE 100%);
+            border-radius: 12px;
+            border: 1px solid #93C5FD;
+          }
+
+          .info-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+          }
+
+          .info-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E40AF;
+            margin: 0;
+          }
+
+          .info-section-text {
+            font-size: 13px;
+            color: #1E40AF;
+            margin-bottom: 12px;
+            line-height: 1.5;
+          }
+
+          .github-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            width: 100%;
+            background: white;
+            border: 1px solid #3B82F6;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1D4ED8;
+            transition: all 0.2s;
+          }
+
+          .github-link:hover {
+            background: #3B82F6;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+          }
+
+          .github-link:focus {
+            outline: 2px solid #3B82F6;
+            outline-offset: 2px;
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 Design Tokens Extracted!</h1>
-            <p>Choose how you'd like to export your design tokens</p>
+            <h1><i class="ph-rocket-launch" data-weight="duotone"></i> Design Tokens Extracted!</h1>
+            <p>Choose how to export your tokens</p>
 
             <div class="stats">
               <div class="stat">
@@ -837,10 +914,6 @@ export class UnifiedExportUI {
                 <span class="stat-value">${fileSize} KB</span>
                 <span class="stat-label">File Size</span>
               </div>
-              <div class="stat">
-                <span class="stat-value">${Math.round(extractionDuration / 1000)}s</span>
-                <span class="stat-label">Duration</span>
-              </div>
             </div>
           </div>
 
@@ -849,7 +922,7 @@ export class UnifiedExportUI {
               Export Options
             </button>
             <button class="tab" onclick="switchTab('github-setup')">
-              ${isGitConfigured ? '✓ ' : ''}GitHub Setup
+              Setup
             </button>
           </div>
 
@@ -859,7 +932,7 @@ export class UnifiedExportUI {
               <div class="export-options">
                 <div id="github-export-option" class="export-option ${isGitConfigured ? '' : 'disabled'}" onclick="${isGitConfigured ? 'selectExport(\'git-push\')' : 'switchTab(\'github-setup\')'}">
                   <div class="option-header">
-                    <div class="option-icon" style="background: #d4edda; color: white;">🚀</div>
+                    <div class="option-icon" style="background: #16a34a; color: white;"><i class="ph-rocket-launch" data-weight="bold"></i></div>
                     <div class="option-title">Push to GitHub</div>
                     <div class="option-status ${isGitConfigured ? 'status-ready' : 'status-setup-required'}">
                       ${isGitConfigured ? 'Ready' : 'Setup Required'}
@@ -878,7 +951,7 @@ export class UnifiedExportUI {
 
                 <div class="export-option" onclick="selectExport('download')">
                   <div class="option-header">
-                    <div class="option-icon" style="background:#d7adf0; color: white;">💾</div>
+                    <div class="option-icon" style="background: #8B5CF6; color: white;"><i class="ph-download-simple" data-weight="bold"></i></div>
                     <div class="option-title">Download JSON File</div>
                     <div class="option-status status-available">Always Available</div>
                   </div>
@@ -886,8 +959,29 @@ export class UnifiedExportUI {
                     Download tokens as JSON file for manual processing or integration
                   </div>
                   <div class="option-details">
-                    📄 figma-tokens-${new Date().toISOString().split('T')[0]}.json (${fileSize} KB)
+                    <i class="ph-file-text"></i> figma-tokens-${new Date().toISOString().split('T')[0]}.json (${fileSize} KB)
                   </div>
+                </div>
+
+                <!-- NEW: Repository Info Section -->
+                <div class="info-section">
+                  <div class="info-section-header">
+                    <i class="ph-question" data-weight="fill" style="font-size: 20px; color: #1E40AF;"></i>
+                    <h3 class="info-section-title">Need help?</h3>
+                  </div>
+                  <p class="info-section-text">
+                    Learn about this plugin, how it works, FAQs etc.
+                  </p>
+                  <a
+                    href="https://github.com/SilvT/Figma-Design-System-Distributor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="github-link"
+                  >
+                    <i class="ph-git-branch" data-weight="bold" style="font-size: 16px;"></i>
+                    Read documentation on GitHub
+                    <span>→</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -958,8 +1052,8 @@ export class UnifiedExportUI {
 
             <p style="margin-top: 12px;">When <strong>unchecked</strong>, you'll need to re-enter your credentials each time you use the plugin.</p>
 
-            <p style="margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #f9a8d4;">
-              <strong>💡 Recommendation:</strong> Keep this checked for convenience. Your data is encrypted and only accessible to you within Figma.
+            <p style="margin-top: 16px; padding: 12px; background: var(--color-primary-background); border-radius: 6px; border-left: 3px solid var(--color-primary-light);">
+              <strong><i class="ph-lightbulb" data-weight="fill"></i> Recommendation:</strong> Keep this checked for convenience. Your data is encrypted and only accessible to you within Figma.
             </p>
           </div>
         </div>
@@ -1351,10 +1445,10 @@ export class UnifiedExportUI {
             if (repoInfoDiv) {
               const repoPath = \`\${owner}/\${name}\`;
               repoInfoDiv.innerHTML = \`
-                <div style="font-size: 13px; color: #155724; margin-bottom: 6px;">
+                <div style="font-size: 13px; color: var(--color-success-dark); margin-bottom: 6px;">
                   <strong>📁 Repository:</strong> \${repoPath}
                 </div>
-                <div style="font-size: 13px; color: #155724;">
+                <div style="font-size: 13px; color: var(--color-success-dark);">
                   <strong>🌿 Branch:</strong> \${branch}
                 </div>
               \`;
@@ -1566,23 +1660,23 @@ export class UnifiedExportUI {
     const branch = repo?.branch || 'main';
 
     return `
-      <div class="gitConfigured" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #28a745;">
+      <div class="gitConfigured" style="background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success-light) 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--color-success);">
         <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <div style="font-size: 20px; margin-right: 12px;">✅</div>
+          <div style="font-size: 20px; margin-right: 12px;"><i class="ph-check-circle" data-weight="fill" style="color: #16a34a;"></i></div>
           <div>
-            <h3 style="margin: 0; color: #155724; font-size: 16px;">GitHub Configured</h3>
+            <h3 style="margin: 0; color: var(--color-success-dark); font-size: 16px;">GitHub Configured</h3>
 
           </div>
         </div>
         <div style="display:none; background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; margin-top: 12px;">
-          <div style="font-size: 13px; color: #155724; margin-bottom: 6px;">
+          <div style="font-size: 13px; color: var(--color-success-dark); margin-bottom: 6px;">
             <strong>📁 Repository:</strong> ${repoPath}
           </div>
-          <div style="font-size: 13px; color: #155724;">
+          <div style="font-size: 13px; color: var(--color-success-dark);">
             <strong>🌿 Branch:</strong> ${branch}
           </div>
         </div>
-        <p style="margin: 12px 0 0 0; font-size: 12px; color: #155724; opacity: 0.8;">
+        <p style="margin: 12px 0 0 0; font-size: 12px; color: var(--color-success-dark); opacity: 0.8;">
           You can update your configuration below if needed
         </p>
       </div>

@@ -4,16 +4,19 @@
  * Ensures consistent window sizing and theming across all plugin flows
  */
 
+import { PLUGIN_DIMENSIONS } from '../design-system/tokens';
+
 // =============================================================================
 // WINDOW DIMENSIONS
 // =============================================================================
 
 /**
  * Standard window dimensions for all plugin UI windows
+ * Now using the new design system dimensions
  */
 export const WINDOW_SIZE = {
-  width: 640,
-  height: 800
+  width: PLUGIN_DIMENSIONS.DEFAULT_WIDTH,
+  height: PLUGIN_DIMENSIONS.DEFAULT_HEIGHT
 } as const;
 
 /**

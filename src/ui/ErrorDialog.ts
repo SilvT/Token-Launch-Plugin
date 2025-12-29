@@ -406,7 +406,7 @@ export class ErrorDialog {
         flex-shrink: 0;
         width: 28px;
         height: 28px;
-        background: #18a0fb;
+        background: #000000;
         color: white;
         border-radius: 50%;
         display: flex;
@@ -505,7 +505,7 @@ export class ErrorDialog {
       }
 
       .btn-primary {
-        background: #18a0fb;
+        background: #000000;
         color: white;
       }
 
@@ -524,7 +524,7 @@ export class ErrorDialog {
 
       .btn-link {
         background: transparent;
-        color: #18a0fb;
+        color: #000000;
         text-decoration: underline;
       }
 
