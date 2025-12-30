@@ -11,7 +11,7 @@ import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
 import { SecureStorage } from '../storage/SecureStorage';
 import { getWindowOptions } from './constants';
-import { getSharedStyles } from './styles/theme';
+import { generateDesignSystemCSS } from '../design-system/html-utils';
 
 // =============================================================================
 // TYPES
@@ -80,8 +80,19 @@ export class UnifiedExportUI {
       <html>
       <head>
         <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
-        ${getSharedStyles()}
         <style>
+          ${generateDesignSystemCSS()}
+        </style>
+        <style>
+          /* Body background with design system gradient */
+          body {
+            background: var(--color-background-gradient) !important;
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+            font-family: var(--font-family);
+          }
+
           /* Additional styles specific to UnifiedExportUI using design system */
           .header {
             text-align: center;
@@ -962,7 +973,7 @@ export class UnifiedExportUI {
             cursor: pointer;
             text-decoration: underline;
             font-weight: 500;
-            margin-left: 8px;
+            font-size: 13px;
           }
 
           .ds-learn-more:hover {
@@ -1930,8 +1941,10 @@ export class UnifiedExportUI {
             id="save-credentials-checkbox"
             checked
           >
-          <span>Save credentials between sessions</span>
-          <span class="ds-learn-more" onclick="showSecurityTooltip()">Learn more</span>
+          <div class="ds-checkbox-text">
+            <span>Save credentials between sessions</span>
+            <span class="ds-learn-more" onclick="showSecurityTooltip()">Learn more</span>
+          </div>
         </label>
         <div class="ds-form-help" style="margin-left: 24px;">
           When checked, your credentials are encrypted and stored locally by Figma

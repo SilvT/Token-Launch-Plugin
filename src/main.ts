@@ -559,7 +559,7 @@ function showLoadingScreen(): void {
 <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter","Roboto","Helvetica Neue",Arial,sans-serif;background:linear-gradient(135deg,#DEE3FC 0%,#FFFFFF 100%);display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:visible;padding:24px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter","Roboto","Helvetica Neue",Arial,sans-serif;background:linear-gradient(135deg,#DEE3FC 0%,#F7E3E3 100%);display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:visible;padding:24px}
 .container{text-align:center;color:#0F1112;padding:32px;background:white;border-radius:16px;box-shadow:0 2px 8px rgba(15,17,18,0.04);max-width:400px}
 .logo{font-size:64px;margin-bottom:24px;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1)}
 .title{font-size:24px;font-weight:700;margin-bottom:8px;animation:fadeIn 0.5s ease-out;color:#0F1112}

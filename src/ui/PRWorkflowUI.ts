@@ -9,7 +9,7 @@ import { ExtractionResult } from '../TokenExtractor';
 import { getWindowOptions } from './constants';
 import { WorkflowTriggerConfig, WorkflowTriggerResult } from '../github/GitHubTypes';
 import { SecureStorage, WorkflowSettings } from '../storage/SecureStorage';
-import { getSharedStyles } from './styles/theme';
+import { generateDesignSystemCSS } from '../design-system/html-utils';
 
 // =============================================================================
 // TYPES
@@ -1233,28 +1233,28 @@ export class PRWorkflowUI {
     .title {
       font-size: 24px;
       font-weight: 600;
-      color: #28a745;
+      color: var(--color-text-primary);
       margin-bottom: 8px;
     }
 
     .subtitle {
-      color: #666;
+      color: var(--color-text-secondary);
       margin-bottom: 30px;
     }
 
     .details {
-      background: #f8f9fa;
+      background: var(--color-background-secondary);
       border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
       text-align: left;
     }
 
     .detail-row {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #e9ecef;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--color-border);
     }
 
     .detail-row:last-child {
@@ -1263,31 +1263,33 @@ export class PRWorkflowUI {
 
     .detail-label {
       font-weight: 500;
-      color: #666;
+      color: var(--color-text-tertiary);
       font-size: 13px;
     }
 
     .detail-value {
       font-weight: 600;
-      color: #333;
+      color: var(--color-text-primary);
       font-size: 13px;
     }
 
     .link-btn {
       display: block;
-      background: var(--color-primary-light);
+      background: var(--color-primary-300);
       color: var(--color-text-primary);
       text-decoration: none;
-      padding: 14px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-weight: 600;
       margin-bottom: 16px;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      text-align: center;
     }
 
     .link-btn:hover {
-      background: var(--color-text-primary);
+      background: var(--color-primary);
       color: white;
+      transform: translateY(-1px);
     }
 
     .link-btn:focus {
@@ -1295,12 +1297,23 @@ export class PRWorkflowUI {
       outline-offset: 2px;
     }
 
+    .ds-btn-secondary {
+      background: var(--color-text-primary);
+      color: white;
+      border: none;
+    }
+
+    .ds-btn-secondary:hover {
+      background: var(--color-grey-700);
+      color: white;
+    }
+
     /* Removed custom .btn-done styles to let design system .ds-btn styles take precedence */
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon"><i class="ph-rocket-launch" data-weight="fill" style="color: #9DD4C8;"></i></div>
+    <div class="icon"><i class="ph-rocket-launch" data-weight="fill" style="color: var(--color-mint-700);"></i></div>
     <h1 class="title">${isPR ? 'Pull Request Created!' : 'Pushed to Branch!'}</h1>
     <p class="subtitle">${isPR ? 'Your tokens are ready for review' : 'Your Tokens are now ready to be consumed!'}</p>
 
@@ -1344,7 +1357,7 @@ export class PRWorkflowUI {
       </a>
     ` : ''}
 
-    <button class="ds-btn ds-btn-primary" onclick="handleDone()">Done</button>
+    <button class="ds-btn ds-btn-secondary" onclick="handleDone()">Done</button>
   </div>
 
   <script>
@@ -1409,6 +1422,6 @@ export class PRWorkflowUI {
    * Get shared CSS styles
    */
   private getSharedStyles(): string {
-    return getSharedStyles();
+    return `<style>${generateDesignSystemCSS()}</style>`;
   }
 }

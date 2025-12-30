@@ -7,7 +7,7 @@
 
 import { ExtractionResult } from '../TokenExtractor';
 import { DocumentInfo } from '../types/CommonTypes';
-import { getSharedStyles } from './styles/theme';
+import { generateDesignSystemCSS } from '../design-system/html-utils';
 import { getWindowOptions } from './constants';
 
 // =============================================================================
@@ -67,8 +67,19 @@ export class ExportChoiceUI {
       <html>
        <head>
         <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
-        ${getSharedStyles()}
         <style>
+          ${generateDesignSystemCSS()}
+        </style>
+        <style>
+          /* Body background with design system gradient */
+          body {
+            background: var(--color-background-gradient) !important;
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+            font-family: var(--font-family);
+          }
+
           /* Estilos específicos de ExportChoiceUI */
           .stats {
             background: var(--color-background-primary);

@@ -180,7 +180,7 @@ export const generateDesignSystemCSS = (): string => {
     }
 
     .ds-btn-primary {
-      background-color: ${COLORS.lavender[300]};
+      background-color: ${COLORS.primary[300]};
       color: ${COLORS.neutral[900]};
       font-weight: 600;
     }
@@ -504,6 +504,12 @@ export const generateDesignSystemCSS = (): string => {
       color: ${COLORS.grey[900]};
       cursor: pointer;
       user-select: none;
+    }
+
+    .ds-checkbox-label .ds-checkbox-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .ds-checkbox-label:hover .ds-checkbox {

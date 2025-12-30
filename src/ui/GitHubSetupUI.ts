@@ -7,7 +7,7 @@
 
 import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
-import { getSharedStyles } from './styles/theme';
+import { generateDesignSystemCSS } from '../design-system/html-utils';
 import { getWindowOptions } from './constants';
 
 
@@ -93,7 +93,9 @@ export class GitHubSetupUI {
       <html>
        <head>
         <link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">
-        ${getSharedStyles()}
+        <style>
+          ${generateDesignSystemCSS()}
+        </style>
         <style>
           * {
             margin: 0;
@@ -102,8 +104,8 @@ export class GitHubSetupUI {
           }
 
           body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
+            font-family: var(--font-family);
+            background: var(--color-background-gradient) !important;
             padding: 20px;
             min-height: 100vh;
             display: flex;

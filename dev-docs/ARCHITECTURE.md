@@ -158,7 +158,7 @@ class UnifiedExportUI {
 - `src/ui/UnifiedExportUI.ts` - Main export interface
 - `src/ui/PRWorkflowUI.ts` - GitHub workflow interface
 - `src/ui/GitHubSetupUI.ts` - Setup wizard
-- `src/ui/styles/theme.ts` - Design system theme
+- `archive/legacy-ui-styles/theme.ts` - Archived legacy theme (now using design system directly)
 - `src/design-system/` - Component utilities and tokens
 
 ### **4. Export Workflows**
