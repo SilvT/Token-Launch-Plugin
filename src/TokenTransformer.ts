@@ -51,6 +51,15 @@ export interface CleanCollection {
 }
 
 export interface CleanTokenOutput {
+  _metadata?: {
+    file: string;
+    exportedAt: string;
+    exportedBy: string;
+    sourceDocument: string;
+    totalTokens: number;
+    totalVariables: number;
+    collections: string[];
+  };
   version: string;
   generatedAt: string;
   source: {

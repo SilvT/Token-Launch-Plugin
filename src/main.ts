@@ -314,11 +314,46 @@ async function performRealExtraction(): Promise<ExtractionResult> {
 }
 
 /**
- * Create structured JSON dataset from extraction results
+ * Get plugin version from package.json
+ */
+function getPluginVersion(): string {
+  return '1.3.1'; // Update this when releasing new versions
+}
+
+/**
+ * Generate smart commit message from token data
+ */
+export function generateSmartCommitMessage(result: ExtractionResult, documentInfo: DocumentInfo): string {
+  const now = new Date();
+  const timestamp = now.toISOString().replace('T', ' ').substring(0, 16); // YYYY-MM-DD HH:MM
+
+  const totalTokens = result.tokens.length;
+  const totalVariables = result.variables.length;
+  const collectionsCount = result.collections.length;
+
+  // Base message with timestamp
+  let message = `Update design tokens from Figma - ${timestamp}\n\nChanges:\n- ${totalTokens} tokens\n- ${totalVariables} variables\n- ${collectionsCount} collections`;
+
+  // Add collection details if we have collections
+  if (result.collections.length > 0) {
+    message += '\n\nUpdated collections:';
+    result.collections.forEach(col => {
+      const tokenCount = col.variables?.length || 0;
+      message += `\n- ${col.name} (${tokenCount} tokens)`;
+    });
+  }
+
+  return message;
+}
+
+/**
+ * Create structured JSON dataset from extraction results with metadata header
  */
 function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): CleanTokenOutput {
   // Transform to clean format
   const transformer = new TokenTransformer();
+  const timestamp = new Date().toISOString();
+  const filename = generateJSONFilename(documentInfo);
 
   const rawData = {
     metadata: {
@@ -335,7 +370,22 @@ function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo,
     designTokens: result.tokens
   };
 
-  return transformer.transform(rawData);
+  const transformed = transformer.transform(rawData);
+
+  // Add metadata header for better commit tracking
+  transformed._metadata = {
+    file: filename,
+    exportedAt: timestamp,
+    exportedBy: `Figma Design System Distributor v${getPluginVersion()}`,
+    sourceDocument: documentInfo.name,
+    totalTokens: result.tokens.length,
+    totalVariables: result.variables.length,
+    collections: result.collections.map(col =>
+      `${col.name} (${col.variables?.length || 0} tokens)`
+    )
+  };
+
+  return transformed;
 }
 
 /**

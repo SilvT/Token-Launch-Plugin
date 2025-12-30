@@ -273,6 +273,7 @@ export class ExportWorkflow {
       const prDetails = await new Promise<PRDetails | null>((resolve) => {
         const prUI = new PRWorkflowUI({
           tokenData: extractionResult,
+          documentInfo: this.documentInfo,
           defaultBranch: baseBranch,
           availableBranches,
           onComplete: (details) => resolve(details),
@@ -410,6 +411,7 @@ export class ExportWorkflow {
       // Show success
       const prUI = new PRWorkflowUI({
         tokenData: extractionResult,
+        documentInfo: this.documentInfo,
         onComplete: () => {},
         onCancel: () => {}
       });
@@ -536,6 +538,7 @@ export class ExportWorkflow {
       // Show success modal through PR workflow UI
       const prUI = new PRWorkflowUI({
         tokenData: extractionResult,
+        documentInfo: this.documentInfo,
         defaultBranch: baseBranch,
         onComplete: () => {},
         onCancel: () => {}
@@ -759,11 +762,34 @@ export class ExportWorkflow {
   }
 
   /**
-   * Create JSON dataset for download
+   * Get plugin version
+   */
+  private getPluginVersion(): string {
+    return '1.3.1'; // Update this when releasing new versions
+  }
+
+  /**
+   * Generate filename for JSON export based on document info
+   */
+  private generateJSONFilename(): string {
+    // Clean document name for use in filename
+    const cleanName = this.documentInfo.name
+      .replace(/[^a-zA-Z0-9-_]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase();
+    const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    return `${cleanName}-design-tokens-${timestamp}.json`;
+  }
+
+  /**
+   * Create JSON dataset for download with metadata header
    */
   private createJSONDataset(result: ExtractionResult, extractionDuration: number): any {
     // Use TokenTransformer to create clean output
     const transformer = new TokenTransformer();
+    const timestamp = new Date().toISOString();
+    const filename = this.generateJSONFilename();
 
     const rawData = {
       metadata: {
@@ -780,7 +806,22 @@ export class ExportWorkflow {
       designTokens: result.tokens
     };
 
-    return transformer.transform(rawData);
+    const transformed = transformer.transform(rawData);
+
+    // Add metadata header for better commit tracking
+    transformed._metadata = {
+      file: filename,
+      exportedAt: timestamp,
+      exportedBy: `Figma Design System Distributor v${this.getPluginVersion()}`,
+      sourceDocument: this.documentInfo.name,
+      totalTokens: result.tokens.length,
+      totalVariables: result.variables.length,
+      collections: result.collections.map(col =>
+        `${col.name} (${col.variables?.length || 0} tokens)`
+      )
+    };
+
+    return transformed;
   }
 
   /**

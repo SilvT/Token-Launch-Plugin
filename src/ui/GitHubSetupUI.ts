@@ -423,6 +423,44 @@ export class GitHubSetupUI {
             }, '*');
           }
 
+          function populateBranchDropdown(branches) {
+            console.log('🌿 populateBranchDropdown called with:', branches);
+            const branchInput = document.getElementById('repo-branch');
+            console.log('🌿 Found branchInput element:', branchInput, 'tagName:', branchInput?.tagName);
+
+            if (branchInput && branchInput.tagName === 'INPUT') {
+              console.log('🌿 Converting input to dropdown...');
+              // Replace input with select dropdown
+              const currentValue = branchInput.value || 'main';
+              const parentDiv = branchInput.parentElement;
+
+              const select = document.createElement('select');
+              select.id = 'repo-branch';
+              select.className = 'form-input';
+              select.setAttribute('data-field', 'repository.branch');
+
+              branches.forEach(branch => {
+                const option = document.createElement('option');
+                option.value = branch;
+                option.textContent = branch;
+                if (branch === currentValue || (currentValue === 'main' && branch === 'main') || (currentValue === 'main' && !branches.includes('main') && branch === 'master')) {
+                  option.selected = true;
+                }
+                select.appendChild(option);
+              });
+
+              parentDiv.replaceChild(select, branchInput);
+              updateConfig('repository.branch', select.value);
+
+              select.addEventListener('change', function() {
+                updateConfig('repository.branch', this.value);
+              });
+              console.log('✅ Branch dropdown created successfully');
+            } else {
+              console.log('❌ Branch input not found or not an INPUT element');
+            }
+          }
+
           // Handle validation results
           window.addEventListener('message', function(event) {
             if (event.data.pluginMessage) {
@@ -442,7 +480,15 @@ export class GitHubSetupUI {
                 if (statusDiv) {
                   statusDiv.style.display = 'block';
                   statusDiv.className = 'validation-status ' + (msg.success ? 'validation-success' : 'validation-error');
-                  statusDiv.textContent = msg.message;
+                  statusDiv.innerHTML = msg.message;
+                }
+
+                // If validation successful, populate branch dropdown
+                if (msg.success && msg.branches) {
+                  console.log('🌿 Received branches:', msg.branches);
+                  populateBranchDropdown(msg.branches);
+                } else if (msg.success) {
+                  console.log('✅ Validation successful but no branches received');
                 }
               }
             }
@@ -488,8 +534,6 @@ export class GitHubSetupUI {
       case 1:
         return this.renderRepositoryStep();
       case 2:
-        return this.renderPathsStep();
-      case 3:
         return this.renderConfirmationStep();
       default:
         return '';
@@ -586,58 +630,15 @@ export class GitHubSetupUI {
           value="${repo.branch || 'main'}"
           placeholder="main"
         >
-        <div class="form-help">The branch where tokens will be pushed</div>
+        <div class="form-help">
+          The branch where tokens will be pushed
+          <br><br>
+          ⚠️ Tip: Most teams use 'main' or 'master'. Don't know? Check your repository on GitHub.
+        </div>
       </div>
     `;
   }
 
-  /**
-   * Step 3: Paths Configuration
-   */
-  private renderPathsStep(): string {
-    const paths = this.currentConfig.paths || { rawTokens: 'tokens/raw/', processedTokens: 'tokens/processed/' };
-
-    return `
-      <div class="form-group">
-        <label class="form-label" for="raw-tokens-path">Raw Tokens Path</label>
-        <input
-          type="text"
-          id="raw-tokens-path"
-          class="form-input"
-          data-field="paths.rawTokens"
-          value="${paths.rawTokens || 'tokens/raw/'}"
-          placeholder="tokens/raw/"
-        >
-        <div class="form-help">Directory where raw token files will be stored (filename: figma-tokens.json)</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="processed-tokens-path">Processed Tokens Path (Optional)</label>
-        <input
-          type="text"
-          id="processed-tokens-path"
-          class="form-input"
-          data-field="paths.processedTokens"
-          value="${paths.processedTokens || 'tokens/processed/'}"
-          placeholder="tokens/processed/"
-        >
-        <div class="form-help">Directory for processed/transformed tokens (future use)</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="commit-message">Commit Message Template</label>
-        <input
-          type="text"
-          id="commit-message"
-          class="form-input"
-          data-field="commitMessage"
-          value="${this.currentConfig.commitMessage || 'feat: update design tokens from Figma - {{timestamp}}'}"
-          placeholder="feat: update design tokens from Figma - {{timestamp}}"
-        >
-        <div class="form-help">Use {{timestamp}} for automatic timestamp insertion</div>
-      </div>
-    `;
-  }
 
   /**
    * Step 4: Confirmation
@@ -659,10 +660,6 @@ export class GitHubSetupUI {
           <span class="preview-value">${config.repository?.branch}</span>
         </div>
 
-        <div class="preview-item">
-          <span class="preview-label">Raw Tokens Path:</span>
-          <span class="preview-value">${config.paths?.rawTokens}</span>
-        </div>
 
         <div class="preview-item">
           <span class="preview-label">Token:</span>
@@ -697,18 +694,11 @@ export class GitHubSetupUI {
         isActive: this.currentStep === 1
       },
       {
-        id: 'paths',
-        title: 'File Paths & Settings',
-        description: 'Configure file paths and commit message templates.',
-        isComplete: this.currentStep > 2,
-        isActive: this.currentStep === 2
-      },
-      {
         id: 'confirmation',
         title: 'Confirm & Save',
         description: 'Review your configuration and complete the setup.',
         isComplete: false,
-        isActive: this.currentStep === 3
+        isActive: this.currentStep === 2
       }
     ];
   }
@@ -760,22 +750,6 @@ export class GitHubSetupUI {
       }
     }
 
-    if (!this.currentConfig.paths) {
-      this.currentConfig.paths = {
-        rawTokens: 'tokens/raw/',
-        processedTokens: 'tokens/processed/'
-      };
-    }
-    if (!this.currentConfig.paths.rawTokens) {
-      this.currentConfig.paths.rawTokens = 'tokens/raw/';
-    }
-    if (!this.currentConfig.paths.processedTokens) {
-      this.currentConfig.paths.processedTokens = 'tokens/processed/';
-    }
-
-    if (!this.currentConfig.commitMessage) {
-      this.currentConfig.commitMessage = 'feat: update design tokens from Figma - {{timestamp}}';
-    }
 
     if (this.currentStep < 3) {
       this.currentStep++;
@@ -935,29 +909,102 @@ export class GitHubSetupUI {
         this.currentConfig.repository.owner = trimmedOwner;
         this.currentConfig.repository.name = trimmedName;
 
-        figma.ui.postMessage({
-          type: 'repository-validation-result',
-          success: true,
-          message: `✅ Repository access confirmed`,
-          permissions: testResult.permissions
-        });
+        // Fetch available branches using direct API call
+        try {
+          console.log('🌿 Starting branch fetching...');
+          const token = this.currentConfig.credentials.token;
+          const url = `https://api.github.com/repos/${trimmedOwner}/${trimmedName}/branches`;
+
+          console.log('🌿 Fetching branches from:', url);
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'User-Agent': 'Figma-Design-System-Plugin/1.0'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch branches: ${response.statusText}`);
+          }
+
+          const branchData = await response.json();
+          const branches = branchData.map((branch: any) => branch.name);
+          console.log('🌿 Retrieved branches:', branches);
+
+          figma.ui.postMessage({
+            type: 'repository-validation-result',
+            success: true,
+            message: `✅ Repository access confirmed`,
+            permissions: testResult.permissions,
+            branches: branches
+          });
+        } catch (branchError) {
+          // If branch fetching fails, still show success but without branch dropdown
+          console.warn('⚠️ Could not fetch branches:', branchError);
+          console.error('🌿 Branch fetch error details:', branchError);
+          figma.ui.postMessage({
+            type: 'repository-validation-result',
+            success: true,
+            message: `✅ Repository access confirmed`,
+            permissions: testResult.permissions
+          });
+        }
       } else {
         console.log('❌ Repository validation failed:', testResult.error);
+
+        // Create detailed error message with fixes
+        let errorMessage = '';
+        if (testResult.error && testResult.error.toLowerCase().includes('not found')) {
+          errorMessage = `
+            ❌ Repository not found or you don't have access to it.
+            <br><br>
+            <strong>Common fixes:</strong><br>
+            • Check the repository owner and name are correct<br>
+            • Verify your GitHub token has 'repo' scope<br>
+            • Ensure the repository isn't private (or use 'repo' scope instead of 'public_repo')
+            <br><br>
+            <button class="btn btn-secondary" onclick="validateRepository()" style="margin-top: 8px;">
+              Validate Again
+            </button>
+          `;
+        } else {
+          errorMessage = testResult.error || 'Repository validation failed';
+        }
+
         figma.ui.postMessage({
           type: 'repository-validation-result',
           success: false,
-          message: testResult.error || 'Repository validation failed'
+          message: errorMessage
         });
       }
 
     } catch (error) {
       console.error('❌ Repository validation error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Repository validation failed';
+      const baseErrorMessage = error instanceof Error ? error.message : 'Repository validation failed';
+
+      let errorMessage = '';
+      if (baseErrorMessage.toLowerCase().includes('not found') || baseErrorMessage.toLowerCase().includes('404')) {
+        errorMessage = `
+          ❌ Repository not found or you don't have access to it.
+          <br><br>
+          <strong>Common fixes:</strong><br>
+          • Check the repository owner and name are correct<br>
+          • Verify your GitHub token has 'repo' scope<br>
+          • Ensure the repository isn't private (or use 'repo' scope instead of 'public_repo')
+          <br><br>
+          <button class="btn btn-secondary" onclick="validateRepository()" style="margin-top: 8px;">
+            Validate Again
+          </button>
+        `;
+      } else {
+        errorMessage = `Validation failed: ${baseErrorMessage}`;
+      }
 
       figma.ui.postMessage({
         type: 'repository-validation-result',
         success: false,
-        message: `Validation failed: ${errorMessage}`
+        message: errorMessage
       });
     }
   }
@@ -972,8 +1019,7 @@ export class GitHubSetupUI {
       config.credentials?.token &&
       config.repository?.owner &&
       config.repository?.name &&
-      config.repository?.branch &&
-      config.paths?.rawTokens
+      config.repository?.branch
     );
   }
 }

@@ -47,9 +47,9 @@
 
 
   -  On "Pushed to Branch" success screen
-      - [ ]Instead of large Check icon, change for rocket on Mint 500 (or a higher value if it doesn't pass contrast check with gradient background colors)
-      - [ ] unify buttons styles with the design system
-      - [ ] Change message subtitle from "Your tokens have been commited!" to -> "Your Tokens are now ready to be consumed!"
+      - [x]Instead of large Check icon, change for rocket on Mint 500 (or a higher value if it doesn't pass contrast check with gradient background colors)
+      - [x] unify buttons styles with the design system
+      - [x] Change message subtitle from "Your tokens have been commited!" to -> "Your Tokens are now ready to be consumed!"
 
   - For 1st submission to Figma's review (live-version-1) 
     - [ ] I want to change the name of the plugin from "Design System Distributor" to "Figma Distributor"
@@ -81,7 +81,7 @@
   -[x] Margins on Push screen equal to the ones on Landing page
  - [x] Commit message box full width
 
-  Later Tasks
+  Cleaning Tasks
 
   - [ ] Clean and delete all console logs we aren't using or are deprecated
   - [ ]Verify JSON file compatibility for Figma re-upload
@@ -91,7 +91,76 @@
   - [ ] Error handling missing: validation checks before allowing the push? (e.g., checking if branch exists, if there are conflicts)
 
 
+---
+---
+🟡 Issue 3: 
+Setup Tab 
+- third accordion "File Paths & Settings: 
+      - [x] Relocate this element from here to the Push Export Screen --> under "Branch" section
+        
+        Next:
+          - [x] change name to : File Paths & Commit Settings (Optional)
+          - [x] eliminate "commit message" element alltogether from here.
+          - [x] Label "Raw Tokens Path" should be changed to "Token File Location"; the helper text underneath the input should read "Where your token files will be saved in the repository"
+          - [x] the placeholder and default should be /tokens
 
+- Second accordion: Repoository Configuration
+    - [ ] error "Repository not found or you don't have access to it." --> change to "
+    ````
+      ❌ Repository not found or you don't have access to it.
+
+      Common fixes:
+      - Check the repository owner and name are correct
+      - Verify your GitHub token has 'repo' scope
+      - Ensure the repository isn't private (or use 'repo' 
+        scope instead of 'public_repo')
+
+      [Validate Again]
+      ````
+
+    - branch input field
+       - [x] once the owner and name has been validated; instead of an input field, it's a dropdown with the branches that already exist in that repo... always main by default --> basically it's the same branch dropdown as the one in the Push Screen. Use the same one, but keep the validation logic we have now
+       - [x] if this is not clear, ask questions about it before working on it.
+
+       - [x] change bottom helper text to read: 
+          ````
+          The branch where tokens will be pushed
+
+          ⚠️ Tip: Most teams use 'main' or 'master'. Don't 
+          know? Check your repository on GitHub.
+          ```
+
+     - [x] small bug - when the credentials have been saved from before, the dropbox doesn't show... I need to reenter either repo name or owner so when the validation triggers again then the dropdown shows... Once it's been validated and nothing has changed on the inputs above, i want the dropdown to always show
+
+-[x] First accordion: 
+      current copy: 
+      '''
+      Create a token at GitHub Settings with 'repo' scope.
+      Learn more
+      '''
+
+      change to --> 
+      '''
+      "Create a token at GitHub Settings with 'repo' scope.
+      [Learn more] ← Keep this
+      
+      ⏱️ Takes ~2 minutes | 🔒 Your token never leaves Figma
+      '''
+
+- [x] Setup actions should be sticky at the bottom of the winndow; always visible when scrolling like a sticky footer
+  - - [ ] followup bug: force to always have scroll on Push screen, so the user can extend and navigate easily the commit message box with current setup, user can extend the box but then cannot see the end as it's under the sticky buttons
+
+
+
+***potential add a banner at the top when complete setup is validated (before the automatic taking you to Export tab)
+
+
+
+
+
+
+---
+---
 
 🟡 Issue 4: Commit Message Needs Better Defaults
 Current state: Default message is "Update design tokens from Figma"
@@ -119,6 +188,12 @@ Updated collections:
 Users can still edit this, but having a descriptive default is far more useful.
 
 
+
+---
+---
+
+
+
 🟡 Issue 5: Add a validation layer before the "Push to Branch" button becomes enabled:
 
 After user fills in branch name, show a loading spinner
@@ -126,8 +201,10 @@ Check if branch exists, check permissions
 Show green checkmark ✓ next to branch field if valid
 Only enable "Push to Branch" button when all validations pass
 
+---
+---
 
-Issue 6: Trigger CI/CD checbox
+🟡Issue 6: Trigger CI/CD checbox
 1. In-plugin info button :
 ` ☐ Trigger CI/CD workflow after push (ℹ️)`
 Clicking (ℹ️) shows tooltip:

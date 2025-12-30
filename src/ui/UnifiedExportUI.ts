@@ -502,13 +502,30 @@ export class UnifiedExportUI {
           }
 
 
+          /* Sticky footer layout */
+          .main-content {
+            padding-bottom: 120px; /* Space for sticky footer */
+          }
+
+          .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--color-border);
+            padding: 16px 20px;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+          }
+
           /* Action buttons layout */
           .action-buttons {
             display: flex;
             justify-content: center;
             gap: 10px;
             align-items: flex-end;
-            margin-top: 16px;
+            margin-top: 8px;
           }
 
           .action-buttons .btn {
@@ -982,7 +999,7 @@ export class UnifiedExportUI {
         </style>
       </head>
       <body>
-        <div class="container">
+        <div class="container main-content">
           <div class="header">
             <h1><i class="ph-rocket-launch" data-weight="duotone"></i> Design Tokens Extracted!</h1>
             <p>Choose how to export your tokens</p>
@@ -1143,6 +1160,21 @@ export class UnifiedExportUI {
           // Apply initial validation visual states for pre-filled fields
           document.addEventListener('DOMContentLoaded', function() {
 
+            // Auto-validate repository and fetch branches if pre-saved
+            if (validationStates.repository && validationStates.token) {
+              const ownerInput = document.getElementById('repo-owner');
+              const nameInput = document.getElementById('repo-name');
+
+              if (ownerInput && nameInput && ownerInput.value && nameInput.value) {
+                console.log('🌿 Auto-validating pre-saved repository:', ownerInput.value + '/' + nameInput.value);
+
+                // Automatically trigger validation to fetch branches
+                setTimeout(() => {
+                  validateRepository();
+                }, 500); // Small delay to ensure DOM is ready
+              }
+            }
+
             // Collapse validated accordions by default
             if (validationStates.token) {
               const tokenInput = document.getElementById('github-token');
@@ -1165,6 +1197,7 @@ export class UnifiedExportUI {
               if (ownerInput && ownerInput.value && nameInput && nameInput.value) {
                 ownerInput.className = 'form-input valid';
                 nameInput.className = 'form-input valid';
+                // Branch input is hidden, so don't style it
               }
 
               // Collapse repository accordion if validated
@@ -1176,13 +1209,6 @@ export class UnifiedExportUI {
               }
             }
 
-            // Always collapse paths accordion (optional settings)
-            const pathsContent = document.getElementById('paths-step-content');
-            const pathsArrow = document.getElementById('paths-step-arrow');
-            if (pathsContent && pathsArrow) {
-              pathsContent.classList.add('collapsed');
-              pathsArrow.classList.add('collapsed');
-            }
           });
 
           // Token tooltip functions
@@ -1345,14 +1371,13 @@ export class UnifiedExportUI {
             const branchInput = document.getElementById('repo-branch');
             const owner = ownerInput.value.trim();
             const name = nameInput.value.trim();
-            const branch = branchInput.value.trim() || 'main';
+            const branch = 'main'; // Always use 'main' as default
 
             if (!owner || !name) return;
 
-            // Show validating state
+            // Show validating state (skip branch input since it's hidden)
             ownerInput.className = 'form-input validating';
             nameInput.className = 'form-input validating';
-            branchInput.className = 'form-input validating';
 
             const statusDiv = document.getElementById('repo-validation');
             statusDiv.style.display = 'block';
@@ -1375,12 +1400,19 @@ export class UnifiedExportUI {
             const shouldSave = saveCheckbox ? saveCheckbox.checked : true;
 
             // Collect all form values before saving
-            updateConfig('credentials.token', document.getElementById('github-token').value);
-            updateConfig('repository.owner', document.getElementById('repo-owner').value);
-            updateConfig('repository.name', document.getElementById('repo-name').value);
-            updateConfig('repository.branch', document.getElementById('repo-branch').value || 'main');
-            updateConfig('paths.rawTokens', document.getElementById('raw-tokens-path').value || 'tokens/raw/');
-            updateConfig('commitMessage', document.getElementById('commit-message').value || 'feat: update design tokens from Figma - {{timestamp}}');
+            const tokenEl = document.getElementById('github-token');
+            const ownerEl = document.getElementById('repo-owner');
+            const nameEl = document.getElementById('repo-name');
+            const branchEl = document.getElementById('repo-branch');
+
+            if (tokenEl) updateConfig('credentials.token', tokenEl.value);
+            if (ownerEl) updateConfig('repository.owner', ownerEl.value);
+            if (nameEl) updateConfig('repository.name', nameEl.value);
+            if (branchEl) updateConfig('repository.branch', branchEl.value || 'main');
+
+            // Set default paths since we removed the paths section
+            updateConfig('paths.rawTokens', '/tokens');
+            updateConfig('commitMessage', 'feat: update design tokens from Figma - {{timestamp}}');
 
             parent.postMessage({
               pluginMessage: {
@@ -1419,6 +1451,16 @@ export class UnifiedExportUI {
             }
           }
 
+          // Branch dropdown population function (disabled for setup - only used in push screen)
+          function populateBranchDropdown(branches) {
+            console.log('🌿 Branch dropdown disabled in setup screen - branches will be selected in push screen');
+            // Just set the default branch value to 'main'
+            const branchInput = document.getElementById('repo-branch');
+            if (branchInput) {
+              branchInput.value = 'main';
+            }
+          }
+
           // Handle validation results
           window.addEventListener('message', function(event) {
             if (event.data.pluginMessage) {
@@ -1446,12 +1488,13 @@ export class UnifiedExportUI {
                   // Update the Complete Setup button state
                   const completeButton = document.querySelector('button[onclick="completeSetup()"]');
                   if (completeButton) {
+                    const helpEl = completeButton.parentElement?.querySelector('.form-help');
                     if (validationStates.token && validationStates.repository) {
                       completeButton.disabled = false;
-                      completeButton.parentElement.querySelector('.form-help').textContent = 'Configuration is ready to be saved';
+                      if (helpEl) helpEl.textContent = 'Configuration is ready to be saved';
                     } else {
                       completeButton.disabled = true;
-                      completeButton.parentElement.querySelector('.form-help').textContent = 'Complete token and repository validation first';
+                      if (helpEl) helpEl.textContent = 'Complete token and repository validation first';
                     }
                   }
                 }
@@ -1463,12 +1506,11 @@ export class UnifiedExportUI {
                 const branchInput = document.getElementById('repo-branch');
                 const statusDiv = document.getElementById('repo-validation');
 
-                // Update input visual states
-                if (ownerInput && nameInput && branchInput) {
+                // Update input visual states (skip branch since it's hidden)
+                if (ownerInput && nameInput) {
                   const stateClass = msg.success ? 'valid' : 'invalid';
                   ownerInput.className = 'form-input ' + stateClass;
                   nameInput.className = 'form-input ' + stateClass;
-                  branchInput.className = 'form-input ' + stateClass;
                 }
 
                 if (statusDiv) {
@@ -1480,7 +1522,15 @@ export class UnifiedExportUI {
                     const branchesUrl = \`https://github.com/\${msg.owner}/\${msg.name}/branches\`;
                     statusDiv.innerHTML = \`\${msg.message}<br><a href="\${branchesUrl}" target="_blank" class="external-link" style="font-size: 12px; margin-top: 8px; display: inline-block;">Go to repository branches to create '\${msg.branch}' →</a>\`;
                   } else {
-                    statusDiv.textContent = msg.message;
+                    statusDiv.innerHTML = msg.message;
+                  }
+
+                  // If validation successful and branches received, populate branch dropdown
+                  if (msg.success && msg.branches) {
+                    console.log('🌿 Received branches:', msg.branches);
+                    populateBranchDropdown(msg.branches);
+                  } else if (msg.success) {
+                    console.log('✅ Validation successful but no branches received');
                   }
 
                   validationStates.repository = msg.success;
@@ -1491,12 +1541,13 @@ export class UnifiedExportUI {
                   // Update the Complete Setup button state
                   const completeButton = document.querySelector('button[onclick="completeSetup()"]');
                   if (completeButton) {
+                    const helpEl = completeButton.parentElement?.querySelector('.form-help');
                     if (validationStates.token && validationStates.repository) {
                       completeButton.disabled = false;
-                      completeButton.parentElement.querySelector('.form-help').textContent = 'Configuration is ready to be saved';
+                      if (helpEl) helpEl.textContent = 'Configuration is ready to be saved';
                     } else {
                       completeButton.disabled = true;
-                      completeButton.parentElement.querySelector('.form-help').textContent = 'Complete token and repository validation first';
+                      if (helpEl) helpEl.textContent = 'Complete token and repository validation first';
                     }
                   }
 
@@ -1573,12 +1624,16 @@ export class UnifiedExportUI {
             }
 
             // Clear all input fields
-            document.getElementById('github-token').value = '';
-            document.getElementById('repo-owner').value = '';
-            document.getElementById('repo-name').value = '';
-            document.getElementById('repo-branch').value = 'main';
-            document.getElementById('raw-tokens-path').value = 'tokens/raw/';
-            document.getElementById('commit-message').value = 'feat: update design tokens from Figma - {{timestamp}}';
+            const tokenEl = document.getElementById('github-token');
+            const ownerEl = document.getElementById('repo-owner');
+            const nameEl = document.getElementById('repo-name');
+            const branchEl = document.getElementById('repo-branch');
+
+            if (tokenEl) tokenEl.value = '';
+            if (ownerEl) ownerEl.value = '';
+            if (nameEl) nameEl.value = '';
+            // Branch always defaults to 'main' (field is hidden)
+            if (branchEl) branchEl.value = 'main';
 
             // Clear validation states
             validationStates.token = false;
@@ -1829,6 +1884,8 @@ export class UnifiedExportUI {
               <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">GitHub Settings</a>
               with 'repo' scope.
               <span class="learn-more" onclick="showTokenTooltip()">Learn more</span>
+              <br><br>
+              ⏱️ Takes ~2 minutes | 🔒 Your token never leaves Figma
             </div>
           </div>
           <div class="validation-auto-note">
@@ -1874,7 +1931,7 @@ export class UnifiedExportUI {
             >
           </div>
 
-          <div class="form-group">
+          <div class="form-group" style="display: none;">
             <label class="form-label" for="repo-branch">Branch</label>
             <input
               type="text"
@@ -1884,7 +1941,11 @@ export class UnifiedExportUI {
               value="${repo.branch || 'main'}"
               placeholder="main"
             >
-            <div class="form-help">The branch where tokens will be pushed</div>
+            <div class="form-help">
+              The branch where tokens will be pushed
+              <br><br>
+              ⚠️ Tip: Most teams use 'main' or 'master'. Don't know? Check your repository on GitHub.
+            </div>
           </div>
 
           <div class="validation-auto-note">
@@ -1897,40 +1958,6 @@ export class UnifiedExportUI {
         </div>
       </div>
 
-      <div id="paths-step" class="setup-step">
-        <div class="step-header" onclick="toggleStep('paths-step')">
-          <div class="step-number" data-number="3">3</div>
-          <div class="step-title">File Paths & Settings</div>
-          <i class="ph-caret-down step-header-arrow" id="paths-step-arrow" data-weight="bold"></i>
-        </div>
-        <div class="step-content" id="paths-step-content">
-          <div class="form-group">
-            <label class="form-label" for="raw-tokens-path">Raw Tokens Path</label>
-            <input
-              type="text"
-              id="raw-tokens-path"
-              class="form-input"
-              data-field="paths.rawTokens"
-              value="${paths.rawTokens || 'tokens/raw/'}"
-              placeholder="tokens/raw/"
-            >
-            <div class="form-help">Directory where raw token files will be stored</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="commit-message">Commit Message Template</label>
-            <input
-              type="text"
-              id="commit-message"
-              class="form-input"
-              data-field="commitMessage"
-              value="${this.gitConfig.commitMessage || 'feat: update design tokens from Figma - {{timestamp}}'}"
-              placeholder="feat: update design tokens from Figma - {{timestamp}}"
-            >
-            <div class="form-help">Use {{timestamp}} for automatic timestamp insertion</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Save Credentials Checkbox -->
       <div class="ds-card" style="margin-top: 8px; background: #f9fafb;">
@@ -1950,24 +1977,25 @@ export class UnifiedExportUI {
           When checked, your credentials are encrypted and stored locally by Figma
         </div>
       </div>
+    </div>
 
-      <div class="setup-actions" style="margin-top: 10px; text-align: center;">
-      <div class="form-help" style="margin-top: 4px; display:flex; flex-direction:column; margin-bottom: 4px; align-items:center;">
+    <!-- Sticky Footer for Setup Actions -->
+    <div class="sticky-footer">
+      <div class="form-help" style="text-align: center; margin-bottom: 8px;">
         ${this.validationStates.token && this.validationStates.repository ?
           'Configuration is ready to be saved' :
           'Complete token and repository validation first'
         }
-        </div>
-       <div class="action-buttons">
-         <button class="ds-btn ds-btn-secondary" onclick="resetSetup()">
-           Reset
-         </button>
-         <button class="ds-btn ds-btn-primary" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
-           Complete Setup
-         </button>
-       </div>
-        </div>
       </div>
+      <div class="action-buttons">
+        <button class="ds-btn ds-btn-secondary" onclick="resetSetup()">
+          Reset
+        </button>
+        <button class="ds-btn ds-btn-primary" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
+          Complete Setup
+        </button>
+      </div>
+    </div>
     `;
   }
 
@@ -2122,77 +2150,88 @@ export class UnifiedExportUI {
       if (!testResult.success) {
         console.log('❌ Repository validation failed:', testResult.error);
         this.validationStates.repository = false;
+
+        // Create detailed error message with fixes
+        let errorMessage = '';
+        if (testResult.error && testResult.error.toLowerCase().includes('not found')) {
+          errorMessage = `
+            ❌ Repository not found or you don't have access to it.
+            <br><br>
+            <strong>Common fixes:</strong><br>
+            • Check the repository owner and name are correct<br>
+            • Verify your GitHub token has 'repo' scope<br>
+            • Ensure the repository isn't private (or use 'repo' scope instead of 'public_repo')
+            <br><br>
+            <button class="ds-btn ds-btn-secondary" onclick="validateRepository()" style="margin-top: 8px;">
+              Validate Again
+            </button>
+          `;
+        } else {
+          errorMessage = testResult.error || 'Repository validation failed';
+        }
+
         figma.ui.postMessage({
           type: 'repository-validation-result',
           success: false,
-          message: testResult.error || 'Repository validation failed',
+          message: errorMessage,
           owner,
           name
         });
         return;
       }
 
-      // Repository exists, now validate branch
-      console.log('✅ Repository access confirmed, validating branch...');
+      // Repository exists, now fetch available branches
+      console.log('✅ Repository access confirmed, fetching branches...');
 
+      // Store the repository config
+      if (!this.gitConfig.repository) this.gitConfig.repository = { owner: '', name: '', branch: 'main' };
+      this.gitConfig.repository.owner = owner;
+      this.gitConfig.repository.name = name;
+      this.validationStates.repository = true;
+
+      // Fetch available branches using direct API call
       try {
-        // Try to get branch info from GitHub API
-        const branchCheckUrl = `https://api.github.com/repos/${owner}/${name}/branches/${branchToValidate}`;
-        const response = await fetch(branchCheckUrl, {
+        console.log('🌿 Starting branch fetching...');
+        const token = this.gitConfig.credentials.token;
+        const url = `https://api.github.com/repos/${owner}/${name}/branches`;
+
+        console.log('🌿 Fetching branches from:', url);
+        const response = await fetch(url, {
           headers: {
-            'Authorization': `token ${this.gitConfig.credentials.token}`,
+            'Authorization': `token ${token}`,
             'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'Figma-Design-System-Distributor'
+            'User-Agent': 'Figma-Design-System-Plugin/1.0'
           }
         });
 
-        if (response.ok) {
-          // Branch exists
-          console.log('✅ Branch validation successful');
-
-          // Store the repository config with branch
-          if (!this.gitConfig.repository) this.gitConfig.repository = { owner: '', name: '', branch: 'main' };
-          this.gitConfig.repository.owner = owner;
-          this.gitConfig.repository.name = name;
-          this.gitConfig.repository.branch = branchToValidate;
-          this.validationStates.repository = true;
-
-          figma.ui.postMessage({
-            type: 'repository-validation-result',
-            success: true,
-            message: `✅ Repository and branch '${branchToValidate}' access confirmed`,
-            permissions: testResult.permissions,
-            owner,
-            name,
-            branch: branchToValidate
-          });
-        } else if (response.status === 404) {
-          // Branch doesn't exist
-          console.log(`⚠️ Branch '${branchToValidate}' not found`);
-          this.validationStates.repository = false;
-
-          figma.ui.postMessage({
-            type: 'repository-validation-result',
-            success: false,
-            message: `⚠️ Branch '${branchToValidate}' doesn't exist in this repository`,
-            branchNotFound: true,
-            owner,
-            name,
-            branch: branchToValidate
-          });
-        } else {
-          throw new Error(`Branch validation failed: ${response.status} ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch branches: ${response.statusText}`);
         }
-      } catch (branchError) {
-        console.error('❌ Branch validation error:', branchError);
-        this.validationStates.repository = false;
+
+        const branchData = await response.json();
+        const branches = branchData.map((branch: any) => branch.name);
+        console.log('🌿 Retrieved branches:', branches);
+
         figma.ui.postMessage({
           type: 'repository-validation-result',
-          success: false,
-          message: `Branch validation failed: ${branchError instanceof Error ? branchError.message : 'Unknown error'}`,
+          success: true,
+          message: `✅ Repository access confirmed`,
+          permissions: testResult.permissions,
+          branches: branches,
           owner,
-          name,
-          branch: branchToValidate
+          name
+        });
+      } catch (branchError) {
+        // If branch fetching fails, still show success but without branch dropdown
+        console.warn('⚠️ Could not fetch branches:', branchError);
+        console.error('🌿 Branch fetch error details:', branchError);
+        figma.ui.postMessage({
+          type: 'repository-validation-result',
+          success: true,
+          message: `✅ Repository access confirmed`,
+          permissions: testResult.permissions,
+          owner,
+          name
         });
       }
 
