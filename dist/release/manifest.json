@@ -1,0 +1,1 @@
+{"api":"1.0.0","editorType":["figma"],"id":"figma-design-system-distributor","name":"Token Launch","main":"build/main.js","documentAccess":"current-page","networkAccess":{"allowedDomains":["https://api.github.com","https://unpkg.com"],"reasoning":"Required for GitHub integration and Phosphor Icons CDN - GitHub API for pushing design tokens and unpkg.com for icon fonts"}}
