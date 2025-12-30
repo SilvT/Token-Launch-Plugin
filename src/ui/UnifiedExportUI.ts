@@ -755,20 +755,30 @@ export class UnifiedExportUI {
           }
 
 
-          /* Info Section Styles */
+          /* Info Section Styles - Collapsible Accordion */
           .info-section {
             margin-top: 24px;
-            padding: 16px;
             background: linear-gradient(135deg, #DBEAFE 0%, #E0F2FE 100%);
             border-radius: 12px;
             border: 1px solid #93C5FD;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
           }
 
           .info-section-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            user-select: none;
+          }
+
+          .info-section-header:hover {
+            background: rgba(255, 255, 255, 0.1);
           }
 
           .info-section-title {
@@ -776,6 +786,37 @@ export class UnifiedExportUI {
             font-weight: 600;
             color: #1E40AF;
             margin: 0;
+            flex: 1;
+          }
+
+          .info-section-arrow {
+            font-size: 16px;
+            color: #1E40AF;
+            transition: transform 0.3s ease;
+          }
+
+          .info-section-arrow.expanded {
+            transform: rotate(180deg);
+          }
+
+          .info-section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+          }
+
+          .info-section-content.expanded {
+            max-height: 200px;
+          }
+
+          .info-section-inner {
+            padding: 0 16px 16px 16px;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 100%;
+            overflow-wrap: break-word;
           }
 
           .info-section-text {
@@ -792,6 +833,8 @@ export class UnifiedExportUI {
             gap: 6px;
             padding: 8px 16px;
             width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             background: white;
             border: 1px solid #3B82F6;
             border-radius: 6px;
@@ -800,6 +843,9 @@ export class UnifiedExportUI {
             font-weight: 500;
             color: #1D4ED8;
             transition: all 0.2s;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
           }
 
           .github-link:hover {
@@ -812,6 +858,115 @@ export class UnifiedExportUI {
           .github-link:focus {
             outline: 2px solid #3B82F6;
             outline-offset: 2px;
+          }
+
+          /* Tooltip styles for GitHub token guidance */
+          .ds-tooltip-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 200ms ease;
+          }
+
+          .ds-tooltip-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+          }
+
+          .ds-tooltip-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            height: auto;
+            overflow: visible;
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 200ms ease;
+          }
+
+          .ds-tooltip-popup.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+          }
+
+          .ds-tooltip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 0 20px;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 20px;
+          }
+
+          .ds-tooltip-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            color: #333;
+          }
+
+          .ds-tooltip-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 150ms ease;
+          }
+
+          .ds-tooltip-close:hover {
+            background: #f8f9fa;
+            color: #333;
+          }
+
+          .ds-tooltip-content {
+            padding: 0 20px 20px 20px;
+            color: #555;
+            line-height: 1.5;
+            overflow: visible;
+            max-height: none;
+          }
+
+          .learn-more {
+            color: #6B21A8;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+          }
+
+          .learn-more:hover {
+            color: #581C87;
+          }
+
+          .ds-learn-more {
+            color: #6B21A8;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 500;
+            margin-left: 8px;
+          }
+
+          .ds-learn-more:hover {
+            color: #581C87;
           }
         </style>
       </head>
@@ -870,25 +1025,30 @@ export class UnifiedExportUI {
                   </div>
                 </div>
 
-                <!-- NEW: Repository Info Section -->
+                <!-- NEW: Repository Info Section - Collapsible Accordion -->
                 <div class="info-section">
-                  <div class="info-section-header">
+                  <div class="info-section-header" onclick="toggleInfoSection()">
                     <i class="ph-question" data-weight="fill" style="font-size: 20px; color: #1E40AF;"></i>
                     <h3 class="info-section-title">Need help?</h3>
+                    <i class="ph-caret-down info-section-arrow" id="info-section-arrow" data-weight="bold"></i>
                   </div>
-                  <p class="info-section-text">
-                    Learn about this plugin, how it works, FAQs etc.
-                  </p>
-                  <a
-                    href="https://github.com/SilvT/Figma-Design-System-Distributor"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="github-link"
-                  >
-                    <i class="ph-git-branch" data-weight="bold" style="font-size: 16px;"></i>
-                    Read documentation on GitHub
-                    <span>→</span>
-                  </a>
+                  <div class="info-section-content" id="info-section-content">
+                    <div class="info-section-inner">
+                      <p class="info-section-text">
+                        Learn about this plugin, how it works, FAQs etc.
+                      </p>
+                      <a
+                        href="https://github.com/SilvT/Figma-Design-System-Distributor"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="github-link"
+                      >
+                        <i class="ph-git-branch" data-weight="bold" style="font-size: 16px;"></i>
+                        Read documentation on GitHub
+                        <span>→</span>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1090,6 +1250,27 @@ export class UnifiedExportUI {
 
           // Make function globally accessible
           window.toggleStep = toggleStep;
+
+          // Toggle info section accordion
+          function toggleInfoSection() {
+            const content = document.getElementById('info-section-content');
+            const arrow = document.getElementById('info-section-arrow');
+
+            if (content && arrow) {
+              const isExpanded = content.classList.contains('expanded');
+
+              if (isExpanded) {
+                content.classList.remove('expanded');
+                arrow.classList.remove('expanded');
+              } else {
+                content.classList.add('expanded');
+                arrow.classList.add('expanded');
+              }
+            }
+          }
+
+          // Make function globally accessible
+          window.toggleInfoSection = toggleInfoSection;
 
           function switchTab(tabName) {
             // Update tab buttons
@@ -1741,8 +1922,8 @@ export class UnifiedExportUI {
       </div>
 
       <!-- Save Credentials Checkbox -->
-      <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-        <label class="ds-checkbox-label" style="font-size: 13px;">
+      <div class="ds-card" style="margin-top: 8px; background: #f9fafb;">
+        <label class="ds-checkbox-label">
           <input
             type="checkbox"
             class="ds-checkbox"
@@ -1752,7 +1933,7 @@ export class UnifiedExportUI {
           <span>Save credentials between sessions</span>
           <span class="ds-learn-more" onclick="showSecurityTooltip()">Learn more</span>
         </label>
-        <div class="ds-form-help" style="margin-top: 4px; margin-left: 24px;">
+        <div class="ds-form-help" style="margin-left: 24px;">
           When checked, your credentials are encrypted and stored locally by Figma
         </div>
       </div>

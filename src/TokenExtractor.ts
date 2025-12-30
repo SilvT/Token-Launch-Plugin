@@ -1225,11 +1225,11 @@ export class TokenExtractor {
                 b: stroke.color.b,
                 a: stroke.opacity !== undefined ? stroke.opacity : 1
               },
-              weight: ('strokeWeight' in node) ? Number((node as any).strokeWeight) : 1,
-              align: ('strokeAlign' in node) ? String((node as any).strokeAlign).toLowerCase() as any : 'inside',
-              cap: ('strokeCap' in node) ? String((node as any).strokeCap).toLowerCase() as any : 'none',
-              join: ('strokeJoin' in node) ? String((node as any).strokeJoin).toLowerCase() as any : 'miter',
-              dashPattern: ('dashPattern' in node) ? [...(node as any).dashPattern] : [],
+              weight: ('strokeWeight' in node) ? this.safeConvertToNumber((node as any).strokeWeight, 1) : 1,
+              align: ('strokeAlign' in node) ? this.safeConvertToString((node as any).strokeAlign, 'inside').toLowerCase() as any : 'inside',
+              cap: ('strokeCap' in node) ? this.safeConvertToString((node as any).strokeCap, 'none').toLowerCase() as any : 'none',
+              join: ('strokeJoin' in node) ? this.safeConvertToString((node as any).strokeJoin, 'miter').toLowerCase() as any : 'miter',
+              dashPattern: ('dashPattern' in node) ? this.safeConvertToArray((node as any).dashPattern, []) : [],
               visible: stroke.visible
             },
             metadata: this.createNodeMetadata(node),
@@ -1877,6 +1877,89 @@ export class TokenExtractor {
    */
   private log(message: string): void {
     // console.log(`[TokenExtractor] ${message}`);
+  }
+
+  /**
+   * Safely convert a value to number, handling Symbol values
+   */
+  private safeConvertToNumber(value: any, defaultValue: number): number {
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+
+    // Handle Symbol values which can't be converted to numbers
+    if (typeof value === 'symbol') {
+      this.addWarning(`Cannot convert Symbol value to number, using default: ${defaultValue}`);
+      return defaultValue;
+    }
+
+    // Try to convert to number
+    const numValue = Number(value);
+    if (isNaN(numValue)) {
+      this.addWarning(`Invalid number value: ${value}, using default: ${defaultValue}`);
+      return defaultValue;
+    }
+
+    return numValue;
+  }
+
+  /**
+   * Safely convert a value to string, handling Symbol values
+   */
+  private safeConvertToString(value: any, defaultValue: string): string {
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+
+    // Handle Symbol values which can't be converted to strings
+    if (typeof value === 'symbol') {
+      this.addWarning(`Cannot convert Symbol value to string, using default: ${defaultValue}`);
+      return defaultValue;
+    }
+
+    // Convert to string
+    try {
+      return String(value);
+    } catch (error) {
+      this.addWarning(`Failed to convert value to string: ${value}, using default: ${defaultValue}`);
+      return defaultValue;
+    }
+  }
+
+  /**
+   * Safely convert a value to array, handling Symbol values
+   */
+  private safeConvertToArray(value: any, defaultValue: any[]): any[] {
+    if (value === null || value === undefined) {
+      return defaultValue;
+    }
+
+    // Handle Symbol values which can't be converted
+    if (typeof value === 'symbol') {
+      this.addWarning(`Cannot convert Symbol value to array, using default: ${JSON.stringify(defaultValue)}`);
+      return defaultValue;
+    }
+
+    // Check if it's already an array
+    if (Array.isArray(value)) {
+      try {
+        return [...value];
+      } catch (error) {
+        this.addWarning(`Failed to spread array value, using default: ${JSON.stringify(defaultValue)}`);
+        return defaultValue;
+      }
+    }
+
+    // Try to convert to array if it's array-like
+    try {
+      if (value && typeof value === 'object' && 'length' in value) {
+        return Array.from(value);
+      }
+    } catch (error) {
+      this.addWarning(`Failed to convert value to array: ${value}, using default: ${JSON.stringify(defaultValue)}`);
+    }
+
+    return defaultValue;
   }
 }
 

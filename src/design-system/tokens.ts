@@ -1,6 +1,6 @@
 export const PLUGIN_DIMENSIONS = {
   DEFAULT_WIDTH: 480,
-  DEFAULT_HEIGHT: 680,
+  DEFAULT_HEIGHT: 750,  // Increased to accommodate full content without scroll
   MIN_WIDTH: 70,      // Figma API minimum
   MIN_HEIGHT: 100,    // Figma API minimum on resize
   MAX_HEIGHT: 800,    // Recommended maximum for screen fit
@@ -58,6 +58,7 @@ mint: {
     300: '#F6EEEA',  // Medium blush
     200: '#F7E3E3',  // Light blush
     100: '#FCE3E0',  // Palest blush
+    50: '#FDF1EF',   // Very pale blush
   },
 
   // Primary Accent (pinkish-purple)
@@ -127,6 +128,9 @@ export const GRADIENTS = {
   blushMedium: createGradient(COLORS.blush[300], COLORS.blush[100]),
   blushLight: createGradient(COLORS.blush[200], COLORS.white),
   blushSubtle: createGradient(COLORS.blush[100], COLORS.white),
+
+  // Cross-color gradients
+  lavenderToBlush: createGradient(COLORS.lavender[300], COLORS.blush[300]),
 } as const;
 
 // Colour application guide

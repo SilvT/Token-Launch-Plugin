@@ -147,16 +147,21 @@ export class PRWorkflowUI {
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 0 24px;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: var(--font-family);
+      background: var(--color-background-gradient) !important;
+      min-height: 100vh;
     }
 
     .container {
-      height: 100vh;
+      min-height: 100vh;
+      height: auto;
       display: flex;
       flex-direction: column;
       background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow-xl);
     }
 
     .header {
@@ -175,8 +180,8 @@ export class PRWorkflowUI {
 
     .content {
       flex: 1;
-      overflow-y: auto;
-      padding: 20px;
+      overflow: visible;
+      padding: 20px 20px 10px 20px;
     }
 
     /* Compact Stats */
@@ -304,6 +309,20 @@ export class PRWorkflowUI {
     .form-textarea {
       resize: vertical;
       min-height: 70px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 20px;
+      font-family: inherit;
+      transition: border-color 150ms ease;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary-light);
     }
 
     .form-row {
@@ -403,6 +422,253 @@ export class PRWorkflowUI {
       background-color: #C084FC !important;
     }
 
+    /* Missing styles for ds-action-tabs section */
+    .ds-action-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ds-action-tab {
+      flex: 1;
+      padding: 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      background: white;
+    }
+
+    .ds-action-tab:hover {
+      border-color: #DEE3FC;
+      background: #f8f9fa;
+    }
+
+    .ds-action-tab.active {
+      border-color: var(--color-primary);
+      background: linear-gradient(135deg, rgba(222, 227, 252, 0.5) 0%, rgba(247, 227, 227, 0.5) 100%);
+    }
+
+    .ds-action-tab-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .ds-action-tab-description {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Form Styling */
+    .ds-form-group {
+      margin-bottom: 16px;
+    }
+
+    .ds-form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .ds-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 20px;
+      background: #fff;
+      transition: border-color 150ms ease;
+      font-family: inherit;
+    }
+
+    .ds-input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .ds-input:disabled {
+      background: #f9fafb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    select.ds-input {
+      cursor: pointer;
+      padding-right: 40px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    /* Branch Configuration */
+    .branch-config-push,
+    .branch-config-pr {
+      margin-top: 12px;
+    }
+
+    /* Actions Container */
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      padding: 16px 20px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 8px;
+      background: #fafbfc;
+    }
+
+    /* Vertical Branch Layout - All elements stack vertically */
+    .branch-config-push .ds-form-group {
+      margin-bottom: 16px;
+    }
+
+    .branch-config-push .ds-form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Disabled Tab Styles */
+    .ds-action-tab.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: auto;
+      position: relative;
+    }
+
+    .ds-action-tab.disabled:hover {
+      background: #f5f5f5;
+      border-color: #ddd;
+      transform: none;
+    }
+
+    .ds-action-tab.disabled .ds-action-tab-title,
+    .ds-action-tab.disabled .ds-action-tab-description {
+      color: #999;
+    }
+
+    /* Simple Tooltip for Disabled Elements */
+    .ds-action-tab.disabled[data-tooltip]:hover::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .ds-action-tab.disabled[data-tooltip]:hover::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: #333;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    /* Modal Overlay Styles */
+    .ds-tooltip-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: all 200ms ease;
+    }
+
+    .ds-tooltip-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .ds-tooltip-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      max-width: 400px;
+      width: 90%;
+      max-height: 90vh;
+      height: auto;
+      overflow: visible;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 200ms ease;
+    }
+
+    .ds-tooltip-popup.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .ds-tooltip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 20px 16px 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .ds-tooltip-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .ds-tooltip-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #999;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 150ms ease;
+    }
+
+    .ds-tooltip-close:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    .ds-tooltip-content {
+      padding: 0 20px 20px 20px;
+      color: #555;
+      line-height: 1.5;
+      overflow: visible;
+      max-height: none;
+    }
+
   </style>
 </head>
 <body>
@@ -457,7 +723,7 @@ export class PRWorkflowUI {
             <div class="ds-action-tab-title">Push to Branch</div>
             <div class="ds-action-tab-description">Commit to branch</div>
           </div>
-          <div class="ds-action-tab" id="tab-pr" onclick="selectAction('create-pr')">
+          <div class="ds-action-tab disabled" id="tab-pr" data-tooltip="Future Feature">
             <div class="ds-action-tab-title">Create Pull Request</div>
             <div class="ds-action-tab-description">Create PR with review</div>
           </div>
@@ -467,28 +733,89 @@ export class PRWorkflowUI {
       <!-- Branch Configuration -->
       <div class="section">
         <div class="section-title">Branch</div>
-        <div class="form-row">
-          <div class="ds-form-group" style="flex: 2;">
-            <label class="ds-form-label">Branch Name</label>
-            <input
-              type="text"
-              class="ds-form-input"
-              id="branch-name"
-              value="${this.prDetails.branchName}"
-              placeholder="tokens/update-2025-10-07"
-            >
-            <span class="branch-tag" id="new-tag" style="display: none;">NEW</span>
-          </div>
-          <div class="ds-form-group" style="flex: 1;">
-            <label class="ds-form-label">Base Branch</label>
-            <select class="ds-form-input" id="base-branch">
+
+        <!-- Push to Branch: Vertical Layout -->
+        <div class="branch-config-push" id="branch-config-push">
+          <!-- Branch Selection Dropdown -->
+          <div class="ds-form-group">
+            <label class="ds-form-label">Select Branch</label>
+            <select class="ds-input" id="branch-select">
               ${this.options.availableBranches && this.options.availableBranches.length > 0 ?
                 this.options.availableBranches.map(branch =>
                   `<option value="${branch}" ${branch === defaultBranch ? 'selected' : ''}>${branch}</option>`
                 ).join('') :
                 `<option value="${defaultBranch}">${defaultBranch}</option>`
               }
-              <option value="__create_new__">+ Create new branch</option>
+            </select>
+          </div>
+
+          <!-- Create New Branch Section -->
+          <div class="create-branch-section" style="background: #F8F9FA; padding: 8px; border-radius: 8px; margin-top: 4px;">
+            <!-- Create New Branch Checkbox -->
+            <div class="ds-form-group" style="margin-bottom: 0;">
+              <label class="ds-checkbox-label">
+                <input
+                  type="checkbox"
+                  class="ds-checkbox"
+                  id="create-new-branch-checkbox"
+                  onchange="console.log('Checkbox changed:', this.checked);
+                    const newInput = document.getElementById('new-branch-input');
+                    const branchDropdown = document.getElementById('branch-select');
+                    if (this.checked) {
+                      newInput.style.display = 'block';
+                      branchDropdown.disabled = true;
+                      branchDropdown.style.opacity = '0.5';
+                      branchDropdown.style.cursor = 'not-allowed';
+                      branchDropdown.style.padding = '3px 4px';
+                    } else {
+                      newInput.style.display = 'none';
+                      branchDropdown.disabled = false;
+                      branchDropdown.style.opacity = '1';
+                      branchDropdown.style.cursor = 'pointer';
+                      branchDropdown.style.padding = '';
+                    }"
+                >
+                <span>Create new branch instead</span>
+              </label>
+            </div>
+
+            <!-- New Branch Name Input (Hidden by Default) -->
+            <div class="ds-form-group" id="new-branch-input" style="display: none;">
+              <label class="ds-form-label" style="font-size: 12px;">New Branch Name</label>
+              <input
+                type="text"
+                class="ds-input"
+                id="new-branch-name"
+                placeholder="feature/update-tokens"
+                style="font-size: 11px; height: 32px; padding: 3px 6px;"
+              >
+              <div class="ds-form-help" style="font-size: 11px;">Enter a name for your new branch</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create PR: Two Field Layout (Future Feature - Hidden) -->
+        <div class="branch-config-pr" id="branch-config-pr" style="display: none;">
+          <div class="ds-form-group">
+            <label class="ds-form-label">From Branch (Your Feature Branch)</label>
+            <input
+              type="text"
+              class="ds-input"
+              id="from-branch"
+              value="${this.prDetails.branchName}"
+              placeholder="feature/update-tokens"
+            >
+            <div class="ds-form-help">The branch where your changes are</div>
+          </div>
+          <div class="ds-form-group" style="margin-top: 16px;">
+            <label class="ds-form-label">To Branch (Base Branch)</label>
+            <select class="ds-input" id="to-branch">
+              ${this.options.availableBranches && this.options.availableBranches.length > 0 ?
+                this.options.availableBranches.map(branch =>
+                  `<option value="${branch}" ${branch === defaultBranch ? 'selected' : ''}>${branch}</option>`
+                ).join('') :
+                `<option value="${defaultBranch}">${defaultBranch}</option>`
+              }
             </select>
           </div>
         </div>
@@ -522,9 +849,9 @@ export class PRWorkflowUI {
       </div>
 
       <!-- Workflow Trigger Section -->
-      <div class="section" style="margin-top: 16px;">
-        <div class="form-group">
-          <label class="ds-checkbox-label">
+      <div class="section" style="margin-top: 16px; display: none;">
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <label class="ds-checkbox-label" style="margin: 0;">
             <input
               type="checkbox"
               class="ds-checkbox"
@@ -532,8 +859,8 @@ export class PRWorkflowUI {
               ${workflowSettings.workflowTriggerEnabled ? 'checked' : ''}
             >
             <span>Trigger CI/CD workflow after push</span>
-            <span class="ds-learn-more" onclick="showCICDTooltip()"><i class="ph-info" data-weight="fill"></i></span>
           </label>
+          <span class="ds-info-icon" data-tooltip="Click for more info" onclick="console.log('Info icon clicked'); showCICDTooltip();"><i class="ph-info" data-weight="fill"></i></span>
         </div>
 
         <div id="workflow-config" style="display: ${workflowSettings.workflowTriggerEnabled ? 'block' : 'none'}; margin-left: 24px; margin-top: 12px;">
@@ -563,7 +890,7 @@ export class PRWorkflowUI {
 
   <script>
     let currentAction = 'push-to-branch';
-    let isNewBranch = true;
+    let isNewBranch = true;  // Default, but will be updated based on initial selection
 
     function toggleCollections() {
       const list = document.getElementById('collections-list');
@@ -611,6 +938,72 @@ export class PRWorkflowUI {
       // Store original value for when user switches back to create new
       branchNameInput.setAttribute('data-original-value', branchNameInput.value);
 
+      // Debug: Check if page has loaded completely
+      console.log('🔍 STARTUP DEBUG:');
+      console.log('Document ready state:', document.readyState);
+      console.log('All elements in document:', document.querySelectorAll('*').length);
+      console.log('Looking for checkbox...');
+
+      // Handle create new branch checkbox
+      const createNewBranchCheckbox = document.getElementById('create-new-branch-checkbox');
+      const newBranchInput = document.getElementById('new-branch-input');
+
+      console.log('🔍 DEBUG: Element lookup results:');
+      console.log('createNewBranchCheckbox:', createNewBranchCheckbox);
+      console.log('newBranchInput:', newBranchInput);
+
+      // Debug: Show what IDs exist
+      const allElements = document.querySelectorAll('[id]');
+      console.log('All elements with IDs:', Array.from(allElements).map(el => el.id));
+
+      if (createNewBranchCheckbox && newBranchInput) {
+        createNewBranchCheckbox.addEventListener('change', function() {
+          console.log('📝 checkbox change event fired:', this.checked);
+
+          const branchDropdown = document.getElementById('branch-select');
+
+          if (this.checked) {
+            console.log('✅ Showing new branch input');
+            newBranchInput.style.display = 'block';
+
+            // Disable and style dropdown
+            if (branchDropdown) {
+              branchDropdown.disabled = true;
+              branchDropdown.style.opacity = '0.5';
+              branchDropdown.style.cursor = 'not-allowed';
+              branchDropdown.style.padding = '3px 4px';
+            }
+
+            const nameInput = document.getElementById('new-branch-name');
+            if (nameInput) {
+              setTimeout(() => nameInput.focus(), 100);
+            }
+          } else {
+            console.log('❌ Hiding new branch input');
+            newBranchInput.style.display = 'none';
+
+            // Re-enable and style dropdown
+            if (branchDropdown) {
+              branchDropdown.disabled = false;
+              branchDropdown.style.opacity = '1';
+              branchDropdown.style.cursor = 'pointer';
+              branchDropdown.style.padding = '';
+            }
+
+            const nameInput = document.getElementById('new-branch-name');
+            if (nameInput) {
+              nameInput.value = '';
+            }
+          }
+        });
+        console.log('✅ Checkbox event listener added');
+      } else {
+        console.error('❌ Could not find checkbox elements:', {
+          createNewBranchCheckbox: !!createNewBranchCheckbox,
+          newBranchInput: !!newBranchInput
+        });
+      }
+
       // Handle workflow trigger checkbox
       const workflowCheckbox = document.getElementById('enable-workflow-trigger');
       const workflowConfig = document.getElementById('workflow-config');
@@ -625,6 +1018,11 @@ export class PRWorkflowUI {
     });
 
     function selectAction(action) {
+      // Prevent selection of disabled PR option
+      if (action === 'create-pr') {
+        return;
+      }
+
       currentAction = action;
 
       // Update tabs
@@ -640,10 +1038,6 @@ export class PRWorkflowUI {
         branchTab.classList.add('active');
         prFields.classList.remove('visible');
         submitBtn.textContent = 'Push to Branch';
-      } else {
-        prTab.classList.add('active');
-        prFields.classList.add('visible');
-        submitBtn.textContent = 'Create Pull Request';
       }
     }
 
@@ -652,8 +1046,22 @@ export class PRWorkflowUI {
     }
 
     function handleSubmit() {
-      const baseBranchValue = document.getElementById('base-branch').value;
-      const actualBaseBranch = baseBranchValue === '__create_new__' ? 'main' : baseBranchValue;
+      // Get branch information from new structure
+      const branchSelect = document.getElementById('branch-select');
+      const createNewBranchCheckbox = document.getElementById('create-new-branch-checkbox');
+      let branchName, baseBranch, isNewBranch;
+
+      if (createNewBranchCheckbox.checked) {
+        // Creating new branch
+        branchName = document.getElementById('new-branch-name').value.trim();
+        baseBranch = 'main'; // Default base for new branches
+        isNewBranch = true;
+      } else {
+        // Using existing branch
+        branchName = branchSelect.value;
+        baseBranch = branchSelect.value; // Same as branch name for direct push
+        isNewBranch = false;
+      }
 
       // Get workflow trigger config
       const workflowEnabled = document.getElementById('enable-workflow-trigger').checked;
@@ -661,10 +1069,10 @@ export class PRWorkflowUI {
 
       const details = {
         action: currentAction,
-        branchName: document.getElementById('branch-name').value.trim(),
-        baseBranch: actualBaseBranch,
+        branchName: branchName,
+        baseBranch: baseBranch,
         commitMessage: document.getElementById('commit-message').value.trim(),
-        prTitle: document.getElementById('pr-title').value.trim(),
+        prTitle: '', // Not used for push-to-branch
         isNewBranch: isNewBranch,
         workflowTrigger: workflowEnabled ? {
           enabled: true,
@@ -703,11 +1111,17 @@ export class PRWorkflowUI {
 
     // CI/CD Tooltip functions
     function showCICDTooltip() {
+      console.log('showCICDTooltip called');
       const overlay = document.getElementById('cicd-tooltip-overlay');
       const tooltip = document.getElementById('cicd-tooltip');
+      console.log('overlay:', overlay);
+      console.log('tooltip:', tooltip);
       if (overlay && tooltip) {
+        console.log('Adding visible classes');
         overlay.classList.add('visible');
         tooltip.classList.add('visible');
+      } else {
+        console.log('Elements not found');
       }
     }
 
@@ -722,6 +1136,39 @@ export class PRWorkflowUI {
 
     window.showCICDTooltip = showCICDTooltip;
     window.hideCICDTooltip = hideCICDTooltip;
+
+    // Initialize isNewBranch based on the currently selected branch
+    function initializeBranchState() {
+      const baseBranchSelect = document.getElementById('base-branch');
+      const branchNameInput = document.getElementById('branch-name');
+      const newTag = document.getElementById('new-tag');
+
+      if (baseBranchSelect && branchNameInput) {
+        const selectedValue = baseBranchSelect.value;
+        if (selectedValue === '__create_new__') {
+          isNewBranch = true;
+          newTag.style.display = 'inline-block';
+          branchNameInput.disabled = false;
+        } else {
+          // User has selected an existing branch
+          isNewBranch = false;
+          newTag.style.display = 'none';
+          branchNameInput.value = selectedValue;
+          branchNameInput.disabled = true;
+        }
+        console.log('🔧 Initialized branch state: isNewBranch=' + isNewBranch + ', selectedBranch=' + selectedValue);
+      }
+    }
+
+    // Initialize when the page loads
+    document.addEventListener('DOMContentLoaded', initializeBranchState);
+
+    // Also initialize immediately in case DOM is already ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeBranchState);
+    } else {
+      initializeBranchState();
+    }
   </script>
 
   <!-- CI/CD Workflow Tooltip -->
@@ -848,35 +1295,14 @@ export class PRWorkflowUI {
       outline-offset: 2px;
     }
 
-    .btn-done {
-      width: 100%;
-      padding: 12px;
-      background: #DEE3FC;
-      color: var(--color-text-primary);
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-done:hover {
-      background: #7C2D92;
-      color: white;
-    }
-
-    .btn-done:focus {
-      outline: 2px solid #DEE3FC;
-      outline-offset: 2px;
-    }
+    /* Removed custom .btn-done styles to let design system .ds-btn styles take precedence */
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon"><i class="ph-check-circle" data-weight="fill" style="color: #16a34a;"></i></div>
+    <div class="icon"><i class="ph-rocket-launch" data-weight="fill" style="color: #9DD4C8;"></i></div>
     <h1 class="title">${isPR ? 'Pull Request Created!' : 'Pushed to Branch!'}</h1>
-    <p class="subtitle">${isPR ? 'Your tokens are ready for review' : 'Your tokens have been committed'}</p>
+    <p class="subtitle">${isPR ? 'Your tokens are ready for review' : 'Your Tokens are now ready to be consumed!'}</p>
 
     <div class="details">
       ${isPR && success.prNumber ? `

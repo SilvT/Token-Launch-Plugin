@@ -126,6 +126,31 @@ export class ExportChoiceUI {
             box-shadow: var(--shadow-md);
           }
 
+          .choice-button.selected {
+            border: 3px solid #C084FC;
+            background: rgba(252, 227, 224, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(192, 132, 252, 0.15);
+          }
+
+          .choice-button.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            background: #C084FC;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1;
+          }
+
           .choice-button.primary {
             background: var(--color-gradient);
             color: white;
@@ -291,7 +316,14 @@ export class ExportChoiceUI {
             button.addEventListener('click', (e) => {
               const choice = button.getAttribute('data-choice');
               if (!button.classList.contains('disabled')) {
-                handleChoice(choice);
+                // Remove selected class from all buttons
+                document.querySelectorAll('.choice-button').forEach(btn => btn.classList.remove('selected'));
+                // Add selected class to clicked button
+                button.classList.add('selected');
+                // Wait a moment to show selection, then proceed
+                setTimeout(() => {
+                  handleChoice(choice);
+                }, 200);
               }
             });
           });

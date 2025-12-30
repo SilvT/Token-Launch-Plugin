@@ -658,11 +658,20 @@ export class GitOperations {
 
     } catch (error) {
       ClientTracker.log('❌ GitOperations.createBranch - Failed', error);
-      console.error('❌ Failed to create branch:', error);
 
+      // Special handling for "Reference already exists" error
+      const errorMessage = this.parseGitError(error);
+      if (errorMessage.includes('Reference already exists')) {
+        // This is actually OK - the branch already exists, so we can just use it
+        debugLog.githubDebug(`ℹ️ Branch ${branchName} already exists, which is fine for our use case`);
+        console.log(`ℹ️ Branch ${branchName} already exists, proceeding...`);
+        return { success: true };
+      }
+
+      console.error('❌ Failed to create branch:', error);
       return {
         success: false,
-        error: this.parseGitError(error)
+        error: errorMessage
       };
     }
   }

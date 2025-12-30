@@ -16,9 +16,147 @@ export const generateDesignSystemHead = (): string => {
   `;
 };
 
+// Generate CSS custom properties from design system tokens
+export const generateCSSCustomProperties = (): string => {
+  return `
+    :root {
+      /* Primary Colors */
+      --color-primary-50: ${COLORS.primary[50]};
+      --color-primary-100: ${COLORS.primary[100]};
+      --color-primary-200: ${COLORS.primary[200]};
+      --color-primary-300: ${COLORS.primary[300]};
+      --color-primary-400: ${COLORS.primary[400]};
+      --color-primary: ${COLORS.primary[400]};
+      --color-primary-500: ${COLORS.primary[500]};
+      --color-primary-600: ${COLORS.primary[600]};
+      --color-primary-700: ${COLORS.primary[700]};
+      --color-primary-800: ${COLORS.primary[800]};
+      --color-primary-900: ${COLORS.primary[900]};
+      --color-primary-light: ${COLORS.primary[400]};
+      --color-primary-dark: ${COLORS.primary[500]};
+      --color-primary-extraDark: ${COLORS.primary[700]};
+      --color-primary-background: ${COLORS.primary[50]};
+
+      /* Neutral/Grey Colors */
+      --color-neutral-50: ${COLORS.neutral[50]};
+      --color-neutral-100: ${COLORS.neutral[100]};
+      --color-neutral-500: ${COLORS.neutral[500]};
+      --color-neutral-900: ${COLORS.neutral[900]};
+      --color-black: ${COLORS.black};
+      --color-white: ${COLORS.white};
+      --color-grey-50: ${COLORS.grey[50]};
+      --color-grey-100: ${COLORS.grey[100]};
+      --color-grey-200: ${COLORS.grey[200]};
+      --color-grey-300: ${COLORS.grey[300]};
+      --color-grey-400: ${COLORS.grey[400]};
+      --color-grey-500: ${COLORS.grey[500]};
+      --color-grey-600: ${COLORS.grey[600]};
+      --color-grey-700: ${COLORS.grey[700]};
+      --color-grey-800: ${COLORS.grey[800]};
+      --color-grey-900: ${COLORS.grey[900]};
+
+      /* Lavender Colors */
+      --color-lavender-100: ${COLORS.lavender[100]};
+      --color-lavender-200: ${COLORS.lavender[200]};
+      --color-lavender-300: ${COLORS.lavender[300]};
+      --color-lavender-400: ${COLORS.lavender[400]};
+
+      /* Mint Colors */
+      --color-mint-100: ${COLORS.mint[100]};
+      --color-mint-200: ${COLORS.mint[200]};
+      --color-mint-300: ${COLORS.mint[300]};
+      --color-mint-400: ${COLORS.mint[400]};
+      --color-mint-500: ${COLORS.mint[500]};
+      --color-mint-600: ${COLORS.mint[600]};
+      --color-mint-700: ${COLORS.mint[700]};
+      --color-mint-800: ${COLORS.mint[800]};
+      --color-mint-900: ${COLORS.mint[900]};
+
+      /* Blush Colors */
+      --color-blush-50: ${COLORS.blush[50]};
+      --color-blush-100: ${COLORS.blush[100]};
+      --color-blush-200: ${COLORS.blush[200]};
+      --color-blush-300: ${COLORS.blush[300]};
+      --color-blush-400: ${COLORS.blush[400]};
+
+      /* Text Colors */
+      --color-text-primary: ${COLORS.neutral[900]};
+      --color-text-secondary: ${COLORS.neutral[500]};
+      --color-text-tertiary: ${COLORS.grey[600]};
+      --color-text-disabled: ${COLORS.grey[400]};
+      --color-text-light: ${COLORS.white};
+
+      /* Background Colors */
+      --color-background-primary: ${COLORS.white};
+      --color-background-secondary: ${COLORS.neutral[100]};
+      --color-background-tertiary: ${COLORS.grey[50]};
+      --color-background-overlay: rgba(15, 17, 18, 0.3);
+      --color-background-gradient: linear-gradient(135deg, ${COLORS.lavender[300]} 0%, ${COLORS.blush[200]} 100%);
+
+      /* State Colors */
+      --color-success: ${COLORS.state.success.text};
+      --color-success-light: ${COLORS.state.success.bg};
+      --color-success-dark: ${COLORS.state.success.text};
+      --color-success-border: ${COLORS.state.success.border};
+
+      --color-error: ${COLORS.state.error.text};
+      --color-error-light: ${COLORS.state.error.bg};
+      --color-error-dark: ${COLORS.state.error.text};
+      --color-error-border: ${COLORS.state.error.border};
+
+      --color-warning: ${COLORS.state.warning.text};
+      --color-warning-light: ${COLORS.state.warning.bg};
+      --color-warning-dark: ${COLORS.state.warning.text};
+      --color-warning-border: ${COLORS.state.warning.border};
+
+      --color-info: ${COLORS.state.info.text};
+      --color-info-light: ${COLORS.state.info.bg};
+      --color-info-dark: ${COLORS.state.info.text};
+      --color-info-border: ${COLORS.state.info.border};
+
+      /* Border Colors */
+      --color-border: ${COLORS.grey[200]};
+      --color-border-active: ${COLORS.primary[400]};
+      --color-border-input: ${COLORS.grey[200]};
+      --color-border-hover: ${COLORS.primary[500]};
+
+      /* Hover States */
+      --color-hover-bg: rgba(15, 17, 18, 0.02);
+
+      /* Spacing */
+      --spacing-0: ${SPACING[0]};
+      --spacing-1: ${SPACING[1]};
+      --spacing-2: ${SPACING[2]};
+      --spacing-3: ${SPACING[3]};
+      --spacing-4: ${SPACING[4]};
+      --spacing-5: ${SPACING[5]};
+      --spacing-6: ${SPACING[6]};
+      --spacing-7: ${SPACING[7]};
+      --spacing-8: ${SPACING[8]};
+
+      /* Transitions */
+      --transition-fast: ${TRANSITIONS.fast};
+      --transition-base: ${TRANSITIONS.base};
+      --transition-slow: ${TRANSITIONS.slow};
+      --transition-slower: ${TRANSITIONS.slower};
+      --transition-default: ${TRANSITIONS.base};
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(15, 17, 18, 0.05);
+      --shadow-md: 0 2px 8px 0 rgba(15, 17, 18, 0.04);
+      --shadow-lg: 0 4px 12px 0 rgba(15, 17, 18, 0.08);
+      --shadow-xl: 0 8px 24px 0 rgba(15, 17, 18, 0.12);
+
+      /* Typography */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    }
+  `;
+};
+
 // Generate complete CSS for the design system
 export const generateDesignSystemCSS = (): string => {
   return `
+    ${generateCSSCustomProperties()}
     ${ANIMATIONS_CSS}
 
     /* Design System Base Styles */
@@ -301,6 +439,119 @@ export const generateDesignSystemCSS = (): string => {
     .ds-justify-center { justify-content: center; }
     .ds-justify-between { justify-content: space-between; }
     .ds-text-center { text-align: center; }
+
+    /* Form Help Text */
+    .ds-form-help {
+      font-size: 12px;
+      color: ${COLORS.grey[600]};
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Checkbox Styles */
+    .ds-checkbox {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid ${COLORS.grey[300]};
+      border-radius: 3px;
+      background-color: ${COLORS.white};
+      cursor: pointer;
+      position: relative;
+      margin-right: 8px;
+      transition: all 150ms ease;
+    }
+
+    .ds-checkbox:hover {
+      border-color: ${COLORS.primary[400]};
+    }
+
+    .ds-checkbox:checked {
+      background-color: ${COLORS.primary[400]};
+      border-color: ${COLORS.primary[400]};
+    }
+
+    .ds-checkbox:checked::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 8px;
+      border: solid ${COLORS.white};
+      border-width: 0 2px 2px 0;
+      transform: translate(-50%, -60%) rotate(45deg);
+    }
+
+    .ds-checkbox:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .ds-checkbox:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: ${COLORS.grey[50]};
+      border-color: ${COLORS.grey[200]};
+    }
+
+    .ds-checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 20px;
+      color: ${COLORS.grey[900]};
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ds-checkbox-label:hover .ds-checkbox {
+      border-color: ${COLORS.primary[400]};
+    }
+
+    /* Info Icon Tooltip Styles */
+    .ds-info-icon {
+      position: relative;
+      cursor: pointer;
+      color: ${COLORS.grey[600]};
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 150ms ease;
+      margin-left: 8px;
+    }
+
+    .ds-info-icon:hover {
+      background-color: ${COLORS.primary[300]};
+      color: ${COLORS.white};
+    }
+
+    .ds-info-icon[data-tooltip]:hover::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: ${COLORS.black};
+      color: ${COLORS.white};
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1000;
+      margin-bottom: 4px;
+    }
+
+    .ds-info-icon[data-tooltip]:hover::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: ${COLORS.black};
+      z-index: 1000;
+    }
   `;
 };
 
@@ -462,4 +713,23 @@ export const createIconWithText = (
       <span class="ds-body">${text}</span>
     </div>
   `;
+};
+
+export const createInfoIcon = (
+  options: {
+    tooltip?: string;
+    onclick?: string;
+    className?: string;
+  } = {}
+): string => {
+  const classes = ['ds-info-icon'];
+  if (options.className) classes.push(options.className);
+
+  const attributes = [
+    `class="${classes.join(' ')}"`,
+    options.tooltip ? `data-tooltip="${options.tooltip}"` : '',
+    options.onclick ? `onclick="${options.onclick}"` : '',
+  ].filter(Boolean).join(' ');
+
+  return `<span ${attributes}><i class="ph-info" data-weight="fill"></i></span>`;
 };
