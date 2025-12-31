@@ -33,6 +33,12 @@ export const COLORS = {
 
   // Lavender/Purple system (from fintech reference)
   lavender: {
+    950: '#7C2D92;',  // Ultra deep lavender
+    900: '#2E32F4',  // Deepest lavender
+    800: '#3F46F9',  // Darkest lavender
+    700: '#5A5FF3',  // Dark lavender
+    600: '#7C82F7',  // Deep lavender
+    500: '#A3A6F0',  // Medium lavender
     400: '#D7D9F6',  // Richest lavender
     300: '#DEE3FC',  // Medium lavender
     200: '#E8E9FD',  // Light lavender

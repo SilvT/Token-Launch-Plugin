@@ -38,7 +38,8 @@
       "Bash(rm:*)",
       "Bash(npx tsc:*)",
       "Bash(git checkout:*)",
-      "Bash(time npm run build)"
+      "Bash(time npm run build)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
