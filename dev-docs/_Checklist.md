@@ -89,7 +89,7 @@
   - [x]Compile and unify documentation
   - [ ]research if the window's top bar (X, name etc..) can be changed or styled
   - [ ] Error handling missing: validation checks before allowing the push? (e.g., checking if branch exists, if there are conflicts)
-- [ ] Change Name to Token Launch
+- [x] Change Name to Token Launch
 
 ---
 ---
