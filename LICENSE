@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Silvia T.
+Copyright (c) 2026 Silvia Travieso
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,18 @@ SOFTWARE.
 
 ---
 
+COPYRIGHT NOTICE
+
+Token Launch - Figma Plugin for Design Token Automation
+Copyright (c) 2025 Silvia T. <silvtgit@gmail.com>
+
+This plugin connects Figma designs to development workflows by automatically
+extracting design tokens and pushing them to GitHub repositories. The software
+is released under the MIT License, granting broad permissions for use,
+modification, and distribution.
+
+---
+
 TRADEMARK NOTICE
 
 "Token Launch" and associated branding are trademarks of Silvia T.
@@ -33,3 +45,20 @@ While this software is licensed under MIT, the author reserves the right to offe
 commercial versions, premium features, or commercial licenses in the future.
 This license applies to the current version (1.x) and does not restrict the
 author's ability to release future versions under different terms.
+
+---
+
+THIRD-PARTY LICENSES AND ATTRIBUTIONS
+
+This software incorporates the following open-source libraries and resources:
+
+- Phosphor Icons (MIT License) - https://github.com/phosphor-icons/phosphor-icons
+- Phosphor React (MIT License) - https://github.com/phosphor-icons/phosphor-react
+- Octokit (MIT License) - https://github.com/octokit/octokit.js
+- Create Figma Plugin Utilities (MIT License) - https://github.com/yuanqing/create-figma-plugin
+- Simple Git (MIT License) - https://github.com/steveukx/git-js
+- Task Master AI - https://www.npmjs.com/package/task-master-ai
+
+Icon assets served via unpkg.com CDN.
+
+All third-party licenses are preserved and available in their respective repositories.

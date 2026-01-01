@@ -1,4 +1,8 @@
 /**
+ * Token Launch - Figma Plugin for Design Token Automation
+ * Copyright (c) 2026 Silvia Travieso
+ * Licensed under the MIT License
+ *
  * Unified Export UI with Integrated GitHub Setup
  *
  * Combines export choice and GitHub setup into a single tabbed interface

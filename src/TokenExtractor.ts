@@ -1,4 +1,8 @@
 /**
+ * Token Launch - Figma Plugin for Design Token Automation
+ * Copyright (c) 2026 Silvia Travieso
+ * Licensed under the MIT License
+ *
  * TokenExtractor - Comprehensive design token extraction for Token Launch
  *
  * This class handles extraction of all design token types from Figma documents,

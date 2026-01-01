@@ -1,4 +1,8 @@
 /**
+ * Token Launch - Figma Plugin for Design Token Automation
+ * Copyright (c) 2026 Silvia Travieso
+ * Licensed under the MIT License
+ *
  * Error Handler
  *
  * Central error handling utility that classifies errors,

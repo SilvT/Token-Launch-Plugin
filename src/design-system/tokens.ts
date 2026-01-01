@@ -1,3 +1,11 @@
+/**
+ * Token Launch - Figma Plugin for Design Token Automation
+ * Copyright (c) 2026 Silvia Travieso
+ * Licensed under the MIT License
+ *
+ * Design System Tokens
+ */
+
 export const PLUGIN_DIMENSIONS = {
   DEFAULT_WIDTH: 480,
   DEFAULT_HEIGHT: 750,  // Increased to accommodate full content without scroll

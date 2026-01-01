@@ -631,7 +631,7 @@ That's it! Your design tokens are now in sync with your codebase.
 
 **Recommended:**
 ```
-Email: 99726377+SilvT@users.noreply.github.com
+Email: silvtgit@gmail.com
 GitHub Issues: https://github.com/SilvT/Token-Launch-Plugin/issues
 FAQ: https://github.com/SilvT/Token-Launch-Plugin/blob/main/FAQ.md
 Privacy Policy: https://github.com/SilvT/Token-Launch-Plugin/blob/main/PRIVACY.md

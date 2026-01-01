@@ -2,11 +2,11 @@
   "name": "token-launch",
   "version": "1.3.1",
   "description": "Token Launch - Connect your design to development automatically. Extract design tokens from Figma and push to GitHub with one click.",
-  "author": "Silvia T. <99726377+SilvT@users.noreply.github.com>",
+  "author": "Silvia T. <silvtgit@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SilvT/Figma-Design-System-Distributor.git"
+    "url": "https://github.com/SilvT/Token-Launch-Plugin.git"
   },
   "keywords": [
     "figma",
