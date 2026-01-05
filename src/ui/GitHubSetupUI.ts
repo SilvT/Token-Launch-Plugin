@@ -901,11 +901,9 @@ export class GitHubSetupUI {
 
         // Fetch available branches using direct API call
         try {
-          console.log('🌿 Starting branch fetching...');
           const token = this.currentConfig.credentials.token;
           const url = `https://api.github.com/repos/${trimmedOwner}/${trimmedName}/branches`;
 
-          console.log('🌿 Fetching branches from:', url);
           const response = await fetch(url, {
             headers: {
               'Authorization': `token ${token}`,
@@ -931,7 +929,6 @@ export class GitHubSetupUI {
           });
         } catch (branchError) {
           // If branch fetching fails, still show success but without branch dropdown
-          console.error('🌿 Branch fetch error details:', branchError);
           figma.ui.postMessage({
             type: 'repository-validation-result',
             success: true,

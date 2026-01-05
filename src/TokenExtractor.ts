@@ -447,10 +447,14 @@ export class TokenExtractor {
     try {
       // Extract from local text styles
       const textStyles = figma.getLocalTextStyles();
+      console.log(`📝 Found ${textStyles.length} local text styles`);
+
       for (const style of textStyles) {
         try {
+          console.log(`📝 Processing text style: "${style.name}"`);
           const typographyToken = this.convertTextStyleToTypographyToken(style);
           if (typographyToken) {
+            console.log(`✅ Successfully converted text style: "${style.name}" to typography token`);
             typographyTokens.push(typographyToken);
           }
         } catch (error) {
@@ -518,10 +522,14 @@ export class TokenExtractor {
     try {
       // Extract from local effect styles
       const effectStyles = figma.getLocalEffectStyles();
+      console.log(`✨ Found ${effectStyles.length} local effect styles`);
+
       for (const style of effectStyles) {
         try {
+          console.log(`✨ Processing effect style: "${style.name}"`);
           const effectToken = this.convertEffectStyleToEffectToken(style);
           if (effectToken) {
+            console.log(`✅ Successfully converted effect style: "${style.name}" to effect token`);
             effectTokens.push(effectToken);
           }
         } catch (error) {

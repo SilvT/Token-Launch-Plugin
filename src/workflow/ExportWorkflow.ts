@@ -246,7 +246,6 @@ export class ExportWorkflow {
         availableBranches = await this.gitOps.listBranches(repository);
         console.log('   Available branches:', availableBranches);
       } catch (error) {
-        console.warn('⚠️ Could not fetch branches:', error);
         // Continue with just the base branch if fetch fails
         availableBranches = [baseBranch];
       }
