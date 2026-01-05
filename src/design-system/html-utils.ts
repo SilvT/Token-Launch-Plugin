@@ -195,13 +195,24 @@ export const generateDesignSystemCSS = (): string => {
     }
 
     .ds-btn-secondary {
-      background-color: ${COLORS.white};
-      color: ${COLORS.black};
-      border: 2px solid ${COLORS.black};
+      background-color: transparent;
+      color: ${COLORS.grey[900]};
+      border: 2px solid ${COLORS.grey[900]};
     }
 
     .ds-btn-secondary:hover:not(:disabled) {
-      background-color: ${COLORS.grey[50]};
+      background-color: ${COLORS.lavender[200]};
+    }
+
+    .ds-btn-secondary-filled {
+      background-color: ${COLORS.grey[900]};
+      color: ${COLORS.grey[50]};
+      border: 2px solid ${COLORS.grey[900]};
+    }
+
+    .ds-btn-secondary-filled:hover:not(:disabled) {
+      background-color: ${COLORS.grey[100]};
+      color: ${COLORS.grey[900]};
     }
 
     .ds-btn-tertiary {
@@ -567,7 +578,7 @@ export const generateDesignSystemCSS = (): string => {
 
 export const createButton = (
   text: string,
-  variant: 'primary' | 'secondary' | 'tertiary' = 'primary',
+  variant: 'primary' | 'secondary' | 'secondary-filled' | 'tertiary' = 'primary',
   options: {
     onclick?: string;
     disabled?: boolean;

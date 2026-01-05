@@ -23,15 +23,15 @@
     "octokit": "^5.0.3",
     "phosphor-icons": "^1.4.2",
     "phosphor-react": "^1.4.1",
-    "simple-git": "^3.28.0",
-    "task-master-ai": "^0.28.0"
+    "simple-git": "^3.28.0"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "^1.0.119",
+    "@anthropic-ai/claude-code": "^2.0.76",
     "@create-figma-plugin/build": "^4.0.3",
     "@create-figma-plugin/tsconfig": "^4.0.3",
     "@figma/plugin-typings": "^1.109.0",
     "@types/node": "^24.5.2",
+    "baseline-browser-mapping": "^2.9.11",
     "typescript": ">=5"
   },
   "scripts": {
@@ -45,6 +45,7 @@
     ],
     "id": "token-launch",
     "name": "Token Launch",
+    "api": "1.0.0",
     "main": "src/main.ts",
     "documentAccess": "current-page",
     "networkAccess": {
@@ -53,6 +54,6 @@
         "https://unpkg.com"
       ],
       "reasoning": "Required for GitHub integration and Phosphor Icons CDN - GitHub API for pushing design tokens and unpkg.com for icon fonts"
-    }    
+    }
   }
 }

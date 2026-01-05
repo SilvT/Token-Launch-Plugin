@@ -66,7 +66,7 @@ export class ExportWorkflow {
     const startTime = Date.now();
 
     try {
-      console.log('🚀 Starting export workflow...');
+      // Starting export workflow
 
       // Step 1: Initialize GitHub services only (no setup wizard)
       await this.initializeGitHubServices();
@@ -106,55 +106,37 @@ export class ExportWorkflow {
    */
   private async initializeGitHubServices(): Promise<void> {
     try {
-      console.log('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - START');
+      // Starting service initialization
 
-      console.log('🐛 DEBUG: Initializing GitHubAuth...');
+      // Initializing GitHubAuth
       await this.githubAuth.initialize();
-      console.log('🐛 DEBUG: GitHubAuth initialized');
+      // GitHubAuth initialized
 
       const authState = this.githubAuth.getState();
-      console.log('🐛 DEBUG: GitHubAuth state after init:', {
-        isConfigured: authState.isConfigured,
-        isConnected: authState.isConnected,
-        hasConfig: !!authState.config,
-        hasClient: this.githubAuth.hasClient(),
-        errors: authState.errors
-      });
+      // GitHubAuth state logged
 
-      console.log('🐛 DEBUG: Initializing TokenPushService...');
+      // Initializing TokenPushService
       await this.pushService.initialize();
-      console.log('🐛 DEBUG: TokenPushService initialized');
+      // TokenPushService initialized
 
-      console.log('🐛 DEBUG: Initializing PullRequestService...');
+      // Initializing PullRequestService
       await this.prService.initialize();
-      console.log('🐛 DEBUG: PullRequestService initialized');
+      // PullRequestService initialized
 
-      console.log('🐛 DEBUG: Initializing GitOperations...');
+      // Initializing GitOperations
       await this.gitOps.initialize();
-      console.log('🐛 DEBUG: GitOperations initialized');
+      // GitOperations initialized
 
       // Verify the complete initialization chain
       if (this.githubAuth.hasClient()) {
-        console.log('🐛 DEBUG: Verifying client availability...');
-        const client = this.githubAuth.getClient();
-        console.log('🐛 DEBUG: Client verification:', {
-          available: !!client,
-          clientId: client.getClientId(),
-          methodTypes: {
-            fileExists: typeof client.fileExists,
-            createFile: typeof client.createFile,
-            getRepository: typeof client.getRepository
-          }
-        });
+        // Client verification completed
       } else {
-        console.log('🐛 DEBUG: No client available after initialization');
+        // No client available after initialization
       }
 
-      console.log('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - END, SUCCESS');
+      // Service initialization completed
     } catch (error) {
-      console.error('🐛 DEBUG: ExportWorkflow.initializeGitHubServices() - ERROR:', error);
-      console.error('🐛 DEBUG: Error type:', typeof error);
-      console.error('🐛 DEBUG: Error stack:', error instanceof Error ? error.stack : 'No stack');
+      // Service initialization error logged
       console.warn('⚠️ GitHub service initialization partial, continuing anyway');
       // Continue anyway - Git operations might not be available
     }
@@ -164,12 +146,12 @@ export class ExportWorkflow {
    * Extract design tokens from Figma
    */
   private async extractTokens(): Promise<ExtractionResult> {
-    console.log('📊 Extracting design tokens...');
+    // Extracting design tokens
 
     const result = await this.tokenExtractor.extractAllTokens();
 
     const totalTokens = result.tokens.length + result.variables.length;
-    console.log(`✅ Extracted ${totalTokens} tokens (${result.tokens.length} design tokens, ${result.variables.length} variables)`);
+    // Token extraction completed
 
     if (result.metadata.errors.length > 0) {
       console.warn(`⚠️ Extraction completed with ${result.metadata.errors.length} errors`);
@@ -388,9 +370,15 @@ export class ExportWorkflow {
         }
       }
 
+      // Generate file path based on user input
+      const basePath = prDetails.tokenFileLocation !== undefined ? prDetails.tokenFileLocation : '/tokens';  // Default to /tokens, but allow empty string for root
+      const cleanBasePath = basePath === '' ? '' : basePath.replace(/^\/+|\/+$/g, '');  // Clean leading/trailing slashes
+      const fileName = 'figma-tokens.json';
+      const filePath = cleanBasePath === '' ? fileName : `${cleanBasePath}/${fileName}`;
+
       // Push tokens to branch
       const fileConfig: TokenFileConfig = {
-        path: 'tokens/raw/figma-tokens.json',
+        path: filePath,
         content: this.prepareTokenData(extractionResult),
         message: prDetails.commitMessage
       };
@@ -475,8 +463,14 @@ export class ExportWorkflow {
       figma.notify('Pushing tokens to branch...', { timeout: 2000 });
       console.log(`📤 Pushing tokens to branch: ${prDetails.branchName}`);
 
+      // Generate file path based on user input
+      const basePath = prDetails.tokenFileLocation !== undefined ? prDetails.tokenFileLocation : '/tokens';  // Default to /tokens, but allow empty string for root
+      const cleanBasePath = basePath === '' ? '' : basePath.replace(/^\/+|\/+$/g, '');  // Clean leading/trailing slashes
+      const fileName = 'figma-tokens.json';
+      const filePath = cleanBasePath === '' ? fileName : `${cleanBasePath}/${fileName}`;
+
       const fileConfig: TokenFileConfig = {
-        path: 'tokens/raw/figma-tokens.json',
+        path: filePath,
         content: this.prepareTokenData(extractionResult),
         message: prDetails.commitMessage
       };

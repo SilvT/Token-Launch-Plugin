@@ -653,7 +653,7 @@ async function main(): Promise<void> {
     mainUIShown: 0
   };
 
-  log.critical(`\n🚀 Plugin launched`);
+  // Plugin launched
 
   try {
     // Step 1: Show loading screen IMMEDIATELY
@@ -662,7 +662,7 @@ async function main(): Promise<void> {
     userFacingTimings.loadingScreenShown = Date.now();
     const timeToLoadingScreen = userFacingTimings.loadingScreenShown - launchTime;
 
-    log.critical(`🎨 Loading screen visible (+${timeToLoadingScreen}ms)`);
+    // Loading screen visible
 
     timings['1_show_loading_screen'] = Date.now() - step1Start;
     log.debug(`⏱️  [${timings['1_show_loading_screen']}ms] Loading screen displayed`);

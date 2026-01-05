@@ -33,6 +33,7 @@ export interface PRDetails {
   prTitle?: string;
   prBody?: string;
   isNewBranch: boolean;
+  tokenFileLocation?: string;  // NEW: Optional token file location
   workflowTrigger?: WorkflowTriggerConfig;  // NEW: Optional workflow trigger config
 }
 
@@ -146,6 +147,16 @@ export class PRWorkflowUI {
       workflowTriggerEnabled: false,
       workflowFileName: 'transform-tokens.yml'
     };
+
+    // Get saved token file location (with fallback to default)
+    const getSavedTokenFileLocation = (): string => {
+      try {
+        return localStorage.getItem('tokenFileLocation') || '/tokens';
+      } catch (e) {
+        return '/tokens'; // Fallback if localStorage unavailable
+      }
+    };
+    const savedTokenFileLocation = getSavedTokenFileLocation();
 
     const html = `
 <!DOCTYPE html>
@@ -849,29 +860,19 @@ export class PRWorkflowUI {
         </div>
       </div>
 
-      <!-- File Paths & Commit Settings (Optional) -->
+      <!-- Token File Location (Optional) -->
       <div class="section">
-        <details class="accordion">
-          <summary class="accordion-summary">
-            <span class="accordion-title">File Paths & Commit Settings (Optional)</span>
-            <svg class="accordion-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6,9 12,15 18,9"></polyline>
-            </svg>
-          </summary>
-          <div class="accordion-content">
-            <div class="ds-form-group">
-              <label class="ds-form-label" for="token-file-location">Token File Location</label>
-              <input
-                type="text"
-                class="ds-input"
-                id="token-file-location"
-                value="/tokens"
-                placeholder="/tokens"
-              >
-              <div class="ds-form-help">Where your token files will be saved in the repository</div>
-            </div>
-          </div>
-        </details>
+        <div class="ds-form-group">
+          <label class="ds-form-label" for="token-file-location">Token File Location (Optional)</label>
+          <input
+            type="text"
+            class="ds-input"
+            id="token-file-location"
+            value="${savedTokenFileLocation}"
+            placeholder="leave empty for root level"
+          >
+          <div class="ds-form-help">Folder path in your repository (empty = root level)</div>
+        </div>
       </div>
 
       <!-- Commit Message -->
@@ -1108,6 +1109,19 @@ export class PRWorkflowUI {
       const workflowEnabled = document.getElementById('enable-workflow-trigger').checked;
       const workflowFileName = document.getElementById('workflow-filename').value.trim();
 
+      // Get token file location
+      const tokenFileLocationElement = document.getElementById('token-file-location');
+      const tokenFileLocationRaw = tokenFileLocationElement ? tokenFileLocationElement.value : '';
+      const tokenFileLocationValue = tokenFileLocationRaw.trim();
+      const tokenFileLocation = tokenFileLocationValue; // Keep empty string as is to allow root placement
+
+      // Save user's choice for next session
+      try {
+        localStorage.setItem('tokenFileLocation', tokenFileLocation);
+      } catch (e) {
+        // Silently fail if localStorage unavailable
+      }
+
       const details = {
         action: currentAction,
         branchName: branchName,
@@ -1115,6 +1129,7 @@ export class PRWorkflowUI {
         commitMessage: document.getElementById('commit-message').value.trim(),
         prTitle: '', // Not used for push-to-branch
         isNewBranch: isNewBranch,
+        tokenFileLocation: tokenFileLocation,
         workflowTrigger: workflowEnabled ? {
           enabled: true,
           workflowFileName: workflowFileName || 'transform-tokens.yml'
@@ -1282,7 +1297,7 @@ export class PRWorkflowUI {
     }
 
     .subtitle {
-      color: var(--color-text-secondary);
+      color: #1A1C1E;
       margin-bottom: 30px;
     }
 
@@ -1341,18 +1356,7 @@ export class PRWorkflowUI {
       outline-offset: 2px;
     }
 
-    .ds-btn-secondary {
-      background: var(--color-text-primary);
-      color: white;
-      border: none;
-    }
-
-    .ds-btn-secondary:hover {
-      background: var(--color-grey-700);
-      color: white;
-    }
-
-    /* Removed custom .btn-done styles to let design system .ds-btn styles take precedence */
+    /* Using design system button styles without overrides */
   </style>
 </head>
 <body>
@@ -1401,7 +1405,7 @@ export class PRWorkflowUI {
       </a>
     ` : ''}
 
-    <button class="ds-btn ds-btn-secondary" onclick="handleDone()">Done</button>
+    <button class="ds-btn ds-btn-secondary-filled" onclick="handleDone()">Done</button>
   </div>
 
   <script>
@@ -1437,6 +1441,7 @@ export class PRWorkflowUI {
             prTitle: msg.details.prTitle,
             prBody: this.generatePRBody(),
             isNewBranch: msg.details.isNewBranch,
+            tokenFileLocation: msg.details.tokenFileLocation,  // NEW: Include token file location
             workflowTrigger: msg.details.workflowTrigger  // NEW: Include workflow trigger config
           };
 

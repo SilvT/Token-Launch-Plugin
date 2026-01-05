@@ -18,7 +18,7 @@ import { TokenTransformer } from '../TokenTransformer';
 
 export interface PushConfiguration {
   repository: RepositoryConfig;
-  targetPath?: string;        // Default: 'tokens/raw/'
+  targetPath?: string;        // Default: 'tokens/'
   filename?: string;          // Default: auto-generated with timestamp
   commitMessage?: string;     // Default: auto-generated from metadata
 }
@@ -340,7 +340,7 @@ export class TokenPushService {
     const filename = config.filename || GitOperations.generateFileName('figma-tokens', 'json');
 
     // Construct full path
-    const basePath = config.targetPath || 'tokens/raw/';
+    const basePath = config.targetPath || 'tokens/';
     const fullPath = basePath.endsWith('/') ? `${basePath}${filename}` : `${basePath}/${filename}`;
 
     // Prepare structured data for GitHub
