@@ -53,6 +53,6 @@
         "https://unpkg.com"
       ],
       "reasoning": "Required for GitHub integration and Phosphor Icons CDN - GitHub API for pushing design tokens and unpkg.com for icon fonts"
-    }
+    }    
   }
 }
