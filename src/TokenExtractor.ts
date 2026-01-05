@@ -402,14 +402,25 @@ export class TokenExtractor {
     try {
       // Extract from local paint styles
       const paintStyles = figma.getLocalPaintStyles();
+      console.log(`🎨 Found ${paintStyles.length} local paint styles`);
+
       for (const style of paintStyles) {
         try {
+          console.log(`🎨 Processing paint style: "${style.name}" with ${style.paints?.length || 0} paints`);
+          if (style.paints && style.paints.length > 0) {
+            console.log(`🎨 Paint type for "${style.name}": ${style.paints[0].type}`);
+          }
+
           const colorToken = this.convertPaintStyleToColorToken(style);
           if (colorToken) {
+            console.log(`✅ Successfully converted paint style: "${style.name}" to color token`);
             colorTokens.push(colorToken);
+          } else {
+            console.log(`❌ Failed to convert paint style: "${style.name}" (returned null)`);
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error(`❌ Error processing paint style "${style.name}":`, error);
           this.addError(`Failed to process paint style: ${style.name}`, 'error', { styleId: style.id, error: errorMessage });
         }
       }
@@ -625,6 +636,9 @@ export class TokenExtractor {
    * Convert gradient paint to color token with variable reference support
    */
   private convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): ColorToken {
+    console.log(`🌈 Converting gradient "${style.name}" of type ${paint.type}`);
+    console.log(`🌈 Gradient has ${paint.gradientStops.length} stops`);
+
     const gradientType = paint.type.replace('GRADIENT_', '').toLowerCase() as 'linear' | 'radial' | 'angular' | 'diamond';
 
     // Process gradient stops with variable reference handling
@@ -670,7 +684,7 @@ export class TokenExtractor {
       // You could resolve the variable value here if needed
     }
 
-    return {
+    const token: ColorToken = {
       id: style.id,
       name: style.name,
       description: style.description,
@@ -694,6 +708,9 @@ export class TokenExtractor {
       metadata: this.createTokenMetadata(style),
       figmaNodeId: style.id
     };
+
+    console.log(`✅ Successfully created gradient token for "${style.name}"`);
+    return token;
   }
 
   /**

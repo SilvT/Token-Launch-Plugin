@@ -89,11 +89,24 @@ export class TokenTransformer {
    * Transform raw extraction result to clean format
    */
   public transform(rawData: any): CleanTokenOutput {
+    console.log('🔄 TokenTransformer processing data:', {
+      variables: rawData.variables?.length || 0,
+      designTokens: rawData.designTokens?.length || 0
+    });
+
     // Build index for alias resolution
     this.buildVariableIndex(rawData.variables || []);
 
-    // Extract clean tokens
-    const tokens = this.extractCleanTokens(rawData.variables || []);
+    // Extract clean tokens from variables
+    const variableTokens = this.extractCleanTokens(rawData.variables || []);
+    console.log(`✅ Extracted ${variableTokens.length} tokens from variables`);
+
+    // Extract clean tokens from design tokens (styles)
+    const styleTokens = this.extractCleanStyleTokens(rawData.designTokens || []);
+    console.log(`✅ Extracted ${styleTokens.length} tokens from styles`);
+
+    // Combine all tokens
+    const tokens = [...variableTokens, ...styleTokens];
 
     // Consolidate typography tokens
     const consolidatedTokens = this.consolidateTypography(tokens);
@@ -197,6 +210,42 @@ export class TokenTransformer {
     }
 
     return value;
+  }
+
+  /**
+   * Extract clean tokens from style tokens (paint styles, text styles, effect styles)
+   */
+  private extractCleanStyleTokens(styleTokens: any[]): CleanToken[] {
+    return styleTokens.map(styleToken => {
+      console.log(`🎨 Processing style token: "${styleToken.name}" of type ${styleToken.type}`);
+
+      // Clean color values for style tokens
+      let value = styleToken.value;
+      if (styleToken.type === 'color') {
+        value = this.cleanColorValue(value);
+      }
+
+      return {
+        name: styleToken.name,
+        description: styleToken.description || '',
+        type: styleToken.type,
+        value: value,
+        collection: this.extractCollectionFromStyleName(styleToken.name),
+        reference: null, // Style tokens don't have references
+        originalType: styleToken.type,
+        source: 'style', // Distinguish from variable source
+        figmaNodeId: styleToken.figmaNodeId
+      };
+    });
+  }
+
+  /**
+   * Extract collection name from style token name (e.g., "gradient/surface/main" → "gradient")
+   */
+  private extractCollectionFromStyleName(name: string): string {
+    // Split by '/' and take first part as collection
+    const parts = name.split('/');
+    return parts.length > 1 ? parts[0] : 'Styles';
   }
 
   /**
