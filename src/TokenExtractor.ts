@@ -107,8 +107,10 @@ interface GradientToken extends BaseToken {
     stops: Array<{
       position: number;
       color: {
-        hex: string;
+        hex?: string;
         alpha?: number;
+        $alias?: string;
+        $aliasId?: string;
       };
     }>;
     angle?: number;
@@ -685,6 +687,7 @@ export class TokenExtractor {
     return parts.length > 1 ? parts[0] : 'Styles';
   }
 
+
   /**
    * Convert gradient paint to gradient token (separate from color tokens)
    */
@@ -692,18 +695,39 @@ export class TokenExtractor {
     console.log(`🌈 Converting gradient "${style.name}" of type ${paint.type}`);
     console.log(`🌈 Gradient has ${paint.gradientStops.length} stops`);
 
-    // Process gradient stops - convert to hex format for cleaner output
+    // Process gradient stops - preserve variable references when available
     const stops = paint.gradientStops.map((stop, index) => {
-      const stopColour = this.rgbToHex(stop.color.r, stop.color.g, stop.color.b);
-      console.log(`  Stop ${index}: position=${stop.position}, colour=${stopColour}`);
+      const stopWithVars = stop as any;
 
-      return {
-        position: stop.position,
-        color: {
-          hex: stopColour,
-          ...(stop.color.a !== undefined && stop.color.a < 1 && { alpha: stop.color.a })
-        }
-      };
+      // Check if this stop has variable references
+      const hasColorVariable = stopWithVars.boundVariables?.color?.type === 'VARIABLE_ALIAS';
+
+      if (hasColorVariable) {
+        const variableId = stopWithVars.boundVariables.color.id;
+        const variableName = this.getVariableNameById(variableId);
+
+        console.log(`  Stop ${index}: position=${stop.position}, variable=${variableName || variableId}`);
+
+        return {
+          position: stop.position,
+          color: {
+            $alias: variableName || `{${variableId}}`,
+            $aliasId: variableId
+          }
+        };
+      } else {
+        // No variable reference, use computed color value
+        const stopColour = this.rgbToHex(stop.color.r, stop.color.g, stop.color.b);
+        console.log(`  Stop ${index}: position=${stop.position}, colour=${stopColour}`);
+
+        return {
+          position: stop.position,
+          color: {
+            hex: stopColour,
+            ...(stop.color.a !== undefined && stop.color.a < 1 && { alpha: stop.color.a })
+          }
+        };
+      }
     });
 
     // Calculate angle for linear gradients
@@ -762,12 +786,44 @@ export class TokenExtractor {
       // Defensive checks for typography properties
       this.log(`Processing text style: ${style.name}`);
 
-      // Validate font name properties
-      const fontFamily = style.fontName?.family || 'Arial';
-      const fontWeight = style.fontName?.style || 'Regular';
+      // Check for variable references in text style properties
+      const styleWithVars = style as any;
+
+      // Check common text style variables
+      const hasFontFamilyVariable = styleWithVars.boundVariables?.fontFamily?.type === 'VARIABLE_ALIAS';
+      const hasFontWeightVariable = styleWithVars.boundVariables?.fontWeight?.type === 'VARIABLE_ALIAS';
+      const hasFontSizeVariable = styleWithVars.boundVariables?.fontSize?.type === 'VARIABLE_ALIAS';
+      const hasLineHeightVariable = styleWithVars.boundVariables?.lineHeight?.type === 'VARIABLE_ALIAS';
+      const hasLetterSpacingVariable = styleWithVars.boundVariables?.letterSpacing?.type === 'VARIABLE_ALIAS';
+
+      // Handle fontFamily - preserve variable reference or use computed value
+      let fontFamilyValue: any = style.fontName?.family || 'Arial';
+      if (hasFontFamilyVariable) {
+        const fontFamilyVariableId = styleWithVars.boundVariables.fontFamily.id;
+        const fontFamilyVariableName = this.getVariableNameById(fontFamilyVariableId);
+        console.log(`  Typography fontFamily variable: ${fontFamilyVariableName || fontFamilyVariableId}`);
+
+        fontFamilyValue = {
+          $alias: fontFamilyVariableName || `{${fontFamilyVariableId}}`,
+          $aliasId: fontFamilyVariableId
+        };
+      }
+
+      // Handle fontWeight - preserve variable reference or use computed value
+      let fontWeightValue: any = style.fontName?.style || 'Regular';
+      if (hasFontWeightVariable) {
+        const fontWeightVariableId = styleWithVars.boundVariables.fontWeight.id;
+        const fontWeightVariableName = this.getVariableNameById(fontWeightVariableId);
+        console.log(`  Typography fontWeight variable: ${fontWeightVariableName || fontWeightVariableId}`);
+
+        fontWeightValue = {
+          $alias: fontWeightVariableName || `{${fontWeightVariableId}}`,
+          $aliasId: fontWeightVariableId
+        };
+      }
 
       // Log property availability for debugging
-      this.log(`Font family: ${fontFamily}, Font weight: ${fontWeight}`);
+      this.log(`Font family: ${typeof fontFamilyValue === 'string' ? fontFamilyValue : 'variable'}, Font weight: ${typeof fontWeightValue === 'string' ? fontWeightValue : 'variable'}`);
 
       // Safe font style extraction
       const fontStyle = this.extractFontStyle(style.fontName?.style);
@@ -775,17 +831,56 @@ export class TokenExtractor {
       // Safe text align extraction
       const textAlign = this.extractTextAlign(style);
 
+      // Handle fontSize - preserve variable reference or use computed value
+      let fontSizeValue: any = style.fontSize || 16;
+      if (hasFontSizeVariable) {
+        const fontSizeVariableId = styleWithVars.boundVariables.fontSize.id;
+        const fontSizeVariableName = this.getVariableNameById(fontSizeVariableId);
+        console.log(`  Typography fontSize variable: ${fontSizeVariableName || fontSizeVariableId}`);
+
+        fontSizeValue = {
+          $alias: fontSizeVariableName || `{${fontSizeVariableId}}`,
+          $aliasId: fontSizeVariableId
+        };
+      }
+
+      // Handle lineHeight - preserve variable reference or use computed value
+      let lineHeightValue: any = this.convertLineHeightSafe(style.lineHeight);
+      if (hasLineHeightVariable) {
+        const lineHeightVariableId = styleWithVars.boundVariables.lineHeight.id;
+        const lineHeightVariableName = this.getVariableNameById(lineHeightVariableId);
+        console.log(`  Typography lineHeight variable: ${lineHeightVariableName || lineHeightVariableId}`);
+
+        lineHeightValue = {
+          $alias: lineHeightVariableName || `{${lineHeightVariableId}}`,
+          $aliasId: lineHeightVariableId
+        };
+      }
+
+      // Handle letterSpacing - preserve variable reference or use computed value
+      let letterSpacingValue: any = this.convertLetterSpacingSafe(style.letterSpacing);
+      if (hasLetterSpacingVariable) {
+        const letterSpacingVariableId = styleWithVars.boundVariables.letterSpacing.id;
+        const letterSpacingVariableName = this.getVariableNameById(letterSpacingVariableId);
+        console.log(`  Typography letterSpacing variable: ${letterSpacingVariableName || letterSpacingVariableId}`);
+
+        letterSpacingValue = {
+          $alias: letterSpacingVariableName || `{${letterSpacingVariableId}}`,
+          $aliasId: letterSpacingVariableId
+        };
+      }
+
       return {
         id: style.id,
         name: style.name,
         description: style.description || '',
         type: 'typography',
         value: {
-          fontFamily: fontFamily,
-          fontWeight: fontWeight,
-          fontSize: style.fontSize || 16,
-          lineHeight: this.convertLineHeightSafe(style.lineHeight),
-          letterSpacing: this.convertLetterSpacingSafe(style.letterSpacing),
+          fontFamily: fontFamilyValue,
+          fontWeight: fontWeightValue,
+          fontSize: fontSizeValue,
+          lineHeight: lineHeightValue,
+          letterSpacing: letterSpacingValue,
           paragraphSpacing: style.paragraphSpacing || 0,
           textCase: this.convertTextCaseSafe(style.textCase),
           textDecoration: this.convertTextDecorationSafe(style.textDecoration),
@@ -812,12 +907,53 @@ export class TokenExtractor {
    */
   private convertEffectStyleToEffectToken(style: EffectStyle): EffectToken | null {
     try {
+
       if (!style.effects || style.effects.length === 0) {
         this.addWarning(`Effect style ${style.name} has no effects`);
         return null;
       }
 
       const effect = style.effects[0]; // Use first effect
+      const effectWithVars = effect as any;
+
+      // Check for variable references in effect properties
+      const hasColorVariable = effectWithVars.boundVariables?.color?.type === 'VARIABLE_ALIAS';
+      const hasRadiusVariable = effectWithVars.boundVariables?.radius?.type === 'VARIABLE_ALIAS';
+
+      // Handle color - preserve variable reference or use computed value
+      let colorValue: any = undefined;
+      if ('color' in effect) {
+        if (hasColorVariable) {
+          const colorVariableId = effectWithVars.boundVariables.color.id;
+          const colorVariableName = this.getVariableNameById(colorVariableId);
+          console.log(`  Effect color variable: ${colorVariableName || colorVariableId}`);
+
+          colorValue = {
+            $alias: colorVariableName || `{${colorVariableId}}`,
+            $aliasId: colorVariableId
+          };
+        } else {
+          colorValue = {
+            r: effect.color.r,
+            g: effect.color.g,
+            b: effect.color.b,
+            a: effect.color.a
+          };
+        }
+      }
+
+      // Handle radius/blur - preserve variable reference or use computed value
+      let blurValue: any = effect.radius;
+      if (hasRadiusVariable) {
+        const radiusVariableId = effectWithVars.boundVariables.radius.id;
+        const radiusVariableName = this.getVariableNameById(radiusVariableId);
+        console.log(`  Effect radius variable: ${radiusVariableName || radiusVariableId}`);
+
+        blurValue = {
+          $alias: radiusVariableName || `{${radiusVariableId}}`,
+          $aliasId: radiusVariableId
+        };
+      }
 
       return {
         id: style.id,
@@ -828,14 +964,9 @@ export class TokenExtractor {
           type: effect.type.toLowerCase().replace('_', '-') as any,
           x: 'offset' in effect ? effect.offset.x : undefined,
           y: 'offset' in effect ? effect.offset.y : undefined,
-          blur: effect.radius,
+          blur: blurValue,
           spread: 'spread' in effect ? effect.spread : undefined,
-          color: 'color' in effect ? {
-            r: effect.color.r,
-            g: effect.color.g,
-            b: effect.color.b,
-            a: effect.color.a
-          } : undefined,
+          color: colorValue,
           visible: effect.visible
         },
         metadata: this.createTokenMetadata(style),
@@ -946,6 +1077,19 @@ export class TokenExtractor {
         valuesByMode: variable.valuesByMode,
         error: error instanceof Error ? error.message : String(error)
       });
+      return null;
+    }
+  }
+
+  /**
+   * Get variable name by ID from Figma's variable registry
+   */
+  private getVariableNameById(variableId: string): string | null {
+    try {
+      const variable = figma.variables.getVariableById(variableId);
+      return variable?.name || null;
+    } catch (error) {
+      console.warn(`⚠️  Could not resolve variable ID: ${variableId}`, error);
       return null;
     }
   }
