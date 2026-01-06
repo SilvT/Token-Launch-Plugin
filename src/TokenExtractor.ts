@@ -61,6 +61,7 @@ interface TokenUsage {
  */
 type TokenType =
   | 'color'
+  | 'gradient'
   | 'typography'
   | 'spacing'
   | 'border-radius'
@@ -93,6 +94,24 @@ interface ColorToken extends BaseToken {
     alpha: number;
     gradient?: GradientData;
     pattern?: ImageData;
+  };
+}
+
+/**
+ * Gradient token interface
+ */
+interface GradientToken extends BaseToken {
+  type: 'gradient';
+  value: {
+    gradientType: 'GRADIENT_LINEAR' | 'GRADIENT_RADIAL' | 'GRADIENT_ANGULAR' | 'GRADIENT_DIAMOND';
+    stops: Array<{
+      position: number;
+      color: {
+        hex: string;
+        alpha?: number;
+      };
+    }>;
+    angle?: number;
   };
 }
 
@@ -396,8 +415,8 @@ export class TokenExtractor {
   /**
    * Extract color tokens from paint styles and variable colors
    */
-  public async extractColorTokens(): Promise<ColorToken[]> {
-    const colorTokens: ColorToken[] = [];
+  public async extractColorTokens(): Promise<(ColorToken | GradientToken)[]> {
+    const colorTokens: (ColorToken | GradientToken)[] = [];
 
     try {
       // Extract from local paint styles
@@ -595,9 +614,9 @@ export class TokenExtractor {
   // =============================================================================
 
   /**
-   * Convert Figma paint style to color token
+   * Convert Figma paint style to color token or gradient token
    */
-  private convertPaintStyleToColorToken(style: PaintStyle): ColorToken | null {
+  private convertPaintStyleToColorToken(style: PaintStyle): ColorToken | GradientToken | null {
     try {
       if (!style.paints || style.paints.length === 0) {
         this.addWarning(`Paint style ${style.name} has no paints`);
@@ -641,77 +660,69 @@ export class TokenExtractor {
   }
 
   /**
-   * Convert gradient paint to color token with variable reference support
+   * Calculate gradient angle from Figma's transform matrix
+   * Transform is a 3x2 matrix: [[a, b, tx], [c, d, ty]]
    */
-  private convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): ColorToken {
+  private calculateGradientAngle(transform: Transform): number {
+    const [[a, b], [c, d]] = transform;
+
+    // Calculate angle in degrees from the transformation matrix
+    let angle = Math.atan2(c, a) * (180 / Math.PI);
+
+    // Normalise to 0-360 range
+    if (angle < 0) {
+      angle += 360;
+    }
+
+    return Math.round(angle);
+  }
+
+  /**
+   * Extract collection name from style token name (e.g., "gradient/surface/main" → "gradient")
+   */
+  private extractCollectionFromName(name: string): string {
+    const parts = name.split('/');
+    return parts.length > 1 ? parts[0] : 'Styles';
+  }
+
+  /**
+   * Convert gradient paint to gradient token (separate from color tokens)
+   */
+  private convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): GradientToken {
     console.log(`🌈 Converting gradient "${style.name}" of type ${paint.type}`);
     console.log(`🌈 Gradient has ${paint.gradientStops.length} stops`);
 
-    const gradientType = paint.type.replace('GRADIENT_', '').toLowerCase() as 'linear' | 'radial' | 'angular' | 'diamond';
+    // Process gradient stops - convert to hex format for cleaner output
+    const stops = paint.gradientStops.map((stop, index) => {
+      const stopColour = this.rgbToHex(stop.color.r, stop.color.g, stop.color.b);
+      console.log(`  Stop ${index}: position=${stop.position}, colour=${stopColour}`);
 
-    // Process gradient stops with variable reference handling
-    const processedStops = paint.gradientStops.map(stop => {
-      const variableId = this.getVariableIdFromReference(stop.color);
-
-      if (variableId) {
-        // This is a variable reference - store reference instead of extracting value
-        const variableInfo = this.getVariableInfo(variableId);
-        this.log(`Gradient stop references variable: ${variableInfo?.name || variableId}`);
-
-        return {
-          position: stop.position,
-          variableReference: {
-            id: variableId,
-            name: variableInfo?.name || 'Unknown Variable',
-            type: 'VARIABLE_REFERENCE' as const
-          }
-        };
-      } else {
-        // Direct color value - process normally
-        return {
-          position: stop.position,
-          color: {
-            r: stop.color.r,
-            g: stop.color.g,
-            b: stop.color.b,
-            a: stop.color.a
-          }
-        };
-      }
+      return {
+        position: stop.position,
+        color: {
+          hex: stopColour,
+          ...(stop.color.a !== undefined && stop.color.a < 1 && { alpha: stop.color.a })
+        }
+      };
     });
 
-    // Calculate primary color from first stop
-    const firstStop = processedStops[0];
-    let primaryColor = { r: 0, g: 0, b: 0 };
-
-    if ('color' in firstStop && firstStop.color) {
-      primaryColor = firstStop.color;
-    } else if ('variableReference' in firstStop) {
-      // For variable references, we'll use a placeholder or resolve the variable
-      this.log(`Primary color is variable reference: ${firstStop.variableReference.name}`);
-      // You could resolve the variable value here if needed
+    // Calculate angle for linear gradients
+    let angle: number | undefined;
+    if (paint.type === 'GRADIENT_LINEAR') {
+      angle = this.calculateGradientAngle(paint.gradientTransform);
+      console.log(`  Gradient angle: ${angle}°`);
     }
 
-    const token: ColorToken = {
+    const token: GradientToken = {
       id: style.id,
       name: style.name,
       description: style.description,
-      type: 'color',
+      category: this.extractCollectionFromName(style.name),
+      type: 'gradient',
       value: {
-        hex: this.rgbToHex(primaryColor.r, primaryColor.g, primaryColor.b),
-        rgb: {
-          r: Math.round(primaryColor.r * 255),
-          g: Math.round(primaryColor.g * 255),
-          b: Math.round(primaryColor.b * 255)
-        },
-        hsl: this.rgbToHsl(primaryColor.r, primaryColor.g, primaryColor.b),
-        hsb: this.rgbToHsb(primaryColor.r, primaryColor.g, primaryColor.b),
-        alpha: 1,
-        gradient: {
-          type: gradientType,
-          stops: processedStops,
-          transform: paint.gradientTransform
-        }
+        gradientType: paint.type,
+        stops: stops,
+        ...(angle !== undefined && { angle })
       },
       metadata: this.createTokenMetadata(style),
       figmaNodeId: style.id
