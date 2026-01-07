@@ -45,7 +45,8 @@
       "mcp__ide__getDiagnostics",
       "WebSearch",
       "Bash(node:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
