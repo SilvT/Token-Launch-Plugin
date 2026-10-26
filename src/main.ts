@@ -429,7 +429,7 @@ function outputJSONToConsole(result: ExtractionResult, documentInfo: DocumentInf
 
   console.log('\n' + '='.repeat(80));
   console.log('='.repeat(80));
-  console.log(`📅 Export Time: ${dataset.generatedAt}`);
+  console.log(`📅 Export Time: ${dataset._metadata?.exportedAt}`);
   console.log(`🎯 Total Collections: ${Object.keys(dataset.collections).length}`);
   // Source variables counted
   console.log(`📚 Source Tokens: ${dataset.source.originalTokenCount}`);
