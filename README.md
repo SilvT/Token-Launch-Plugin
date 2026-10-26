@@ -113,6 +113,19 @@ The plugin extracts tokens from:
 - **Effect Styles** (shadows, blurs, etc.)
 - **Figma Variables** and collections
 
+### Modes
+Every variable is exported **once per mode**. A collection with 3 modes (for example `primary`, `secondary`, `tertiary`) produces 3 rows per variable, each with a `mode` field set to that mode's name.
+
+Values are exported exactly as Figma stores them:
+- **Aliases** are kept as aliases (`{ "type": "VARIABLE_ALIAS", "id": "...", "name": "..." }`), with the variable name next to the id, so no id lookup is needed.
+- **Composed colours** such as `{ color, opacity }` are kept as-is, not resolved.
+- Only a raw `{r, g, b, a}` colour is converted to hex.
+
+### Output format
+- Collections appear in Figma's order, tokens are sorted by name, and every token has the same property order.
+- The file body contains no per-export timestamp, so exporting twice without changing Figma produces an identical file and an empty `git diff`. A rename or edit shows up as only the lines that changed.
+- The `uncategorized` group only keeps `typography`, `gradient` and `shadow` styles.
+
 ---
 
 ## 🔄 Typical Workflow
@@ -123,11 +136,11 @@ The plugin extracts tokens from:
 3. Choose your target: main branch, existing branch, or create a new branch
 4. Add a commit message (auto-suggests changes since last push)
 5. Push directly to GitHub or download JSON file
-6. Your developer receives the updates with timestamp metadata
+6. Your developer receives the updates as a clean, diff-friendly file
 
 **For GitHub Users:**
 - Pushes JSON file directly to your chosen branch
-- Includes metadata with timestamps and change tracking
+- Output is deterministic, so Git diffs show only real changes
 - Ready for GitHub Actions or other CI/CD workflows
 - JSON can be easily converted to any format your team needs
 
