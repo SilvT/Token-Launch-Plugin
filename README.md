@@ -54,9 +54,12 @@ Shoot your Fima Design tokens into code with one click. No technical knowledge r
 *Coming Soon - Plugin submission in progress*
 
 ### Option 2: Install Manually (Available Now)
-1. **Download:** Get the [Manifest File](/manifest.json) from this repo
-2. **Install:** Figma → Plugins → Development → Import plugin from manifest
-3. **Run:** Find "Token Launch" in your plugins list
+1. **Download:** Clone or download this repo (the manifest alone is not enough, the plugin code is built from `src/`)
+2. **Build:** Run `npm install` then `npm run build`. This creates the `build/` folder with `main.js`
+3. **Install:** Figma → Plugins → Development → Import plugin from manifest, and pick `manifest.json`
+4. **Run:** Find "Token Launch" in your plugins list
+
+If you change the source, rebuild before running again (or use `npm run watch`). See [INSTALLATION.md](INSTALLATION.md) for details.
 
 ---
 
