@@ -61,7 +61,6 @@ export interface CleanTokenOutput {
     collections: string[];
   };
   version: string;
-  generatedAt: string;
   source: {
     document: string;
     originalTokenCount: number;
@@ -76,12 +75,12 @@ export interface CleanTokenOutput {
 // TOKEN TRANSFORMER CLASS
 // =============================================================================
 
+const UNCATEGORIZED_KEEP_TYPES = ['typography', 'gradient', 'shadow'];
+
 export class TokenTransformer {
-  private variableMap: Map<string, any>;
   private collections: Map<string, CleanCollection>;
 
   constructor() {
-    this.variableMap = new Map();
     this.collections = new Map();
   }
 
@@ -95,12 +94,15 @@ export class TokenTransformer {
       collections: rawData.collections?.length || 0
     });
 
-    // Build index for alias resolution
-    this.buildVariableIndex(rawData.variables || []);
-
     // Extract clean tokens from variables
     const variableTokens = this.extractCleanTokens(rawData.variables || []);
     console.log(`🔍 DEBUG: Extracted ${variableTokens.length} tokens from variables`);
+    const rowsPerCollectionMode: Record<string, number> = {};
+    variableTokens.forEach(t => {
+      const key = `${(t as any).collectionName} | ${t.mode}`;
+      rowsPerCollectionMode[key] = (rowsPerCollectionMode[key] || 0) + 1;
+    });
+    console.log('[ModeCheck] exported rows per collection | mode:', rowsPerCollectionMode);
 
     // Extract clean tokens from design tokens (styles)
     const styleTokens = this.extractCleanStyleTokens(rawData.designTokens || []);
@@ -120,14 +122,16 @@ export class TokenTransformer {
     const consolidatedTokens = this.consolidateTypography(tokens);
     console.log(`🔍 DEBUG: After consolidation: ${consolidatedTokens.length} tokens`);
 
-    // Organize hierarchically
-    const organized = this.organizeHierarchically(consolidatedTokens);
+    // Organize hierarchically, then fix ordering so repeated exports are byte-identical
+    const organized = this.canonicalize(
+      this.organizeHierarchically(consolidatedTokens),
+      (rawData.collections || []).map((c: any) => c.name)
+    );
     console.log(`🔍 DEBUG: Organized into collections:`, Object.keys(organized));
 
     // Create final output
     return {
       version: '2.0.0',
-      generatedAt: new Date().toISOString(),
       source: {
         document: rawData.metadata?.sourceDocument?.name || 'Unknown',
         originalTokenCount: rawData.metadata?.tokenCounts?.totalTokens || 0,
@@ -135,50 +139,6 @@ export class TokenTransformer {
       },
       collections: organized
     };
-  }
-
-  /**
-   * Build index of all variables for alias resolution
-   */
-  private buildVariableIndex(variables: any[]): void {
-    variables.forEach(variable => {
-      const id = variable.id || variable.variableId;
-      if (id) {
-        this.variableMap.set(id, variable);
-      }
-    });
-  }
-
-  /**
-   * Resolve a variable alias to its actual value
-   */
-  private resolveAlias(aliasValue: any, maxDepth: number = 10): any {
-    if (!aliasValue || typeof aliasValue !== 'object') {
-      return aliasValue;
-    }
-
-    if (aliasValue.type === 'VARIABLE_ALIAS' && aliasValue.id) {
-      if (maxDepth <= 0) {
-        console.warn(`Max depth reached resolving alias ${aliasValue.id}`);
-        return aliasValue;
-      }
-
-      const referencedVariable = this.variableMap.get(aliasValue.id);
-      if (!referencedVariable) {
-        console.warn(`Cannot resolve alias: ${aliasValue.id}`);
-        return aliasValue;
-      }
-
-      // Return both resolved value and reference info
-      const resolvedValue = this.resolveAlias(referencedVariable.value, maxDepth - 1);
-      return {
-        value: resolvedValue,
-        $ref: referencedVariable.name,
-        $refId: aliasValue.id
-      };
-    }
-
-    return aliasValue;
   }
 
   /**
@@ -264,28 +224,15 @@ export class TokenTransformer {
   private extractCleanTokens(variables: any[]): CleanToken[] {
     return variables.map(variable => {
       const collectionName = variable.variable?.collectionName || 'Uncategorized';
-      const modes = variable.variable?.modes || {};
-      const modeNames = Object.values(modes);
+      const modeName = variable.modeName ?? (Object.values(variable.variable?.modes || {})[0] as string | undefined);
 
-      // Resolve value
-      let value = variable.value;
-      let reference = null;
-
-      if (value && typeof value === 'object' && value.type === 'VARIABLE_ALIAS') {
-        const resolved = this.resolveAlias(value);
-        if (resolved.$ref) {
-          value = resolved.value;
-          reference = {
-            name: resolved.$ref
-          };
-        }
-      }
+      // Export the mode's value unchanged; aliases keep their id and name, nothing is resolved
+      const value = variable.type === 'color' ? this.cleanColorValue(variable.value) : variable.value;
+      const reference = variable.value?.type === 'VARIABLE_ALIAS' && variable.value.name
+        ? { name: variable.value.name }
+        : null;
 
       // Clean color values (remove RGB, HSL, HSB unless alpha != 1)
-      if (variable.type === 'color') {
-        value = this.cleanColorValue(value);
-      }
-
       const token: CleanToken = {
         name: variable.name,
         type: variable.type,
@@ -306,8 +253,8 @@ export class TokenTransformer {
       }
 
       // Add mode info if available
-      if (modeNames.length > 0) {
-        token.mode = modeNames[0] as string;
+      if (modeName !== undefined) {
+        token.mode = modeName;
       }
 
       // Add $extensions with Figma-specific data
@@ -336,9 +283,10 @@ export class TokenTransformer {
 
       if (match) {
         const [, baseName, property] = match;
+        const key = `${(token as any).collectionName}|${token.mode}|${baseName}`;
 
-        if (!typography[baseName]) {
-          typography[baseName] = {
+        if (!typography[key]) {
+          typography[key] = {
             name: baseName,
             type: 'typography',
             value: null,
@@ -357,14 +305,14 @@ export class TokenTransformer {
         };
 
         const standardName = propertyMap[property] || property;
-        typography[baseName].properties[standardName as keyof CleanTypographyToken['properties']] = {
+        typography[key].properties[standardName as keyof CleanTypographyToken['properties']] = {
           value: token.value,
           ...(token.$alias && { $alias: token.$alias })
         } as any;
 
         // Preserve description from any fragment
-        if (token.description && !typography[baseName].description) {
-          typography[baseName].description = token.description;
+        if (token.description && !typography[key].description) {
+          typography[key].description = token.description;
         }
       } else {
         otherTokens.push(token);
@@ -375,6 +323,60 @@ export class TokenTransformer {
     return [...otherTokens, ...Object.values(typography)];
   }
 
+
+  /**
+   * Deterministic output: collections in Figma order (uncategorized last), token types alphabetical,
+   * tokens sorted by name then mode, and a fixed property order inside each token.
+   */
+  private canonicalize(
+    organized: { [key: string]: CleanCollection },
+    figmaOrder: string[]
+  ): { [key: string]: CleanCollection } {
+    const rank = (name: string): number => {
+      if (name === 'uncategorized') return Number.MAX_SAFE_INTEGER;
+      const i = figmaOrder.indexOf(name);
+      return i === -1 ? figmaOrder.length : i;
+    };
+    const names = Object.keys(organized).sort((a, b) => rank(a) - rank(b) || (a < b ? -1 : a > b ? 1 : 0));
+
+    const result: { [key: string]: CleanCollection } = {};
+    names.forEach(name => {
+      const tokens: { [type: string]: CleanToken[] } = {};
+      Object.keys(organized[name].tokens).sort().forEach(type => {
+        tokens[type] = organized[name].tokens[type]
+          .map(t => this.orderTokenKeys(t))
+          .sort((a: any, b: any) => this.compareTokens(a, b));
+      });
+      result[name] = { tokens };
+    });
+    return result;
+  }
+
+  private static readonly TOKEN_KEY_ORDER = [
+    'name', 'type', 'value', 'description', 'properties', '$alias', 'mode', 'collection', 'collectionName',
+    'reference', 'originalType', 'source', 'figmaNodeId', '$extensions'
+  ];
+
+  private orderTokenKeys(token: any): any {
+    const ordered: any = {};
+    TokenTransformer.TOKEN_KEY_ORDER.forEach(k => {
+      if (k in token) ordered[k] = token[k];
+    });
+    Object.keys(token).sort().forEach(k => {
+      if (!(k in ordered)) ordered[k] = token[k];
+    });
+    return ordered;
+  }
+
+  private compareTokens(a: any, b: any): number {
+    const cmp = (x: string, y: string) => (x < y ? -1 : x > y ? 1 : 0);
+    return (
+      cmp(String(a.name), String(b.name)) ||
+      cmp(String(a.mode ?? ''), String(b.mode ?? '')) ||
+      cmp(JSON.stringify(a), JSON.stringify(b))
+    );
+  }
+
   /**
    * Organize tokens hierarchically by collection and type
    */
@@ -383,6 +385,11 @@ export class TokenTransformer {
 
     tokens.forEach(token => {
       const collectionName = (token as any).collectionName || 'uncategorized';
+
+      // Style/node tokens land in 'uncategorized'; the pipeline only needs these groups from it
+      if (collectionName === 'uncategorized' && !UNCATEGORIZED_KEEP_TYPES.includes(token.type)) {
+        return;
+      }
 
       if (!organized[collectionName]) {
         organized[collectionName] = {
@@ -404,6 +411,13 @@ export class TokenTransformer {
 
       collection.tokens[tokenType].push(cleanToken);
     });
+
+    if (organized['uncategorized']) {
+      const counts = Object.fromEntries(
+        Object.entries(organized['uncategorized'].tokens).map(([type, list]) => [type, list.length])
+      );
+      console.log('[UncategorizedCheck] kept groups:', counts);
+    }
 
     return organized;
   }

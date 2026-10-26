@@ -209,6 +209,8 @@ interface StrokeToken extends BaseToken {
 interface VariableToken extends BaseToken {
   type: TokenType;
   value: any;
+  modeId: string;
+  modeName: string;
   variable: {
     id: string;
     name: string;
@@ -994,10 +996,8 @@ export class TokenExtractor {
       try {
         const variable = await figma.variables.getVariableByIdAsync(variableId);
         if (variable) {
-          const variableToken = await this.convertFigmaVariableToToken(variable, collection);
-          if (variableToken) {
-            variables.push(variableToken);
-          }
+          const variableTokens = await this.convertFigmaVariableToTokens(variable, collection);
+          variables.push(...variableTokens);
         }
       } catch (error) {
         this.addError(`Failed to process variable ${variableId}`, 'error', {
@@ -1007,6 +1007,13 @@ export class TokenExtractor {
         });
       }
     }
+
+    const expectedRows = variableIds.length * collection.modes.length;
+    console.log(
+      `[ModeCheck] ${collection.name}: modes=[${collection.modes.map((m: any) => m.name).join(', ')}] ` +
+      `variables=${variableIds.length} rows=${variables.length} expected=${expectedRows} ` +
+      `${variables.length === expectedRows ? 'PASS' : 'FAIL'}`
+    );
 
     return {
       id: collection.id,
@@ -1023,14 +1030,14 @@ export class TokenExtractor {
   }
 
   /**
-   * Convert Figma variable to token
+   * Convert Figma variable to one token per mode of its collection
    */
-  private async convertFigmaVariableToToken(variable: Variable, collection: any): Promise<VariableToken | null> {
+  private async convertFigmaVariableToTokens(variable: Variable, collection: any): Promise<VariableToken[]> {
     try {
       // Check if this variable has already been processed
       if (this.isVariableProcessed(variable.id)) {
         this.log(`Skipping already processed variable: ${variable.name} (${variable.id})`);
-        return null;
+        return [];
       }
 
       this.log(`Processing variable: ${variable.name} (type: ${variable.resolvedType})`);
@@ -1039,35 +1046,39 @@ export class TokenExtractor {
       this.markVariableAsProcessed(variable.id);
 
       const tokenType = this.mapVariableTypeToTokenType(variable.resolvedType);
-      const baseValue = this.getVariableBaseValue(variable);
 
-      // Enhanced value processing based on variable type
-      const processedValue = this.processVariableValue(variable.resolvedType, baseValue, variable);
+      return Promise.all(collection.modes.map(async (mode: any) => {
+        const baseValue = variable.valuesByMode[mode.modeId] ?? null;
+        const withNames = await this.attachAliasNames(baseValue);
+        const processedValue = this.processVariableValue(variable.resolvedType, withNames, variable);
 
-      this.log(`Variable ${variable.name}: tokenType=${tokenType}, baseValue=${JSON.stringify(baseValue)}, processedValue=${JSON.stringify(processedValue)}`);
+        this.log(`Variable ${variable.name} [${mode.name}]: tokenType=${tokenType}, baseValue=${JSON.stringify(baseValue)}, processedValue=${JSON.stringify(processedValue)}`);
 
-      return {
-        id: variable.id,
-        name: variable.name,
-        description: variable.description || '',
-        type: tokenType,
-        value: processedValue,
-        metadata: this.createVariableMetadata(variable),
-        variableId: variable.id,
-        variable: {
+        return {
           id: variable.id,
           name: variable.name,
           description: variable.description || '',
-          resolvedType: variable.resolvedType,
-          scopes: variable.scopes,
-          collectionId: collection.id,
-          collectionName: collection.name,
-          modes: Object.fromEntries(collection.modes.map((mode: any) => [mode.modeId, mode.name])),
-          valuesByMode: variable.valuesByMode,
-          codeSyntax: variable.codeSyntax,
-          hiddenFromPublishing: variable.hiddenFromPublishing
-        }
-      };
+          type: tokenType,
+          value: processedValue,
+          modeId: mode.modeId,
+          modeName: mode.name,
+          metadata: this.createVariableMetadata(variable),
+          variableId: variable.id,
+          variable: {
+            id: variable.id,
+            name: variable.name,
+            description: variable.description || '',
+            resolvedType: variable.resolvedType,
+            scopes: variable.scopes,
+            collectionId: collection.id,
+            collectionName: collection.name,
+            modes: Object.fromEntries(collection.modes.map((m: any) => [m.modeId, m.name])),
+            valuesByMode: variable.valuesByMode,
+            codeSyntax: variable.codeSyntax,
+            hiddenFromPublishing: variable.hiddenFromPublishing
+          }
+        };
+      }));
     } catch (error) {
       this.addError(`Failed to convert variable ${variable.name}`, 'error', {
         variableId: variable.id,
@@ -1075,8 +1086,33 @@ export class TokenExtractor {
         valuesByMode: variable.valuesByMode,
         error: error instanceof Error ? error.message : String(error)
       });
-      return null;
+      return [];
     }
+  }
+
+  private aliasNameCache = new Map<string, string | null>();
+
+  /**
+   * Return the value unchanged, except every VARIABLE_ALIAS (top-level or nested inside a
+   * composed value such as {color, opacity}) gets a `name` next to its `id`.
+   */
+  private async attachAliasNames(value: any): Promise<any> {
+    if (!value || typeof value !== 'object') return value;
+    if (Array.isArray(value)) return Promise.all(value.map(v => this.attachAliasNames(v)));
+
+    if (value.type === 'VARIABLE_ALIAS' && value.id) {
+      if (!this.aliasNameCache.has(value.id)) {
+        this.aliasNameCache.set(value.id, await this.getVariableNameById(value.id));
+      }
+      const name = this.aliasNameCache.get(value.id);
+      return name ? { ...value, name } : { ...value };
+    }
+
+    const out: any = {};
+    for (const key of Object.keys(value)) {
+      out[key] = await this.attachAliasNames(value[key]);
+    }
+    return out;
   }
 
   /**
@@ -1532,7 +1568,8 @@ export class TokenExtractor {
    * Process color variable value
    */
   private processColorVariableValue(value: any): any {
-    if (typeof value === 'object' && 'r' in value && 'g' in value && 'b' in value) {
+    // Only a raw {r,g,b,a} is converted; aliases and composed values ({color, opacity}) pass through
+    if (value && typeof value === 'object' && 'r' in value && 'g' in value && 'b' in value) {
       const { r, g, b, a = 1 } = value;
       return {
         hex: this.rgbToHex(r, g, b),
@@ -1604,17 +1641,6 @@ export class TokenExtractor {
       default:
         return 'dimension';
     }
-  }
-
-  /**
-   * Get base value from variable
-   */
-  private getVariableBaseValue(variable: Variable): any {
-    const modes = Object.keys(variable.valuesByMode);
-    if (modes.length > 0) {
-      return variable.valuesByMode[modes[0]];
-    }
-    return null;
   }
 
   /**
