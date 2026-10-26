@@ -328,7 +328,7 @@ async function performRealExtraction(): Promise<ExtractionResult> {
  * Get plugin version from package.json
  */
 function getPluginVersion(): string {
-  return '1.3.1'; // Update this when releasing new versions
+  return '1.4.0'; // Update this when releasing new versions
 }
 
 /**
